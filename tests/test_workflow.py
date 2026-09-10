@@ -8,18 +8,19 @@ import sys
 from pathlib import Path
 
 import pytest
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from collage.cli import app as cli
 from collage.core.errors import CollageError
 from collage.core.io import atomic_save_image, atomic_write_json, read_json
 from collage.projects import DataPaths, ProjectStore
+from collage.providers import ProviderAudit
 from collage.template.review import confirm_draft
 from collage.template.validation import validate_package
 from collage.workflows import WorkflowService
 
 
-def _manual_draft(*, with_photo: bool = False) -> dict:
+def _manual_draft(*, with_photo: bool = False, photo_mode: str = "photo") -> dict:
     slots = []
     layers = [{"type": "background"}]
     if with_photo:
@@ -28,7 +29,7 @@ def _manual_draft(*, with_photo: bool = False) -> dict:
                 "id": "photo",
                 "label": "客户照片",
                 "type": "image",
-                "mode": "photo",
+                "mode": photo_mode,
                 "source_rect": [2, 2, 12, 10],
                 "target_rect": [2, 2, 12, 10],
                 "upload_hint": "上传一张照片",
@@ -49,7 +50,10 @@ def _manual_draft(*, with_photo: bool = False) -> dict:
 
 
 def _source_files(
-    tmp_path: Path, *, with_photo: bool = False
+    tmp_path: Path,
+    *,
+    with_photo: bool = False,
+    photo_mode: str = "photo",
 ) -> tuple[Path, Path, Path]:
     reference = tmp_path / "outside" / "reference.jpg"
     manual = tmp_path / "outside" / "manual.json"
@@ -57,7 +61,10 @@ def _source_files(
     reference.parent.mkdir()
     Image.new("RGB", (24, 16), "#CC8844").save(reference)
     Image.new("RGB", (24, 16), "#DDBB88").save(candidate)
-    atomic_write_json(manual, _manual_draft(with_photo=with_photo))
+    atomic_write_json(
+        manual,
+        _manual_draft(with_photo=with_photo, photo_mode=photo_mode),
+    )
     return reference, manual, candidate
 
 
@@ -232,6 +239,81 @@ def test_blocked_build_can_resume_with_a_different_provider(tmp_path: Path) -> N
     )
     assert recovered["stage"] == "awaiting_approval"
     assert (project.renders / "result.png").is_file()
+
+
+def test_workflow_automatically_prepares_opaque_cutout_binding(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reference, manual, candidate = _source_files(
+        tmp_path,
+        with_photo=True,
+        photo_mode="cutout",
+    )
+    store = ProjectStore(DataPaths.resolve(tmp_path / "data"))
+    workflow = WorkflowService(store)
+    workflow.start(
+        "cutout-flow",
+        reference,
+        reviewer="tester",
+        manual_draft_path=manual,
+        background_candidate_path=candidate,
+        open_review=False,
+    )
+    _confirm_project(store, "cutout-flow")
+    assert workflow.resume("cutout-flow", open_review=False)["stage"] == (
+        "awaiting_bindings"
+    )
+
+    customer_dir = tmp_path / "cutout-customer"
+    customer_dir.mkdir()
+    Image.new("RGB", (20, 20), "#2288CC").save(customer_dir / "person.jpg")
+    bindings_path = customer_dir / "bindings.json"
+    atomic_write_json(
+        bindings_path,
+        {
+            "version": "collage-bindings/1",
+            "slots": {"photo": {"path": "person.jpg"}},
+        },
+    )
+
+    class LocalCutout:
+        name = "local-cutout-test"
+        local_only = True
+
+        def cutout(self, customer_image: Image.Image):
+            alpha = Image.new("L", customer_image.size, 0)
+            ImageDraw.Draw(alpha).ellipse((2, 2, 17, 17), fill=255)
+            return alpha, ProviderAudit(
+                self.name,
+                "test-model",
+                "test-model",
+                "cutout-request",
+                False,
+                1,
+            )
+
+    provider = LocalCutout()
+
+    def fake_load(spec: str, expected_protocol: object) -> LocalCutout:
+        assert spec == "example:cutout"
+        return provider
+
+    monkeypatch.setattr("collage.workflows.bindings.load_provider", fake_load)
+    rendered = workflow.resume(
+        "cutout-flow",
+        bindings_path=bindings_path,
+        cutout_provider_spec="example:cutout",
+        open_review=False,
+    )
+
+    project = store.open("cutout-flow")
+    imported = read_json(project.renders / "bindings.json")
+    prepared = project.inputs / "prepared" / "photo.png"
+    assert rendered["stage"] == "awaiting_approval"
+    assert imported["slots"]["photo"]["path"] == "../inputs/prepared/photo.png"
+    assert Image.open(prepared).getchannel("A").getextrema() == (0, 255)
+    assert prepared.with_suffix(".png.audit.json").is_file()
 
 
 def test_cli_exposes_run_resume_and_status_commands(tmp_path: Path) -> None:
