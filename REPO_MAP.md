@@ -39,6 +39,7 @@
 | `collage/cli/` | 命令行参数和命令路由 |
 | `collage/core/` | 错误类型、日志、原子文件 IO、状态文件 |
 | `collage/projects/` | 外部数据根目录、项目路径和 `project.json` |
+| `collage/workflows/` | 可恢复状态机、阶段执行、客户素材导入和状态摘要 |
 | `collage/schemas/` | Draft、ReviewedSpec、TemplateSpec、Bindings 校验 |
 | `collage/imaging/` | 通用图片读写、mask、alpha、颜色键和几何变换 |
 | `collage/providers/` | VLM、图片生成、抠图 provider 协议及实现 |
@@ -54,8 +55,9 @@
 - `providers/yibu/`：配置、审计 HTTP 客户端、VLM 分析和图片生成。
 - `studio/templates/`、`studio/static/`：审核页前端资源。
 - `rendering/`：Bindings、布局、图片层、文字层与顶层渲染服务。
+- `workflows/`：`run / resume / status` 使用的统一端到端编排层。
 
-依赖方向保持为：`cli/studio → template/rendering/projects → schemas/providers/imaging/core`。
+依赖方向保持为：`cli → workflows/studio → template/rendering/projects → schemas/providers/imaging/core`。
 底层模块不反向依赖 CLI 或页面层。
 
 ## 稳定入口

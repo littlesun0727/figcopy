@@ -2,6 +2,40 @@
 
 本文说明如何在 Windows PowerShell 中运行“参考拼贴图 → 可复用模板 → 更换客户素材 → 导出 PNG”流水线，并给出本次 `Image #1` 的可复现命令。
 
+## 先用这一条主流程
+
+完成下面“环境准备”和 Yibu 配置后，普通使用只需要三个命令，不再逐个调用底层 Python 阶段：
+
+```powershell
+$env:FIGCOPY_DATA_DIR = "D:\datas\figcopy"
+figcopy run --project my-collage --reference "D:\pictures\reference.jpg" --reviewer YOUR_NAME
+figcopy status --project my-collage
+```
+
+`run` 会依次导入参考图、分析 Draft、启动本机审核页，并在页面保存后继续构建。它会在需要客户素材时停下，同时生成：
+
+- `projects/my-collage/reports/upload_guide.html`；
+- `projects/my-collage/renders/bindings.example.json`；
+- 可直接编辑的 `projects/my-collage/renders/bindings.json`。
+
+可以直接编辑项目里的 Bindings，也可以从外部导入；导入时关联图片会一起复制进项目：
+
+```powershell
+figcopy resume --project my-collage --bindings "D:\customer\bindings.json"
+```
+
+如果开始时已有 Bindings，可直接给 `run` 增加 `--bindings "D:\customer\bindings.json"`，审核保存后会继续运行到最终预览门禁。
+
+生成 `renders/result.png` 后先人工检查，再发布：
+
+```powershell
+figcopy resume --project my-collage --approve --approval-notes "已完成视觉检查"
+```
+
+程序关闭、模型失败或依赖缺失时，先运行 `figcopy status --project my-collage` 查看 `stage`、`last_error` 和 `next_action`，修复后再执行 `resume`。已完成阶段会复用磁盘产物。自动流程仍不会替人完成 Draft 审核或最终视觉批准。
+
+没有 VLM 或图片模型时，可在 `run` 中增加 `--manual-draft`、`--background-candidate`；自动化环境可用 `--no-review-ui` 在审核门禁处主动暂停。后续章节的 `analyze / review-ui / build / guide / render / approve` 是高级调试入口。
+
 ## 1. 先理解两种运行阶段
 
 模板制作阶段偶尔运行一次：分析参考图、确认槽位、准备清版背景与透明装饰、构建模板、试拼并人工批准。这个阶段可以导入人工素材，也可以接入外部 VLM、图片编辑或抠图 provider。
@@ -34,7 +68,7 @@ python -m pytest -q
 $env:FIGCOPY_DATA_DIR = "D:\datas\figcopy"
 ```
 
-`demo` 和后续一体化入口会在其中创建 `projects/<项目 ID>`；底层 CLI 的显式 `--out`、`--work` 路径也应指向该目录。
+`run`、`resume`、`status` 和 `demo` 会在其中使用 `projects/<项目 ID>`；底层 CLI 的显式 `--out`、`--work` 路径也应指向该目录。
 
 需要把普通照片用于 `cutout` 槽时，再安装本地 BiRefNet 可选依赖：
 

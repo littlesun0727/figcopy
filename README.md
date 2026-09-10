@@ -25,23 +25,35 @@ Yibu 接入可直接加载现有 `D:\codes\creative-video-editor\shared.py`；�
 
 `demo` 会程序构造参考图、底图、透明贴纸和两张客户测试图，然后构建 `needs_review` 模板并用新素材生成 `D:\datas\figcopy\projects\m1-demo\renders\result.png`。它不会自动冒充真人批准；查看结果后需显式运行 `approve`。整个演示不访问网络，也不把程序构造素材描述成真实模型效果。
 
-## 命令总览
+## 推荐：统一项目工作流
 
 ```powershell
-$projectRoot = "D:\datas\figcopy\projects\demo"
-python -m collage --help
-python -m collage analyze --reference reference.jpg --manual-draft manual_draft.json --out "$projectRoot\analysis"
-python -m collage review-ui --draft "$projectRoot\analysis\draft.json" --out "$projectRoot\review\reviewed.json" --reviewer YOUR_NAME
-python -m collage build --spec "$projectRoot\review\reviewed.json" --out "$projectRoot\template" --work "$projectRoot\workspace"
-python -m collage cutout --input person.jpg --out "$projectRoot\inputs\person_cutout.png"
-python -m collage render --template "$projectRoot\template" --bindings "$projectRoot\renders\bindings.json" --out "$projectRoot\renders\result.png" --allow-unreviewed
-python -m collage approve --template "$projectRoot\template" --evidence "$projectRoot\renders\result.png" --reviewer YOUR_NAME --work "$projectRoot\workspace"
-python -m collage validate --template "$projectRoot\template"
+$env:FIGCOPY_DATA_DIR = "D:\datas\figcopy"
+figcopy run --project demo --reference "D:\pictures\reference.jpg" --reviewer YOUR_NAME
+figcopy status --project demo
 ```
 
-所有命令在关键阶段输出日志。预期业务失败同时输出稳定错误码，例如 `VISION_PROVIDER_UNAVAILABLE`、`IMAGE_PROVIDER_UNAVAILABLE`、`CUTOUT_PROVIDER_UNAVAILABLE`、`OPAQUE_OVERLAY` 或 `SPEC_VALIDATION_FAILED`。
+`run` 会导入参考图、分析 Draft 并启动本机审核页。保存审核结果后，同一进程继续构建模板；需要客户素材时会停在 `awaiting_bindings`，同时生成上传指南和 Bindings 示例。准备好一个引用客户图片的 Bindings 文件后继续：
 
-## 标准工作流
+```powershell
+figcopy resume --project demo --bindings "D:\customer\bindings.json"
+```
+
+如果开始前已经准备好 Bindings，也可以直接在 `run` 中传入 `--bindings`；审核页保存后会继续完成模板构建和预览渲染。
+
+工作流会把 Bindings 引用的图片规范化并复制到项目目录，然后在本地生成 `renders/result.png`。检查图片后才能显式批准：
+
+```powershell
+figcopy resume --project demo --approve --approval-notes "已检查接缝、层序和文字"
+```
+
+失败或关闭程序后再次运行 `resume` 即可从持久化阶段继续。`run`、`resume`、`status` 也都可以写成 `python -m collage ...`。默认使用内置 Yibu Provider；没有模型凭据时可以用 `--manual-draft` 和 `--background-candidate` 导入人工制作内容。
+
+工作流不会跳过两个真人门禁：Draft 审核，以及最终结果图批准。所有命令在关键阶段输出日志；预期业务失败同时输出稳定错误码。
+
+## 高级单步工作流
+
+以下命令保留给调试、局部重做和自定义集成；普通使用不需要逐条执行。
 
 ### 1. 分析参考图
 
