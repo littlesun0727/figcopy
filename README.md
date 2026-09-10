@@ -4,6 +4,8 @@
 
 第一次使用请直接阅读 [USAGE_GUIDE.md](USAGE_GUIDE.md)，其中包含零配置演示、`Image #1` 实际试拼、换成自己照片、人工批准以及排错命令。
 
+运行产物不再默认写入源码仓库。可通过 `--data-dir` 或 `FIGCOPY_DATA_DIR` 指定外部数据目录；未指定时使用系统用户数据目录。原有 `work/`、`templates/`、`artifacts/` 已归档到 `D:\datas\figcopy\archive\legacy-20260910-pre-cleanup`。
+
 实现遵循 [COLLAGE_MVP_PLAN.md](COLLAGE_MVP_PLAN.md)。仓库内置了强制经过本机审计代理的 Yibu VLM/图片 provider，以及完全本地运行的 BiRefNet_lite-matting 抠图 provider；二者都不会在仓库保存密钥或客户原图。无凭据时仍可完整运行本地合成、导入人工素材、人工审核和发布链路。
 
 ## 快速验证
@@ -12,25 +14,29 @@
 
 ```powershell
 python -m pytest -q
-python -m collage demo --out artifacts/m1_demo
-python -m collage validate --template artifacts/m1_demo/template --allow-unreviewed
+$env:FIGCOPY_DATA_DIR = "D:\datas\figcopy"
+python -m collage demo --project m1-demo
+python -m collage validate `
+  --template "$env:FIGCOPY_DATA_DIR\projects\m1-demo\template" `
+  --allow-unreviewed
 ```
 
 Yibu 接入可直接加载现有 `D:\codes\creative-video-editor\shared.py`；仓库配置脚本使用 `kimi-k3` 和 `gemini-3-pro-image-preview`。配置、审计代理启动、真实冒烟测试与完整命令见 [USAGE_GUIDE.md](USAGE_GUIDE.md#3-配置-yibuapi强制走审计)。
 
-`demo` 会程序构造参考图、底图、透明贴纸和两张客户测试图，然后构建 `needs_review` 模板并用新素材生成 `artifacts/m1_demo/result.png`。它不会自动冒充真人批准；查看结果后需显式运行 `approve`。整个演示不访问网络，也不把程序构造素材描述成真实模型效果。
+`demo` 会程序构造参考图、底图、透明贴纸和两张客户测试图，然后构建 `needs_review` 模板并用新素材生成 `D:\datas\figcopy\projects\m1-demo\renders\result.png`。它不会自动冒充真人批准；查看结果后需显式运行 `approve`。整个演示不访问网络，也不把程序构造素材描述成真实模型效果。
 
 ## 命令总览
 
 ```powershell
+$projectRoot = "D:\datas\figcopy\projects\demo"
 python -m collage --help
-python -m collage analyze --reference examples/reference.jpg --manual-draft examples/manual_draft.json --out work/demo
-python -m collage review-ui --draft work/demo/draft.json --out work/demo/reviewed.json --reviewer YOUR_NAME
-python -m collage build --spec work/demo/reviewed.json --out templates/demo
-python -m collage cutout --input customer/person.jpg --out customer/person_cutout.png
-python -m collage render --template templates/demo --bindings examples/bindings.json --out work/result.png --allow-unreviewed
-python -m collage approve --template templates/demo --evidence work/result.png --reviewer YOUR_NAME
-python -m collage validate --template templates/demo
+python -m collage analyze --reference reference.jpg --manual-draft manual_draft.json --out "$projectRoot\analysis"
+python -m collage review-ui --draft "$projectRoot\analysis\draft.json" --out "$projectRoot\review\reviewed.json" --reviewer YOUR_NAME
+python -m collage build --spec "$projectRoot\review\reviewed.json" --out "$projectRoot\template" --work "$projectRoot\workspace"
+python -m collage cutout --input person.jpg --out "$projectRoot\inputs\person_cutout.png"
+python -m collage render --template "$projectRoot\template" --bindings "$projectRoot\renders\bindings.json" --out "$projectRoot\renders\result.png" --allow-unreviewed
+python -m collage approve --template "$projectRoot\template" --evidence "$projectRoot\renders\result.png" --reviewer YOUR_NAME --work "$projectRoot\workspace"
+python -m collage validate --template "$projectRoot\template"
 ```
 
 所有命令在关键阶段输出日志。预期业务失败同时输出稳定错误码，例如 `VISION_PROVIDER_UNAVAILABLE`、`IMAGE_PROVIDER_UNAVAILABLE`、`CUTOUT_PROVIDER_UNAVAILABLE`、`OPAQUE_OVERLAY` 或 `SPEC_VALIDATION_FAILED`。

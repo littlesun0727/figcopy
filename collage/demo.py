@@ -71,7 +71,11 @@ def create_demo(output_dir: Path) -> Path:
 
     root = output_dir.resolve()
     inputs = root / "inputs"
-    inputs.mkdir(parents=True, exist_ok=True)
+    review_dir = root / "review"
+    renders_dir = root / "renders"
+    workspace_dir = root / "workspace"
+    for directory in (inputs, review_dir, renders_dir, workspace_dir):
+        directory.mkdir(parents=True, exist_ok=True)
     canvas = (480, 360)
     clean_background = _paper_background(canvas)
     reference = clean_background.copy()
@@ -108,7 +112,7 @@ def create_demo(output_dir: Path) -> Path:
         "version": "collage-reviewed/1",
         "status": "reviewed",
         "reference": {
-            "path": "inputs/reference.png",
+            "path": "../inputs/reference.png",
             "sha256": sha256_file(paths["reference"]),
         },
         "canvas": {
@@ -162,7 +166,7 @@ def create_demo(output_dir: Path) -> Path:
                 "requires_exact_content": False,
                 "review_notes": "导入预制透明素材",
                 "rotation_deg": 0,
-                "prepared_asset": "inputs/overlay_star.png",
+                "prepared_asset": "../inputs/overlay_star.png",
                 "background_mode": "alpha",
                 "chroma_key": None,
                 "chroma_tolerance": 40,
@@ -172,9 +176,9 @@ def create_demo(output_dir: Path) -> Path:
         "background": {
             "background_brief": "延续米色纸纹，不保留旧色块。",
             "review_notes": "导入确定性测试底图",
-            "remove_mask": "inputs/remove_mask.png",
+            "remove_mask": "../inputs/remove_mask.png",
             "allowed_mask": None,
-            "candidate_path": "inputs/background_candidate.png",
+            "candidate_path": "../inputs/background_candidate.png",
             "expand_px": 0,
             "feather_px": 0,
         },
@@ -192,8 +196,8 @@ def create_demo(output_dir: Path) -> Path:
         },
         "audit": {"fixture": False, "source": "programmatic-demo"},
     }
-    reviewed_path = root / "reviewed.json"
-    bindings_path = root / "bindings.json"
+    reviewed_path = review_dir / "reviewed.json"
+    bindings_path = renders_dir / "bindings.json"
     atomic_write_json(reviewed_path, reviewed)
     atomic_write_json(
         bindings_path,
@@ -201,12 +205,12 @@ def create_demo(output_dir: Path) -> Path:
             "version": "collage-bindings/1",
             "slots": {
                 "photo_left": {
-                    "path": "inputs/customer_photo.png",
+                    "path": "../inputs/customer_photo.png",
                     "scale": 1.0,
                     "offset_px": [0, 0],
                 },
                 "person_main": {
-                    "path": "inputs/customer_cutout.png",
+                    "path": "../inputs/customer_cutout.png",
                     "scale": 1.0,
                     "offset_px": [0, 0],
                 },
@@ -214,8 +218,8 @@ def create_demo(output_dir: Path) -> Path:
         },
     )
     template_dir = root / "template"
-    build_template(reviewed_path, template_dir, work_dir=root / "work")
-    result_path = root / "result.png"
+    build_template(reviewed_path, template_dir, work_dir=workspace_dir)
+    result_path = renders_dir / "result.png"
     render_from_files(template_dir, bindings_path, result_path, require_ready=False)
     LOGGER.info("M1 演示完成，模板仍等待人工批准 | result=%s", result_path)
     return result_path

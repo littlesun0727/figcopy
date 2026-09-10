@@ -22,6 +22,7 @@
 | 本地 BiRefNet_lite-matting 客户图片抠图 provider | `collage/providers/birefnet.py` |
 | 背景/overlay 构建、审计、视觉报告与发布 | `collage/build.py` |
 | 内容寻址缓存和节点状态 | `collage/cache.py` |
+| 外部数据根目录与项目存储 | `collage/projects/paths.py`, `collage/projects/store.py` |
 | 客户图片/文字准备与确定性 Renderer | `collage/render.py` |
 | 独立 cutout 准备及云上传授权门禁 | `collage/cutout.py` |
 | 模板包文件、路径、透明度和发布校验 | `collage/validate.py` |
@@ -37,10 +38,12 @@
 
 ```powershell
 python -m collage --help
-python -m collage demo --out artifacts/m1_demo
-python -m collage validate --template artifacts/m1_demo/template --allow-unreviewed
+python -m collage demo --data-dir D:\datas\figcopy --project m1-demo
+python -m collage validate --template D:\datas\figcopy\projects\m1-demo\template --allow-unreviewed
 python -m pytest -q
 ```
+
+源码仓库不保存运行产物。默认数据根目录由 `FIGCOPY_DATA_DIR` 或操作系统用户数据目录决定；当前开发数据统一位于 `D:\datas\figcopy`。
 
 安装项目后也可使用 `collage ...` console script。依赖与 Python 版本约定在 `pyproject.toml`。
 

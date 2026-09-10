@@ -166,18 +166,18 @@ def test_demo_creates_reviewable_deterministic_package_in_chinese_path(
     template = validate_package(root / "template", require_ready=False)
     assert template["status"] == "needs_review"
     assert template["build"]["fixture_used"] is False
-    assert (root / "work" / "inspection.html").is_file()
-    assert (root / "work" / "background_candidate.png").is_file()
-    assert (root / "work" / "previews" / "overlay_star_edges.png").is_file()
-    assert read_json(root / "work" / "state.json")["status"] == "needs_review"
+    assert (root / "workspace" / "inspection.html").is_file()
+    assert (root / "workspace" / "background_candidate.png").is_file()
+    assert (root / "workspace" / "previews" / "overlay_star_edges.png").is_file()
+    assert read_json(root / "workspace" / "state.json")["status"] == "needs_review"
     approve_template(
         root / "template",
         [result],
         reviewer="test-simulated-reviewer",
-        work_dir=root / "work",
+        work_dir=root / "workspace",
     )
     assert validate_package(root / "template")["status"] == "ready"
-    assert read_json(root / "work" / "state.json")["status"] == "ready"
+    assert read_json(root / "workspace" / "state.json")["status"] == "ready"
 
 
 def test_fixture_build_requires_explicit_approval(

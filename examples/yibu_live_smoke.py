@@ -16,6 +16,7 @@ from PIL import Image, ImageDraw
 
 from collage.build import build_template
 from collage.io_utils import atomic_save_image, atomic_write_json, sha256_file
+from collage.projects import DataPaths, ProjectStore
 from collage.providers.yibu import YibuImageProvider
 
 LOGGER = logging.getLogger("yibu-live-smoke")
@@ -28,8 +29,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--out",
         type=Path,
-        default=Path("artifacts/yibu_live_test/image"),
-        help="Artifact directory for the smoke test.",
+        help="Artifact directory; defaults to the external Figcopy data root.",
+    )
+    parser.add_argument(
+        "--data-dir",
+        type=Path,
+        help="Figcopy data root; defaults to FIGCOPY_DATA_DIR or OS user data.",
     )
     return parser.parse_args()
 
@@ -71,7 +76,12 @@ def main() -> int:
         format="%(asctime)s %(levelname)s %(name)s - %(message)s",
     )
 
-    out_dir = args.out.resolve()
+    if args.out is not None:
+        out_dir = args.out.resolve()
+    else:
+        store = ProjectStore(DataPaths.resolve(args.data_dir))
+        project = store.create("yibu-live-test", exist_ok=True)
+        out_dir = project.root / "image"
     out_dir.mkdir(parents=True, exist_ok=True)
     LOGGER.info("Preparing audited image-model smoke test in %s", out_dir)
 

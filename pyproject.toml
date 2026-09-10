@@ -26,6 +26,7 @@ birefnet = [
 
 [project.scripts]
 collage = "collage.cli:main"
+figcopy = "collage.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["collage*"]

@@ -2,9 +2,12 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.ruff_cache/
 *.egg-info/
 .tmp_demo/
-artifacts/
+/artifacts/
+/templates/
+/work/
 *.render.json
 .env
 .env.*

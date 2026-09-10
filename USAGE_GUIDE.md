@@ -28,6 +28,14 @@ python -m pytest -q
 
 如果当前环境已经能运行 `python -m collage --help`，无需重复安装。
 
+建议固定一个源码仓库之外的数据目录：
+
+```powershell
+$env:FIGCOPY_DATA_DIR = "D:\datas\figcopy"
+```
+
+`demo` 和后续一体化入口会在其中创建 `projects/<项目 ID>`；底层 CLI 的显式 `--out`、`--work` 路径也应指向该目录。
+
 需要把普通照片用于 `cutout` 槽时，再安装本地 BiRefNet 可选依赖：
 
 ```powershell
@@ -171,17 +179,17 @@ python D:\codes\yibu-audit-proxy\run.py report `
 先运行不依赖网络和图片模型的内置演示：
 
 ```powershell
-python -m collage demo --out artifacts/m1_demo
+python -m collage demo --data-dir D:\datas\figcopy --project m1-demo
 python -m collage validate `
-  --template artifacts/m1_demo/template `
+  --template D:\datas\figcopy\projects\m1-demo\template `
   --allow-unreviewed
 ```
 
 主要输出：
 
-- `artifacts/m1_demo/result.png`：替换素材后的试拼图；
-- `artifacts/m1_demo/template/template.json`：状态为 `needs_review` 的模板；
-- `artifacts/m1_demo/work/inspection.html`：制作检查报告。
+- `D:\datas\figcopy\projects\m1-demo\renders\result.png`：替换素材后的试拼图；
+- `D:\datas\figcopy\projects\m1-demo\template\template.json`：状态为 `needs_review` 的模板；
+- `D:\datas\figcopy\projects\m1-demo\workspace\inspection.html`：制作检查报告。
 
 ## 5. 复现本次 Image #1 试拼
 

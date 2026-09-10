@@ -18,6 +18,7 @@ from .errors import CollageError
 from .guide import create_upload_guide
 from .io_utils import read_json
 from .logging_config import configure_logging
+from .projects import DataPaths, ProjectStore
 from .providers import (
     CutoutProvider,
     DeterministicFixtureImageProvider,
@@ -151,7 +152,16 @@ def _parser() -> argparse.ArgumentParser:
     guide.add_argument("--allow-unreviewed", action="store_true")
 
     demo = subparsers.add_parser("demo", help="生成不依赖 AI 的完整 M1 演示")
-    demo.add_argument("--out", type=_path, required=True)
+    destination = demo.add_mutually_exclusive_group()
+    destination.add_argument("--out", type=_path, help="兼容旧版的显式输出目录")
+    destination.add_argument(
+        "--project", default="m1-demo", help="数据目录内的项目 ID"
+    )
+    demo.add_argument(
+        "--data-dir",
+        type=_path,
+        help="运行数据根目录；默认读取 FIGCOPY_DATA_DIR 或系统用户数据目录",
+    )
     return parser
 
 
@@ -248,7 +258,16 @@ def _run(args: argparse.Namespace) -> Any:
             require_ready=not args.allow_unreviewed,
         )
     if args.command == "demo":
-        return create_demo(args.out)
+        if args.out is not None:
+            output_dir = args.out
+            store = None
+        else:
+            store = ProjectStore(DataPaths.resolve(args.data_dir))
+            output_dir = store.create(args.project).root
+        result = create_demo(output_dir)
+        if store is not None:
+            store.set_status(args.project, "needs_review")
+        return result
     raise AssertionError(f"unknown command: {args.command}")
 
 
