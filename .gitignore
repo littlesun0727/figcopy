@@ -1,0 +1,10 @@
+# Python caches and local build artifacts.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.tmp_demo/
+artifacts/
+*.render.json
+.env
+.env.*
