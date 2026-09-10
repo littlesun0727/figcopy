@@ -1,66 +1,85 @@
-# Repository Map
+# 工程结构
 
-本文件记录实施 `COLLAGE_MVP_PLAN.md` 后的真实仓库职责、运行入口和能力缺口。
+这份文件只说明“代码放在哪里、运行数据放在哪里”。具体命令仍见
+[USAGE_GUIDE.md](USAGE_GUIDE.md)。
 
-## 实施前盘点
+## 两类目录
 
-实施开始时仓库只有 `COLLAGE_MVP_PLAN.md`，没有 `AGENTS.md`、README、依赖清单、运行入口、测试、VLM、图片编辑、抠图、文件存储、工作流或渲染接口。因此没有可复用代码，也没有可运行的基线测试；本实现采用计划建议的 Python + Pillow，不引入工作流框架、数据库或前端依赖。
+- `D:\codes\figcopy`：源码、测试、示例和文档。正常运行不应在这里产生项目文件。
+- Figcopy 数据目录：项目输入、中间结果、模板、渲染结果、缓存和日志。由
+  `--data-dir`、`FIGCOPY_DATA_DIR` 或系统用户数据目录决定；当前开发数据使用
+  `D:\datas\figcopy`。
 
-## 文件职责
+数据目录结构：
 
-| 职责 | 真实文件 |
+```text
+<figcopy-data>/
+├─ projects/
+│  └─ <project-id>/
+│     ├─ project.json
+│     ├─ inputs/
+│     ├─ analysis/
+│     ├─ review/
+│     ├─ template/
+│     ├─ renders/
+│     ├─ reports/
+│     └─ workspace/
+├─ cache/
+├─ logs/
+└─ archive/
+```
+
+`projects` 是用户项目的持久化目录；一个项目从参考图分析到最终渲染的文件都归在
+同一个 `<project-id>` 下。它不是 Python 源码目录。
+
+## Python 包分层
+
+| 目录 | 职责 |
 |---|---|
-| CLI 与命令路由 | `collage/cli.py`, `collage/__main__.py` |
-| Draft / ReviewedSpec / TemplateSpec / Bindings 严格校验 | `collage/schema.py` |
-| EXIF、crop、mask、alpha、颜色键与背景保护合成 | `collage/prepare.py` |
-| 等比 provider 补边、回裁和坐标逆变换 | `collage/geometry.py` |
-| VLM 输入、人工 Draft 导入与候选框预览 | `collage/analyze.py` |
-| CLI 人工确认与一页式本地确认界面 | `collage/review.py`, `collage/review_ui.py` |
-| provider 协议、能力声明和显式插件加载 | `collage/providers/base.py` |
-| 明确标记的确定性测试 provider | `collage/providers/fixture.py` |
-| 强制经本机审计代理的 Yibu VLM / Gemini 图片 provider | `collage/providers/yibu.py` |
-| 本地 BiRefNet_lite-matting 客户图片抠图 provider | `collage/providers/birefnet.py` |
-| 背景/overlay 构建、审计、视觉报告与发布 | `collage/build.py` |
-| 内容寻址缓存和节点状态 | `collage/cache.py` |
-| 外部数据根目录与项目存储 | `collage/projects/paths.py`, `collage/projects/store.py` |
-| 客户图片/文字准备与确定性 Renderer | `collage/render.py` |
-| 独立 cutout 准备及云上传授权门禁 | `collage/cutout.py` |
-| 模板包文件、路径、透明度和发布校验 | `collage/validate.py` |
-| 命名上传指南与 Bindings 起始文件 | `collage/guide.py` |
-| 无网络 M1 演示生成 | `collage/demo.py` |
-| Image #1 真实参考图试拼示例 | `examples/reference_image_trial.py` |
-| Yibu 配置与真实图片冒烟测试 | `examples/configure_yibu.ps1`, `examples/yibu_live_smoke.py` |
-| 中文操作指南 | `USAGE_GUIDE.md` |
-| 原子写入、安全路径、哈希、图片解码 | `collage/io_utils.py` |
-| 自动化回归 | `tests/` |
+| `collage/cli/` | 命令行参数和命令路由 |
+| `collage/core/` | 错误类型、日志、原子文件 IO、状态文件 |
+| `collage/projects/` | 外部数据根目录、项目路径和 `project.json` |
+| `collage/schemas/` | Draft、ReviewedSpec、TemplateSpec、Bindings 校验 |
+| `collage/imaging/` | 通用图片读写、mask、alpha、颜色键和几何变换 |
+| `collage/providers/` | VLM、图片生成、抠图 provider 协议及实现 |
+| `collage/template/` | 参考图分析、人工审核、模板构建、发布和校验 |
+| `collage/rendering/` | Bindings 准备、图片层、文字层和确定性合成 |
+| `collage/studio/` | 本机审核服务及独立 HTML/CSS/JS |
+| `collage/devtools/` | 离线演示数据生成；不属于生产渲染路径 |
 
-## 运行入口
+主要子模块：
+
+- `template/build/`：背景、overlay、模板包、检查报告、批准和编排。
+- `template/review/`：审核默认规则与 ReviewedSpec 固化。
+- `providers/yibu/`：配置、审计 HTTP 客户端、VLM 分析和图片生成。
+- `studio/templates/`、`studio/static/`：审核页前端资源。
+- `rendering/`：Bindings、布局、图片层、文字层与顶层渲染服务。
+
+依赖方向保持为：`cli/studio → template/rendering/projects → schemas/providers/imaging/core`。
+底层模块不反向依赖 CLI 或页面层。
+
+## 稳定入口
 
 ```powershell
 python -m collage --help
-python -m collage demo --data-dir D:\datas\figcopy --project m1-demo
-python -m collage validate --template D:\datas\figcopy\projects\m1-demo\template --allow-unreviewed
+figcopy --help
 python -m pytest -q
 ```
 
-源码仓库不保存运行产物。默认数据根目录由 `FIGCOPY_DATA_DIR` 或操作系统用户数据目录决定；当前开发数据统一位于 `D:\datas\figcopy`。
+安装后 `collage` 和 `figcopy` 两个命令指向同一入口。现有 provider 插件字符串保持
+兼容，例如：
 
-安装项目后也可使用 `collage ...` console script。依赖与 Python 版本约定在 `pyproject.toml`。
+```text
+collage.providers.yibu:YibuVisionProvider
+collage.providers.yibu:YibuImageProvider
+collage.providers.birefnet:BiRefNetLiteMattingProvider
+```
 
-## 当前 provider 与能力
+## 仓库边界
 
-| 能力 | 当前实现 | 状态 |
-|---|---|---|
-| VLM 候选 Draft | Yibu 审计 provider + 严格协议 + 人工草稿 fallback | `claude-opus-4-8` 已用 Image #1 实测 |
-| 背景 mask 编辑 | Yibu Gemini provider、mask 极性、保护合成、缓存 | `gemini-3-pro-image-preview` 已用合成 mask 实测 |
-| Overlay 参考生成 | Yibu Gemini provider、alpha/颜色键适配、边缘预览、缓存 | 协议已自动测试，仍需真实模板视觉验收 |
-| Cutout | 透明 PNG 直通 + 本地 BiRefNet_lite-matting + 可插拔 provider + 云上传授权 | 自动测试及 Python 3.11 CPU 真实模型冒烟通过；视觉验收待模板作者确认 |
-| 本地渲染 | Pillow，无 provider 参数、审计固定为零网络调用 | 已实现并自动测试 |
-
-Yibu provider 拒绝公网 Base URL，必须先通过 `127.0.0.1` 审计健康检查；API Key 只从环境变量或明确指定的外部 `shared.py` 动态读取。fixture provider 只用于调用、缓存和失败恢复测试，审计中明确为 `fixture=true`。导入人工制作素材记录为 `imported-*`，也不宣称它来自真实模型。
-
-## 验证范围
-
-自动测试覆盖 EXIF、source rect、provider 补边/回裁、mask 极性、保护像素、缓存失效、层序、cover/contain、旋转、画布裁切、半透明合成、photo feather、cutout 门禁、路径穿越、损坏图片、透明通道、中文路径和发布证据。
-
-额外真实验证已覆盖：Yibu `claude-opus-4-8` 对 Image #1 的候选 Draft，`gemini-3-pro-image-preview` 对合成图的 mask 编辑、尺寸回裁、保护区合成和审计落盘，以及 `BiRefNet_lite-matting` 对 1080×1440 人物照片的 CPU 推理、离线缓存与本地目录加载。尚缺的真实验收不是代码测试可以替代的：完整真实参考图的模型清版与复杂装饰生成、模板作者对抠图边缘与保留对象的确认，以及两类真实拼贴模板 × 每类三组客户素材的人工视觉回归。
+- `tests/`：自动化回归。
+- `examples/`：可选示例，不是运行时项目目录。
+- `COLLAGE_MVP_PLAN.md`：原始产品/技术约束，不是操作手册。
+- 根目录的 `work/`、`templates/`、`artifacts/` 仅作为旧版兼容忽略项；
+  新流程应写入外部数据目录。
+- 缓存、模型权重、客户图片、密钥和生成结果不提交到 Git。

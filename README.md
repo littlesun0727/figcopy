@@ -54,7 +54,7 @@ python -m collage analyze `
   --out work/demo
 ```
 
-程序会应用 EXIF 方向、保存 `work/demo/reference.png`，再写入包含程序所有元数据的 `draft.json` 和框选预览。人工草稿只需提供 `slots`、`overlays`、`background`、`layer_order` 和 `questions`。运行 `demo` 后可参考其 `reviewed.json`；严格字段约定集中在 `collage/schema.py`。
+程序会应用 EXIF 方向、保存 `work/demo/reference.png`，再写入包含程序所有元数据的 `draft.json` 和框选预览。人工草稿只需提供 `slots`、`overlays`、`background`、`layer_order` 和 `questions`。运行 `demo` 后可参考其 `reviewed.json`；严格字段约定按对象类型放在 `collage/schemas/`。
 
 配置真实 VLM 时，显式传入 Python 插件：
 
