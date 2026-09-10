@@ -3,6 +3,10 @@ const ctx = view.getContext('2d');
 const mask = document.createElement('canvas');
 const mctx = mask.getContext('2d');
 const $ = selector => document.querySelector(selector);
+const apiBase = document.querySelector('meta[name="review-api-base"]')?.content || '';
+const returnUrl = document.querySelector('meta[name="review-return-url"]')?.content || '';
+const csrfToken = document.querySelector('meta[name="figcopy-csrf-token"]')?.content || '';
+const endpoint = path => `${apiBase}${path}`;
 const escapeHtml = value => String(value).replace(
   /[&<>"']/g,
   character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character])
@@ -421,21 +425,25 @@ function preflightErrors() {
 }
 
 async function load() {
+  if (returnUrl) {
+    $('#returnLink').hidden = false;
+    $('#returnLink').href = returnUrl;
+  }
   const [draftResponse, optionsResponse] = await Promise.all([
-    fetch('/draft'),
-    fetch('/review-options'),
+    fetch(endpoint('/draft')),
+    fetch(endpoint('/review-options')),
   ]);
   draft = await draftResponse.json();
   reviewOptions = await optionsResponse.json();
 
   image = new Image();
-  image.src = '/reference';
+  image.src = endpoint('/reference');
   await image.decode();
   view.width = mask.width = draft.canvas.width;
   view.height = mask.height = draft.canvas.height;
 
   const initial = new Image();
-  initial.src = '/mask';
+  initial.src = endpoint('/mask');
   await initial.decode();
   const temporary = document.createElement('canvas');
   temporary.width = mask.width;
@@ -480,9 +488,12 @@ $('#save').onclick = async () => {
   const copy = structuredClone(draft);
   copy.questions = [];
   $('#status').textContent = '正在校验并保存…';
-  const response = await fetch('/save', {
+  const response = await fetch(endpoint('/save'), {
     method: 'POST',
-    headers: {'content-type': 'application/json'},
+    headers: {
+      'content-type': 'application/json',
+      ...(csrfToken ? {'X-Figcopy-Token': csrfToken} : {}),
+    },
     body: JSON.stringify({
       draft: copy,
       mask_png: mask.toDataURL('image/png'),
@@ -498,9 +509,11 @@ $('#save').onclick = async () => {
   $('#status').textContent = response.ok
     ? `已保存：${result.path}`
     : `失败 [${result.code}]\n${result.message}\n${JSON.stringify(result.details || {}, null, 2)}`;
+  if (response.ok && returnUrl) {
+    window.setTimeout(() => window.location.assign(returnUrl), 450);
+  }
 };
 
 load().catch(error => {
   $('#status').textContent = '载入失败：' + error;
 });
-

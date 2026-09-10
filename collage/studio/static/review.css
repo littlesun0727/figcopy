@@ -28,4 +28,6 @@ button{padding:6px 9px;border:0;border-radius:5px;cursor:pointer}
 summary{cursor:pointer;color:#dce3ee;margin:6px 0}
 .status{white-space:pre-wrap;padding:8px;background:#17191e;border-radius:6px}
 code{overflow-wrap:anywhere}
-
+/* Shared Draft review page used standalone and inside the project workbench. */
+.return-link { color: #8bd8ff; display: inline-block; margin-bottom: 8px; text-decoration: none; }
+.return-link[hidden] { display: none; }
