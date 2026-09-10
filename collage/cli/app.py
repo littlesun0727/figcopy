@@ -32,9 +32,7 @@ from ..template.review import confirm_draft
 from ..template.validation import validate_package
 
 LOGGER = logging.getLogger(__name__)
-DEFAULT_CUTOUT_PROVIDER = (
-    "collage.providers.birefnet:BiRefNetLiteMattingProvider"
-)
+DEFAULT_CUTOUT_PROVIDER = "collage.providers.birefnet:BiRefNetLiteMattingProvider"
 
 
 def _path(value: str) -> Path:
@@ -136,10 +134,7 @@ def _parser() -> argparse.ArgumentParser:
     cutout.add_argument("--out", type=_path, required=True)
     cutout.add_argument(
         "--provider",
-        help=(
-            "抠图 provider，格式 module:object；"
-            "默认使用本地 BiRefNet_lite-matting"
-        ),
+        help=("抠图 provider，格式 module:object；默认使用本地 BiRefNet_lite-matting"),
     )
     cutout.add_argument("--allow-cloud-upload", action="store_true")
 
@@ -154,9 +149,7 @@ def _parser() -> argparse.ArgumentParser:
     demo = subparsers.add_parser("demo", help="生成不依赖 AI 的完整 M1 演示")
     destination = demo.add_mutually_exclusive_group()
     destination.add_argument("--out", type=_path, help="兼容旧版的显式输出目录")
-    destination.add_argument(
-        "--project", default="m1-demo", help="数据目录内的项目 ID"
-    )
+    destination.add_argument("--project", default="m1-demo", help="数据目录内的项目 ID")
     demo.add_argument(
         "--data-dir",
         type=_path,

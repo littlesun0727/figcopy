@@ -83,7 +83,9 @@ class ProjectStore:
         if not self.paths.projects.exists():
             return []
         manifests: list[dict[str, Any]] = []
-        for directory in sorted(self.paths.projects.iterdir(), key=lambda item: item.name):
+        for directory in sorted(
+            self.paths.projects.iterdir(), key=lambda item: item.name
+        ):
             if not directory.is_dir():
                 continue
             project = self.paths.project(directory.name)

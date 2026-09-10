@@ -101,8 +101,10 @@ class BiRefNetSettings:
         device = os.environ.get("COLLAGE_BIREFNET_DEVICE", "auto").strip().lower()
         cache_value = os.environ.get("COLLAGE_BIREFNET_CACHE_DIR", "").strip()
 
-        if device != "auto" and device != "cpu" and not _CUDA_DEVICE_RE.fullmatch(
-            device
+        if (
+            device != "auto"
+            and device != "cpu"
+            and not _CUDA_DEVICE_RE.fullmatch(device)
         ):
             raise CollageError(
                 "BIREFNET_CONFIG_INVALID",
@@ -129,9 +131,7 @@ class BiRefNetSettings:
             model_source = model_id
             model_revision = revision_value or None
             is_local_model = False
-            local_files_only = _boolean_env(
-                "COLLAGE_BIREFNET_LOCAL_FILES_ONLY", False
-            )
+            local_files_only = _boolean_env("COLLAGE_BIREFNET_LOCAL_FILES_ONLY", False)
 
         cache_dir = Path(cache_value).expanduser().resolve() if cache_value else None
         return cls(
@@ -156,7 +156,7 @@ class _MattingBackend(Protocol):
 def _dependency_error(module_name: str, exc: BaseException) -> CollageError:
     return CollageError(
         "BIREFNET_DEPENDENCY_MISSING",
-        "BiRefNet 本地依赖不可用；请运行 python -m pip install -e \".[birefnet]\"",
+        'BiRefNet 本地依赖不可用；请运行 python -m pip install -e ".[birefnet]"',
         details={"module": module_name, "reason": type(exc).__name__},
     )
 
@@ -230,7 +230,9 @@ class _TorchBiRefNetBackend:
         self._input_size = settings.input_size
         self.device = _select_device(self._torch, settings.device)
         self._dtype = (
-            self._torch.float16 if self.device.startswith("cuda") else self._torch.float32
+            self._torch.float16
+            if self.device.startswith("cuda")
+            else self._torch.float32
         )
         self.dtype_name = "float16" if self._dtype == self._torch.float16 else "float32"
 
@@ -390,14 +392,14 @@ class BiRefNetLiteMattingProvider:
                     self._backend = self._backend_factory(self.settings)
         return self._backend
 
-    def cutout(
-        self, customer_image: Image.Image
-    ) -> tuple[Image.Image, ProviderAudit]:
+    def cutout(self, customer_image: Image.Image) -> tuple[Image.Image, ProviderAudit]:
         """返回与客户原图对齐的单通道软 Alpha，不上传图片。"""
 
         started = time.perf_counter()
         backend = self._get_backend()
-        subject_alpha = backend.predict_alpha(customer_image.convert("RGB")).convert("L")
+        subject_alpha = backend.predict_alpha(customer_image.convert("RGB")).convert(
+            "L"
+        )
         if subject_alpha.size != customer_image.size:
             raise CollageError(
                 "MASK_SIZE_MISMATCH",
