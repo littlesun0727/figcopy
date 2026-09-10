@@ -29,7 +29,7 @@ from ..imaging.operations import (
     parse_color,
     rect_to_box,
 )
-from ..schema import validate_bindings
+from ..schemas import validate_bindings
 from ..template.validation import validate_package
 
 LOGGER = logging.getLogger(__name__)

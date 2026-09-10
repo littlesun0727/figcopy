@@ -41,7 +41,7 @@ from ..imaging.operations import (
     trim_transparent,
 )
 from ..providers import GeneratedImage, ImageProvider, ProviderAudit
-from ..schema import validate_reviewed_spec, validate_template_spec
+from ..schemas import validate_reviewed_spec, validate_template_spec
 from .validation import validate_package
 
 LOGGER = logging.getLogger(__name__)

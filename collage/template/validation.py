@@ -10,7 +10,7 @@ from typing import Any
 from ..core.errors import CollageError, SpecValidationError, ValidationIssue
 from ..core.io import decode_image, read_json, safe_package_path, sha256_file
 from ..imaging.operations import alpha_is_meaningful, parse_color, rect_to_box
-from ..schema import validate_template_spec
+from ..schemas import validate_template_spec
 
 LOGGER = logging.getLogger(__name__)
 _WINDOWS_ABSOLUTE = re.compile(r"^[A-Za-z]:[\\/]")

@@ -22,7 +22,7 @@ from ..core.io import (
     resolve_input_path,
 )
 from ..imaging.operations import load_mask
-from ..schema import validate_draft
+from ..schemas import validate_draft
 from ..template.review import (
     EDGE_FADE_MAX_PX,
     EDGE_FADE_RATIO,

@@ -21,7 +21,7 @@ from ..core.io import (
 )
 from ..imaging.operations import normalize_image, rect_to_box
 from ..providers import ProviderAudit, VisionProvider
-from ..schema import validate_draft
+from ..schemas import validate_draft
 
 LOGGER = logging.getLogger(__name__)
 PROMPT_VERSION = "collage-draft/1"

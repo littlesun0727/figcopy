@@ -8,7 +8,7 @@ import pytest
 
 from collage.core.errors import SpecValidationError
 from collage.core.io import atomic_write_json, read_json
-from collage.schema import (
+from collage.schemas import (
     draft_has_release_blockers,
     validate_bindings,
     validate_draft,
