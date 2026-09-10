@@ -1,0 +1,47 @@
+<!doctype html>
+<!-- 本页用最少输入确认 Draft 的槽位和白=删除 mask；高级参数默认自动处理。 -->
+<meta charset="utf-8">
+<title>Collage Draft Review</title>
+<link rel="stylesheet" href="/static/review.css">
+<main>
+  <div class="stage"><div class="canvas-wrap"><canvas id="view"></canvas></div></div>
+  <aside>
+    <h1>确认模板</h1>
+    <p class="muted">通常只需检查蓝框/粉框位置并画出要从底图清除的区域。羽化、字体和装饰素材已自动处理。</p>
+    <div class="row mode">
+      <button id="boxMode" class="active">拖动框</button>
+      <button id="drawMode">画删除区</button>
+      <button id="eraseMode">擦除</button>
+      <button id="resetMask">恢复自动涂层</button>
+      <label>笔刷 <input id="brush" type="range" min="2" max="160" value="36"></label>
+    </div>
+    <div id="items"></div>
+
+    <h2>清除旧内容</h2>
+    <p id="maskHint" class="auto">正在自动标出需要清除的区域…</p>
+    <label id="emptyMaskOption" class="warning" hidden>
+      <input id="emptyMaskApproved" type="checkbox">
+      这张图不需要清除旧内容
+    </label>
+
+    <details class="advanced">
+      <summary>高级：清版参数</summary>
+      <label class="stack">背景补全要求
+        <textarea id="backgroundBrief"></textarea>
+      </label>
+      <div class="row">
+        <label>删除区扩张 <input id="backgroundExpand" type="number" min="0" max="4096"></label>
+        <label>融合羽化 <input id="backgroundFeather" type="number" min="0" max="4096"></label>
+      </div>
+    </details>
+    <details class="advanced">
+      <summary>高级：调整图层顺序</summary>
+      <div id="layers"></div>
+    </details>
+    <p id="autoSummary" class="muted"></p>
+    <h2>保存</h2>
+    <div class="row"><button id="save" class="primary">确认并保存</button></div>
+    <div id="status" class="status">正在载入…</div>
+  </aside>
+</main>
+<script src="/static/review.js"></script>

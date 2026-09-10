@@ -31,6 +31,9 @@ figcopy = "collage.cli:main"
 [tool.setuptools.packages.find]
 include = ["collage*"]
 
+[tool.setuptools.package-data]
+"collage.studio" = ["templates/*.html", "static/*.css", "static/*.js"]
+
 [tool.pytest.ini_options]
 addopts = "-ra"
 testpaths = ["tests"]

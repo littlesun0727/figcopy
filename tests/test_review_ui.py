@@ -19,14 +19,18 @@ from collage.core.errors import CollageError
 from collage.core.io import atomic_write_json, read_json
 from collage.studio.review_server import (
     HTML,
-    _automatic_remove_mask,
-    _automatic_review_notes,
-    _build_review_options,
-    _question_resolution_notes,
-    _validate_review_decisions,
+    REVIEW_CSS,
+    REVIEW_JS,
     serve_review_ui,
 )
 from collage.template.analysis import analyze_reference
+from collage.template.review import (
+    automatic_remove_mask,
+    automatic_review_notes,
+    build_review_options,
+    question_resolution_notes,
+    validate_review_decisions,
+)
 
 
 def _complex_draft() -> dict:
@@ -60,7 +64,7 @@ def _complex_draft() -> dict:
 
 
 def test_review_options_supply_dynamic_visual_defaults() -> None:
-    options = _build_review_options(
+    options = build_review_options(
         _complex_draft(),
         None,
         None,
@@ -80,7 +84,7 @@ def test_remove_mask_is_automatically_painted_from_source_rects() -> None:
         "slots": [{"source_rect": [10, 10, 20, 10]}],
         "overlays": [{"source_rect": [50, 40, 10, 10]}],
     }
-    mask = _automatic_remove_mask(draft)
+    mask = automatic_remove_mask(draft)
     assert mask.getbbox() == (8, 8, 62, 52)
     assert mask.getpixel((10, 10)) == 255
     assert mask.getpixel((50, 40)) == 255
@@ -89,29 +93,29 @@ def test_remove_mask_is_automatically_painted_from_source_rects() -> None:
 
 def test_review_decisions_accept_automatic_defaults_but_keep_advanced_gate() -> None:
     draft = _complex_draft()
-    options = _build_review_options(
+    options = build_review_options(
         draft,
         None,
         None,
         background_expand_px=0,
         background_feather_px=0,
     )
-    _validate_review_decisions(draft, options["slots"], options["overlays"])
+    validate_review_decisions(draft, options["slots"], options["overlays"])
 
     # 高级覆盖若重新声明必须精确保真，仍然需要提供真实素材。
     options["overlays"]["ticket"]["requires_exact_content"] = True
     with pytest.raises(CollageError) as caught:
-        _validate_review_decisions(draft, options["slots"], options["overlays"])
+        validate_review_decisions(draft, options["slots"], options["overlays"])
     assert caught.value.code == "HUMAN_REVIEW_REQUIRED"
     assert len(caught.value.details["blockers"]) == 1
 
     options["overlays"]["ticket"]["requires_exact_content"] = False
-    _validate_review_decisions(draft, options["slots"], options["overlays"])
+    validate_review_decisions(draft, options["slots"], options["overlays"])
 
 
 def test_question_answers_are_recorded_in_review_notes() -> None:
     questions = ["层序是否正确？", "是否接受近似票券？"]
-    notes = _question_resolution_notes(
+    notes = question_resolution_notes(
         questions,
         [
             {"question": questions[0], "answer": "当前层序正确"},
@@ -122,7 +126,7 @@ def test_question_answers_are_recorded_in_review_notes() -> None:
     assert "A: 接受近似生成" in notes
 
     with pytest.raises(CollageError) as caught:
-        _question_resolution_notes(
+        question_resolution_notes(
             questions,
             [
                 {"question": questions[0], "answer": ""},
@@ -135,14 +139,14 @@ def test_question_answers_are_recorded_in_review_notes() -> None:
 def test_automatic_notes_make_silent_defaults_auditable() -> None:
     draft = _complex_draft()
     draft["questions"] = ["是否接受当前设置？"]
-    options = _build_review_options(
+    options = build_review_options(
         draft,
         None,
         None,
         background_expand_px=0,
         background_feather_px=0,
     )
-    notes = _automatic_review_notes(
+    notes = automatic_review_notes(
         draft,
         options["slots"],
         options["overlays"],
@@ -154,14 +158,17 @@ def test_automatic_notes_make_silent_defaults_auditable() -> None:
 
 
 def test_review_page_hides_nonessential_path_and_question_inputs() -> None:
-    assert "已按图片框大小自动设置" in HTML
-    assert "字体样式已自动处理" in HTML
-    assert "无需上传透明素材" in HTML
-    assert "可选槽位 clip mask 路径" not in HTML
-    assert "精确透明素材路径" not in HTML
-    assert "data-question-index" not in HTML
-    assert "恢复自动涂层" in HTML
-    assert "删除蒙版为空" in HTML
+    page_source = f"{HTML}\n{REVIEW_CSS}\n{REVIEW_JS}"
+    assert 'href="/static/review.css"' in HTML
+    assert 'src="/static/review.js"' in HTML
+    assert "已按图片框大小自动设置" in page_source
+    assert "字体样式已自动处理" in page_source
+    assert "无需上传透明素材" in page_source
+    assert "可选槽位 clip mask 路径" not in page_source
+    assert "精确透明素材路径" not in page_source
+    assert "data-question-index" not in page_source
+    assert "恢复自动涂层" in page_source
+    assert "删除蒙版为空" in page_source
 
 
 def _full_manual_draft() -> dict:
@@ -251,6 +258,14 @@ def test_review_server_saves_complex_draft_with_automatic_decisions(
     base_url = f"http://127.0.0.1:{port}"
     browser_draft = _wait_for_json(f"{base_url}/draft")
     options = _wait_for_json(f"{base_url}/review-options")
+    with urllib.request.urlopen(base_url, timeout=5) as response:
+        assert b"/static/review.css" in response.read()
+    with urllib.request.urlopen(f"{base_url}/static/review.css", timeout=5) as response:
+        assert response.headers.get_content_type() == "text/css"
+        assert b"system-ui" in response.read()
+    with urllib.request.urlopen(f"{base_url}/static/review.js", timeout=5) as response:
+        assert response.headers.get_content_type() == "text/javascript"
+        assert b"fetch(" in response.read()
     with urllib.request.urlopen(f"{base_url}/mask", timeout=5) as response:
         automatic_mask = Image.open(io.BytesIO(response.read())).convert("L")
     assert automatic_mask.getbbox() is not None

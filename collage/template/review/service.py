@@ -9,10 +9,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from ..core.errors import CollageError
-from ..core.io import atomic_write_json, read_json, resolve_input_path, sha256_file
-from ..imaging.operations import load_mask
-from ..schemas import draft_has_release_blockers, validate_draft, validate_reviewed_spec
+from ...core.errors import CollageError
+from ...core.io import atomic_write_json, read_json, resolve_input_path, sha256_file
+from ...imaging.operations import load_mask
+from ...schemas import (
+    draft_has_release_blockers,
+    validate_draft,
+    validate_reviewed_spec,
+)
 
 LOGGER = logging.getLogger(__name__)
 EDGE_FADE_RATIO = 0.08
