@@ -58,13 +58,14 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--name", help="可选项目显示名称")
     run.add_argument("--reference", type=_path, required=True, help="参考拼贴图")
     run.add_argument("--reviewer", required=True, help="审核人名称")
-    run.add_argument("--manual-draft", type=_path, help="可选人工 Draft JSON")
+    run_source = run.add_mutually_exclusive_group()
+    run_source.add_argument("--manual-draft", type=_path, help="可选人工 Draft JSON")
     run.add_argument("--policy", type=_path, help="可选 product_policy JSON")
     run.add_argument("--background-candidate", type=_path, help="可选清版背景")
     run.add_argument("--mask", type=_path, help="可选初始删除蒙版")
     run.add_argument("--allowed-mask", type=_path, help="可选允许编辑区域蒙版")
     run.add_argument("--bindings", type=_path, help="可提前导入客户 Bindings")
-    run.add_argument(
+    run_source.add_argument(
         "--vision-provider",
         help=f"VLM provider；默认 {DEFAULT_VISION_PROVIDER}",
     )

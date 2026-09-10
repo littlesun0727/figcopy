@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -238,3 +241,54 @@ def test_cli_exposes_run_resume_and_status_commands(tmp_path: Path) -> None:
     assert run.command == "run" and run.no_review_ui is True
     assert resume.command == "resume" and resume.approve is True
     assert status.command == "status"
+
+
+def test_cli_run_and_status_share_persisted_workflow(tmp_path: Path) -> None:
+    reference, manual, _candidate = _source_files(tmp_path)
+    data_root = tmp_path / "cli-data"
+    run = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "collage",
+            "run",
+            "--project",
+            "cli-flow",
+            "--data-dir",
+            str(data_root),
+            "--reference",
+            str(reference),
+            "--manual-draft",
+            str(manual),
+            "--reviewer",
+            "tester",
+            "--no-review-ui",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    assert run.returncode == 0, run.stderr
+    assert json.loads(run.stdout)["stage"] == "awaiting_review"
+
+    status = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "collage",
+            "status",
+            "--project",
+            "cli-flow",
+            "--data-dir",
+            str(data_root),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    assert status.returncode == 0, status.stderr
+    payload = json.loads(status.stdout)
+    assert payload["stage"] == "awaiting_review"
+    assert payload["artifacts"]["draft"]["exists"] is True
