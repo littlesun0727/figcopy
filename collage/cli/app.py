@@ -1,4 +1,4 @@
-"""提供 analyze/review/build/render/validate/approve 等稳定命令行入口。"""
+"""Expose the Web studio, resumable workflow, and advanced single-step commands."""
 
 from __future__ import annotations
 
@@ -25,6 +25,7 @@ from ..providers import (
 from ..rendering import render_from_files
 from ..rendering.cutout import prepare_cutout
 from ..studio.review_server import serve_review_ui
+from ..studio.workbench import serve_workbench
 from ..template.analysis import analyze_reference
 from ..template.build import approve_template, build_template
 from ..template.guide import create_upload_guide
@@ -51,6 +52,15 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument("--verbose", action="store_true", help="输出 debug 日志")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    studio = subparsers.add_parser("studio", help="启动端到端本机 Web 工作台")
+    studio.add_argument("--data-dir", type=_path, help="Figcopy 外部数据根目录")
+    studio.add_argument("--port", type=int, default=8787, help="本机监听端口")
+    studio.add_argument(
+        "--no-open",
+        action="store_true",
+        help="启动后不自动打开浏览器",
+    )
 
     run = subparsers.add_parser("run", help="创建项目并端到端推进到下一个人工门禁")
     run.add_argument("--project", required=True, help="项目 ID")
@@ -254,6 +264,13 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _run(args: argparse.Namespace) -> Any:
+    if args.command == "studio":
+        serve_workbench(
+            args.data_dir,
+            port=args.port,
+            open_browser=not args.no_open,
+        )
+        return None
     if args.command == "run":
         workflow = WorkflowService(ProjectStore(DataPaths.resolve(args.data_dir)))
         return workflow.start(

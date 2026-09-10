@@ -227,6 +227,11 @@ class WorkflowService:
                 "必须先生成并查看 renders/result.png，之后才能显式批准",
                 details={"stage": workflow["stage"]},
             )
+        if bindings_path is not None and workflow["stage"] == "complete":
+            raise CollageError(
+                "INVALID_STATE",
+                "已发布项目不能改写验收 Bindings；请新建一次客户渲染",
+            )
         replacement_images = (background_candidate, initial_mask, allowed_mask)
         if any(image is not None for image in replacement_images) and (
             workflow["stage"] not in {"analyzing", "awaiting_review"}
@@ -265,6 +270,9 @@ class WorkflowService:
                     project.renders / "bindings.json",
                     project,
                 )
+                if workflow["stage"] == "awaiting_approval":
+                    # A changed composition invalidates the previous preview.
+                    transition(self.store, project, workflow, "awaiting_bindings")
             return self._advance(
                 project,
                 workflow,

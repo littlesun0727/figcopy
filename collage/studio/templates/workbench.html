@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="figcopy-csrf-token" content="__FIGCOPY_CSRF_TOKEN__">
+  <title>Figcopy 工作台</title>
+  <link rel="stylesheet" href="/static/workbench.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/" data-home>
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span><strong>Figcopy</strong><small>拼贴工作台</small></span>
+    </a>
+    <div class="header-actions">
+      <span id="connectionState" class="connection"><i></i> 本机运行</span>
+      <button id="newProject" class="button primary" type="button">新建项目</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-heading">
+        <span>项目</span><span id="projectCount" class="count">0</span>
+      </div>
+      <label class="search">
+        <span class="sr-only">搜索项目</span>
+        <input id="projectSearch" type="search" placeholder="搜索项目">
+      </label>
+      <nav id="projectList" class="project-list" aria-label="项目列表"></nav>
+      <div class="storage">
+        <span>运行数据</span>
+        <code id="dataDirectory">正在读取…</code>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <section id="welcomeView" class="welcome panel">
+        <div class="welcome-art" aria-hidden="true">
+          <div class="paper one"></div><div class="paper two"></div><div class="paper three"></div>
+        </div>
+        <p class="eyebrow">REFERENCE → TEMPLATE → RESULT</p>
+        <h1>从一张参考图，走完整个拼贴流程</h1>
+        <p>上传参考图后，分析、人工确认、客户素材替换、预览和发布都会留在这个工作台里。</p>
+        <button class="button primary large" type="button" data-open-create>创建第一个项目</button>
+      </section>
+
+      <section id="projectView" class="project-view" hidden>
+        <div class="project-heading">
+          <div>
+            <p id="projectId" class="eyebrow"></p>
+            <h1 id="projectName"></h1>
+          </div>
+          <span id="stageBadge" class="stage-badge"></span>
+        </div>
+
+        <ol id="stageSteps" class="stage-steps" aria-label="工作流进度"></ol>
+        <div id="taskBanner" class="task-banner" hidden></div>
+        <div id="errorBanner" class="error-banner" hidden></div>
+
+        <div class="content-grid">
+          <section id="actionPanel" class="panel action-panel" aria-live="polite"></section>
+          <aside class="panel details-panel">
+            <div class="panel-title"><h2>项目文件</h2><span>自动保存</span></div>
+            <div id="artifactList" class="artifact-list"></div>
+            <details class="history-details">
+              <summary>运行记录</summary>
+              <ol id="historyList" class="history-list"></ol>
+            </details>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="createDialog" class="create-dialog">
+    <form id="createForm" method="dialog">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">NEW PROJECT</p><h2>新建拼贴项目</h2></div>
+        <button class="icon-button" value="cancel" formmethod="dialog" aria-label="关闭">×</button>
+      </div>
+      <div class="form-grid two">
+        <label>项目名称<input name="name" autocomplete="off" placeholder="例如：秋日旅行拼贴"></label>
+        <label>项目 ID<input name="project_id" required pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,63}" placeholder="autumn-collage"></label>
+      </div>
+      <label>审核人<input name="reviewer" required autocomplete="name" placeholder="你的名字"></label>
+      <label class="file-drop required-file">
+        <input id="referenceUpload" name="reference" type="file" accept="image/*" required>
+        <span class="file-icon">＋</span>
+        <strong>选择参考拼贴图</strong>
+        <small id="referenceFileName">JPG / PNG / WEBP，项目的画布与布局从这里开始</small>
+      </label>
+      <div class="form-grid two">
+        <label class="compact-file">人工 Draft JSON <small>可选，无 VLM 时使用</small><input name="manual_draft" type="file" accept="application/json,.json"></label>
+        <label class="compact-file">清版背景图 <small>可选，可跳过生图</small><input name="background_candidate" type="file" accept="image/*"></label>
+      </div>
+      <details class="advanced-settings">
+        <summary>高级设置</summary>
+        <div class="form-grid two">
+          <label>Product policy JSON<input name="product_policy" type="file" accept="application/json,.json"></label>
+          <label>初始删除蒙版<input name="initial_mask" type="file" accept="image/*"></label>
+          <label>允许编辑蒙版<input name="allowed_mask" type="file" accept="image/*"></label>
+          <span></span>
+          <label>VLM Provider<input name="vision_provider" placeholder="module:object（留空用默认）"></label>
+          <label>图片 Provider<input name="image_provider" placeholder="module:object（留空用默认）"></label>
+          <label>抠图 Provider<input name="cutout_provider" placeholder="module:object（留空用默认）"></label>
+        </div>
+        <label class="check"><input name="fixture_provider" type="checkbox"> 使用离线 fixture 图片 Provider（仅测试）</label>
+        <label class="check"><input name="allow_cloud_upload" type="checkbox"> 明确允许客户图片上传到云端抠图 Provider</label>
+      </details>
+      <p id="createError" class="form-error" hidden></p>
+      <div class="dialog-actions">
+        <button class="button quiet" value="cancel" formmethod="dialog">取消</button>
+        <button id="createSubmit" class="button primary" type="submit">创建并开始分析</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="/static/workbench.js"></script>
+</body>
+</html>
