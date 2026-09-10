@@ -1,6 +1,14 @@
 """Prepare customer bindings, render templates, and create cutouts."""
 
-from .composer import render_from_files, render_template
+from .bindings import prepare_bindings
 from .cutout import prepare_cutout
+from .model import PreparedBinding
+from .service import render_from_files, render_template
 
-__all__ = ["prepare_cutout", "render_from_files", "render_template"]
+__all__ = [
+    "PreparedBinding",
+    "prepare_bindings",
+    "prepare_cutout",
+    "render_from_files",
+    "render_template",
+]

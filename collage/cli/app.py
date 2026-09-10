@@ -22,7 +22,7 @@ from ..providers import (
     VisionProvider,
     load_provider,
 )
-from ..rendering.composer import render_from_files
+from ..rendering import render_from_files
 from ..rendering.cutout import prepare_cutout
 from ..studio.review_server import serve_review_ui
 from ..template.analysis import analyze_reference

@@ -16,7 +16,7 @@ from collage.core.io import (
     sha256_file,
 )
 from collage.core.logging import configure_logging
-from collage.rendering.composer import render_from_files
+from collage.rendering import render_from_files
 from collage.template.build import build_template
 
 LOGGER = logging.getLogger(__name__)

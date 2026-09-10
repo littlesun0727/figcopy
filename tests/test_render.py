@@ -14,15 +14,13 @@ from collage.core.io import (
     read_json,
     sha256_file,
 )
-from collage.rendering.composer import (
-    PreparedBinding,
+from collage.rendering import PreparedBinding, render_from_files, render_template
+from collage.rendering.layout import (
     _fit_to_rect,
-    _render_text_slot,
     _rotate_and_place,
     _safe_alpha_composite,
-    render_from_files,
-    render_template,
 )
+from collage.rendering.text_layer import _render_text_slot
 
 
 def test_layer_order_changes_occlusion(asset_package_factory, tmp_path: Path) -> None:
