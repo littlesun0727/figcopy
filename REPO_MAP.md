@@ -45,7 +45,7 @@
 | `collage/providers/` | VLM、图片生成、抠图 provider 协议及实现 |
 | `collage/template/` | 参考图分析、人工审核、模板构建、发布和校验 |
 | `collage/rendering/` | Bindings 准备、图片层、文字层和确定性合成 |
-| `collage/studio/` | 本机审核服务及独立 HTML/CSS/JS |
+| `collage/studio/` | 本机 Web 工作台、审核会话及独立 HTML/CSS/JS |
 | `collage/devtools/` | 离线演示数据生成；不属于生产渲染路径 |
 
 主要子模块：
@@ -53,9 +53,11 @@
 - `template/build/`：背景、overlay、模板包、检查报告、批准和编排。
 - `template/review/`：审核默认规则与 ReviewedSpec 固化。
 - `providers/yibu/`：配置、审计 HTTP 客户端、VLM 分析和图片生成。
-- `studio/templates/`、`studio/static/`：审核页前端资源。
+- `studio/workbench/`：后台任务、受限上传、项目 API 和回环 HTTP 服务。
+- `studio/review_session.py`：可同时由独立审核页和工作台复用的审核业务逻辑。
+- `studio/templates/`、`studio/static/`：工作台与审核页的原生 HTML/CSS/JS。
 - `rendering/`：Bindings、布局、图片层、文字层与顶层渲染服务。
-- `workflows/`：`run / resume / status` 使用的统一端到端编排层。
+- `workflows/`：`studio / run / resume / status` 共用的统一端到端编排层。
 
 依赖方向保持为：`cli → workflows/studio → template/rendering/projects → schemas/providers/imaging/core`。
 底层模块不反向依赖 CLI 或页面层。
@@ -64,6 +66,7 @@
 
 ```powershell
 python -m collage --help
+python -m collage studio --data-dir D:\datas\figcopy
 figcopy --help
 python -m pytest -q
 ```

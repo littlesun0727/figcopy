@@ -317,6 +317,7 @@ def test_workflow_automatically_prepares_opaque_cutout_binding(
 
 
 def test_cli_exposes_run_resume_and_status_commands(tmp_path: Path) -> None:
+    studio = cli._parser().parse_args(["studio", "--no-open", "--port", "8899"])
     run = cli._parser().parse_args(
         [
             "run",
@@ -334,6 +335,8 @@ def test_cli_exposes_run_resume_and_status_commands(tmp_path: Path) -> None:
     )
     status = cli._parser().parse_args(["status", "--project", "sample"])
 
+    assert studio.command == "studio" and studio.no_open is True
+    assert studio.port == 8899
     assert run.command == "run" and run.no_review_ui is True
     assert resume.command == "resume" and resume.approve is True
     assert status.command == "status"

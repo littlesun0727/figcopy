@@ -4,37 +4,42 @@
 
 ## 先用这一条主流程
 
-完成下面“环境准备”和 Yibu 配置后，普通使用只需要三个命令，不再逐个调用底层 Python 阶段：
+完成下面“环境准备”和 Yibu 配置后，普通使用只需启动本机工作台：
 
 ```powershell
-$env:FIGCOPY_DATA_DIR = "D:\datas\figcopy"
+cd D:\codes\figcopy
+python -m collage studio --data-dir D:\datas\figcopy
+```
+
+程序默认打开 `http://127.0.0.1:8787/`。在页面内按顺序完成：
+
+1. 新建项目并上传参考拼贴图；
+2. 检查 Draft 框位、图层与白色删除蒙版，然后保存；
+3. 按页面生成的命名槽位上传客户图片或填写文字；
+4. 查看本地合成预览，人工确认后批准发布。
+
+耗时的 VLM、图片生成、抠图与渲染作为后台任务执行，页面会轮询项目状态。浏览器标签可关闭；如果终端进程也被关闭，重新运行 `studio`，项目会从持久化阶段继续。工作台仍然保留 Draft 与最终预览两个明确的人工门禁。
+
+安装过 editable package 后，等价命令更短：
+
+```powershell
+figcopy studio --data-dir D:\datas\figcopy
+```
+
+默认会自动打开浏览器；`--no-open` 禁止自动打开，`--port 8899` 可更换端口。服务固定只接受本机回环访问；写操作需要页面启动令牌，并拒绝非本机 Host/Origin。单次上传总量限制为 128 MiB。
+
+没有 VLM 或图片模型时，在“新建项目 → 高级设置”上传人工 Draft JSON 与清版背景图。需要 `cutout` 的普通不透明照片时，安装 BiRefNet 可选依赖，或在高级设置中指定其他抠图 Provider。
+
+命令行编排仍可用于自动化和无界面环境：
+
+```powershell
 figcopy run --project my-collage --reference "D:\pictures\reference.jpg" --reviewer YOUR_NAME
 figcopy status --project my-collage
-```
-
-`run` 会依次导入参考图、分析 Draft、启动本机审核页，并在页面保存后继续构建。它会在需要客户素材时停下，同时生成：
-
-- `projects/my-collage/reports/upload_guide.html`；
-- `projects/my-collage/renders/bindings.example.json`；
-- 可直接编辑的 `projects/my-collage/renders/bindings.json`。
-
-可以直接编辑项目里的 Bindings，也可以从外部导入；导入时关联图片会一起复制进项目：
-
-```powershell
 figcopy resume --project my-collage --bindings "D:\customer\bindings.json"
-```
-
-如果开始时已有 Bindings，可直接给 `run` 增加 `--bindings "D:\customer\bindings.json"`，审核保存后会继续运行到最终预览门禁。
-
-生成 `renders/result.png` 后先人工检查，再发布：
-
-```powershell
 figcopy resume --project my-collage --approve --approval-notes "已完成视觉检查"
 ```
 
-程序关闭、模型失败或依赖缺失时，先运行 `figcopy status --project my-collage` 查看 `stage`、`last_error` 和 `next_action`，修复后再执行 `resume`。已完成阶段会复用磁盘产物。自动流程仍不会替人完成 Draft 审核或最终视觉批准。
-
-没有 VLM 或图片模型时，可在 `run` 中增加 `--manual-draft`、`--background-candidate`；自动化环境可用 `--no-review-ui` 在审核门禁处主动暂停。后续章节的 `analyze / review-ui / build / guide / render / approve` 是高级调试入口。
+程序关闭、模型失败或依赖缺失时，工作台会显示稳定错误码与重试表单；CLI 用户可用 `status` 查看 `stage`、`last_error` 和 `next_action`，修复后执行 `resume`。后续章节的 `analyze / review-ui / build / guide / render / approve` 是高级调试入口。
 
 ## 1. 先理解两种运行阶段
 
@@ -68,7 +73,7 @@ python -m pytest -q
 $env:FIGCOPY_DATA_DIR = "D:\datas\figcopy"
 ```
 
-`run`、`resume`、`status` 和 `demo` 会在其中使用 `projects/<项目 ID>`；底层 CLI 的显式 `--out`、`--work` 路径也应指向该目录。
+`studio`、`run`、`resume`、`status` 和 `demo` 会在其中使用 `projects/<项目 ID>`；底层 CLI 的显式 `--out`、`--work` 路径也应指向该目录。
 
 需要把普通照片用于 `cutout` 槽时，再安装本地 BiRefNet 可选依赖：
 

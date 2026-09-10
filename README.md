@@ -25,31 +25,31 @@ Yibu 接入可直接加载现有 `D:\codes\creative-video-editor\shared.py`；�
 
 `demo` 会程序构造参考图、底图、透明贴纸和两张客户测试图，然后构建 `needs_review` 模板并用新素材生成 `D:\datas\figcopy\projects\m1-demo\renders\result.png`。它不会自动冒充真人批准；查看结果后需显式运行 `approve`。整个演示不访问网络，也不把程序构造素材描述成真实模型效果。
 
-## 推荐：统一项目工作流
+## 推荐：本机 Web 工作台
 
 ```powershell
-$env:FIGCOPY_DATA_DIR = "D:\datas\figcopy"
-figcopy run --project demo --reference "D:\pictures\reference.jpg" --reviewer YOUR_NAME
-figcopy status --project demo
+cd D:\codes\figcopy
+python -m collage studio --data-dir D:\datas\figcopy
 ```
 
-`run` 会导入参考图、分析 Draft 并启动本机审核页。保存审核结果后，同一进程继续构建模板；需要客户素材时会停在 `awaiting_bindings`，同时生成上传指南和 Bindings 示例。准备好一个引用客户图片的 Bindings 文件后继续：
+命令会打开只监听 `127.0.0.1` 的浏览器工作台。普通使用不再需要编辑 JSON 或逐条执行 Python：
+
+- 在“新建项目”里上传参考图；
+- 在可视化审核页确认内容框和删除蒙版；
+- 按页面列出的命名槽位上传客户图片、填写文字；
+- 直接查看合成 PNG，并经过第二个人工门禁后发布。
+
+VLM、图片生成和抠图在后台任务中运行，页面会自动刷新阶段。关闭浏览器标签不会丢进度；终端进程被关闭后，重新运行同一条 `studio` 命令即可读取 `project.json` 并从已保存阶段继续。工作台不会跳过 Draft 审核和最终结果批准两个真人门禁。
+
+安装过 editable package 后也可写成：
 
 ```powershell
-figcopy resume --project demo --bindings "D:\customer\bindings.json"
+figcopy studio --data-dir D:\datas\figcopy
 ```
 
-如果开始前已经准备好 Bindings，也可以直接在 `run` 中传入 `--bindings`；审核页保存后会继续完成模板构建和预览渲染。
+默认会自动打开浏览器；用 `--no-open` 可只启动服务，默认地址为 `http://127.0.0.1:8787/`。客户图会被规范化后复制进外部项目数据目录，不会写进源码仓库。页面采用单次启动令牌保护写操作，并拒绝非回环 Host/Origin。
 
-工作流会把 Bindings 引用的图片规范化并复制到项目目录，然后在本地生成 `renders/result.png`。检查图片后才能显式批准：
-
-```powershell
-figcopy resume --project demo --approve --approval-notes "已检查接缝、层序和文字"
-```
-
-失败或关闭程序后再次运行 `resume` 即可从持久化阶段继续。`run`、`resume`、`status` 也都可以写成 `python -m collage ...`。默认使用内置 Yibu Provider；没有模型凭据时可以用 `--manual-draft` 和 `--background-candidate` 导入人工制作内容。
-
-工作流不会跳过两个真人门禁：Draft 审核，以及最终结果图批准。所有命令在关键阶段输出日志；预期业务失败同时输出稳定错误码。
+`run / resume / status` 仍保留给自动化、无界面服务器和排错；底层单步命令继续保留给局部调试。没有模型凭据时，可在新建项目的高级设置中上传人工 Draft 与清版背景图。
 
 ## 高级单步工作流
 
