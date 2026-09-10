@@ -17,7 +17,7 @@ from PIL import Image, ImageDraw
 from collage.core.io import atomic_save_image, atomic_write_json, sha256_file
 from collage.projects import DataPaths, ProjectStore
 from collage.providers.yibu import YibuImageProvider
-from collage.template.builder import build_template
+from collage.template.build import build_template
 
 LOGGER = logging.getLogger("yibu-live-smoke")
 

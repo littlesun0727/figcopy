@@ -12,7 +12,7 @@ from collage.core.errors import CollageError
 from collage.core.io import atomic_save_image, atomic_write_json, read_json
 from collage.devtools.demo import create_demo
 from collage.providers import GeneratedImage, ImageCapabilities, ProviderAudit
-from collage.template.builder import approve_template, build_template
+from collage.template.build import approve_template, build_template
 from collage.template.validation import validate_package
 
 

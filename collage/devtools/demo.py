@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 
 from ..core.io import atomic_save_image, atomic_write_json, sha256_file
 from ..rendering.composer import render_from_files
-from ..template.builder import build_template
+from ..template.build import build_template
 
 LOGGER = logging.getLogger(__name__)
 

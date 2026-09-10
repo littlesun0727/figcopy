@@ -17,7 +17,7 @@ from collage.core.io import (
 )
 from collage.core.logging import configure_logging
 from collage.rendering.composer import render_from_files
-from collage.template.builder import build_template
+from collage.template.build import build_template
 
 LOGGER = logging.getLogger(__name__)
 

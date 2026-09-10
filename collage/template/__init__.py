@@ -1,7 +1,7 @@
 """Reference analysis, review, template construction, and validation."""
 
 from .analysis import analyze_reference
-from .builder import approve_template, build_template
+from .build import approve_template, build_template
 from .review import confirm_draft
 from .validation import validate_package
 

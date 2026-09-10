@@ -26,7 +26,7 @@ from ..rendering.composer import render_from_files
 from ..rendering.cutout import prepare_cutout
 from ..studio.review_server import serve_review_ui
 from ..template.analysis import analyze_reference
-from ..template.builder import approve_template, build_template
+from ..template.build import approve_template, build_template
 from ..template.guide import create_upload_guide
 from ..template.review import confirm_draft
 from ..template.validation import validate_package
