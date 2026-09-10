@@ -7,10 +7,10 @@ from pathlib import Path
 import pytest
 from PIL import Image, ImageDraw
 
-from collage import cli
-from collage.cutout import prepare_cutout
-from collage.errors import CollageError
+from collage.cli import app as cli
+from collage.core.errors import CollageError
 from collage.providers import ProviderAudit
+from collage.rendering.cutout import prepare_cutout
 
 
 class CloudCutout:

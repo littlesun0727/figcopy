@@ -14,15 +14,16 @@ from typing import Any
 
 from PIL import Image, ImageDraw
 
-from .errors import CollageError
-from .io_utils import (
+from ..core.errors import CollageError
+from ..core.io import (
     atomic_save_image,
     atomic_write_json,
     read_json,
     resolve_input_path,
 )
-from .prepare import load_mask
-from .review import (
+from ..imaging.operations import load_mask
+from ..schema import validate_draft
+from ..template.review import (
     EDGE_FADE_MAX_PX,
     EDGE_FADE_RATIO,
     confirm_draft,
@@ -32,7 +33,6 @@ from .review import (
     suggested_edge_fade_px,
     validate_override_map,
 )
-from .schema import validate_draft
 
 LOGGER = logging.getLogger(__name__)
 MAX_REQUEST_BYTES = 64 * 1024 * 1024

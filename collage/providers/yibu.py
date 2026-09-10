@@ -22,7 +22,7 @@ from urllib.parse import quote, urlsplit
 
 from PIL import Image, UnidentifiedImageError
 
-from ..errors import CollageError
+from ..core.errors import CollageError
 from .base import GeneratedImage, ImageCapabilities, ProviderAudit
 
 LOGGER = logging.getLogger(__name__)

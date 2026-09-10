@@ -7,9 +7,13 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from collage.errors import CollageError
-from collage.geometry import contain_transform, pad_for_model, restore_from_model
-from collage.prepare import (
+from collage.core.errors import CollageError
+from collage.imaging.geometry import (
+    contain_transform,
+    pad_for_model,
+    restore_from_model,
+)
+from collage.imaging.operations import (
     alpha_is_meaningful,
     choose_chroma_key,
     clean_chroma_edges,

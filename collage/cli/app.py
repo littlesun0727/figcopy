@@ -9,27 +9,27 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from . import __version__
-from .analyze import analyze_reference
-from .build import approve_template, build_template
-from .cutout import prepare_cutout
-from .demo import create_demo
-from .errors import CollageError
-from .guide import create_upload_guide
-from .io_utils import read_json
-from .logging_config import configure_logging
-from .projects import DataPaths, ProjectStore
-from .providers import (
+from .. import __version__
+from ..core.errors import CollageError
+from ..core.io import read_json
+from ..core.logging import configure_logging
+from ..devtools.demo import create_demo
+from ..projects import DataPaths, ProjectStore
+from ..providers import (
     CutoutProvider,
     DeterministicFixtureImageProvider,
     ImageProvider,
     VisionProvider,
     load_provider,
 )
-from .render import render_from_files
-from .review import confirm_draft
-from .review_ui import serve_review_ui
-from .validate import validate_package
+from ..rendering.composer import render_from_files
+from ..rendering.cutout import prepare_cutout
+from ..studio.review_server import serve_review_ui
+from ..template.analysis import analyze_reference
+from ..template.builder import approve_template, build_template
+from ..template.guide import create_upload_guide
+from ..template.review import confirm_draft
+from ..template.validation import validate_package
 
 LOGGER = logging.getLogger(__name__)
 DEFAULT_CUTOUT_PROVIDER = (

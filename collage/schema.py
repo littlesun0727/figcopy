@@ -8,7 +8,7 @@ from collections import Counter
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from .errors import SpecValidationError, ValidationIssue
+from .core.errors import SpecValidationError, ValidationIssue
 
 IMAGE_MODES = {"photo", "photo_feather", "cutout"}
 DRAFT_IMAGE_MODES = IMAGE_MODES | {"unknown"}

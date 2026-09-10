@@ -15,7 +15,7 @@ from typing import Any
 import pytest
 from PIL import Image
 
-from collage.errors import CollageError
+from collage.core.errors import CollageError
 from collage.providers.yibu import (
     YibuImageProvider,
     YibuSettings,

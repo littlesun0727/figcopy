@@ -9,7 +9,7 @@ from typing import Any
 from PIL import Image
 
 from .errors import CollageError
-from .io_utils import atomic_save_image, atomic_write_json, decode_image, read_json
+from .io import atomic_save_image, atomic_write_json, decode_image, read_json
 
 
 @dataclass(slots=True)

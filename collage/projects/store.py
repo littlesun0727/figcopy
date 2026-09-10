@@ -5,8 +5,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 
-from ..errors import CollageError
-from ..io_utils import atomic_write_json, read_json
+from ..core.errors import CollageError
+from ..core.io import atomic_write_json, read_json
 from .paths import DataPaths, ProjectPaths
 
 PROJECT_VERSION = "figcopy-project/1"

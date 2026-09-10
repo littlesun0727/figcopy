@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from collage import cli
-from collage.errors import CollageError
+from collage.cli import app as cli
+from collage.core.errors import CollageError
 from collage.projects import DATA_DIR_ENV, DataPaths, ProjectStore, resolve_data_root
 
 

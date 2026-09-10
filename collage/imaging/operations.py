@@ -9,8 +9,8 @@ from pathlib import Path
 
 from PIL import Image, ImageChops, ImageColor, ImageFilter, ImageOps
 
-from .errors import CollageError
-from .io_utils import atomic_save_image, decode_image
+from ..core.errors import CollageError
+from ..core.io import atomic_save_image, decode_image
 
 LOGGER = logging.getLogger(__name__)
 

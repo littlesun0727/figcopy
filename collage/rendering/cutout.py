@@ -5,10 +5,10 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from .errors import CollageError
-from .io_utils import atomic_save_image, atomic_write_json, sha256_file
-from .prepare import alpha_is_meaningful, multiply_alpha, normalize_image
-from .providers import CutoutProvider
+from ..core.errors import CollageError
+from ..core.io import atomic_save_image, atomic_write_json, sha256_file
+from ..imaging.operations import alpha_is_meaningful, multiply_alpha, normalize_image
+from ..providers import CutoutProvider
 
 LOGGER = logging.getLogger(__name__)
 

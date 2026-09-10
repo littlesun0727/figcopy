@@ -9,15 +9,15 @@ from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageOps
 
-from collage.build import build_template
-from collage.io_utils import (
+from collage.core.io import (
     atomic_save_image,
     atomic_write_json,
     decode_image,
     sha256_file,
 )
-from collage.logging_config import configure_logging
-from collage.render import render_from_files
+from collage.core.logging import configure_logging
+from collage.rendering.composer import render_from_files
+from collage.template.builder import build_template
 
 LOGGER = logging.getLogger(__name__)
 

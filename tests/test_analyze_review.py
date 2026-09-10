@@ -7,11 +7,15 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from collage.analyze import analyze_reference
-from collage.errors import CollageError
-from collage.io_utils import atomic_save_image, atomic_write_json, read_json
+from collage.core.errors import CollageError
+from collage.core.io import atomic_save_image, atomic_write_json, read_json
 from collage.providers import ProviderAudit
-from collage.review import confirm_draft, infer_default_text, suggested_edge_fade_px
+from collage.template.analysis import analyze_reference
+from collage.template.review import (
+    confirm_draft,
+    infer_default_text,
+    suggested_edge_fade_px,
+)
 
 
 def _draft_payload(mode: str = "photo", questions: list[str] | None = None) -> dict:

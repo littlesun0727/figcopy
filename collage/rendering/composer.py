@@ -10,8 +10,8 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .errors import CollageError
-from .io_utils import (
+from ..core.errors import CollageError
+from ..core.io import (
     atomic_save_image,
     atomic_write_json,
     decode_image,
@@ -20,7 +20,7 @@ from .io_utils import (
     safe_package_path,
     sha256_file,
 )
-from .prepare import (
+from ..imaging.operations import (
     alpha_is_meaningful,
     edge_fade_mask,
     load_mask,
@@ -29,8 +29,8 @@ from .prepare import (
     parse_color,
     rect_to_box,
 )
-from .schema import validate_bindings
-from .validate import validate_package
+from ..schema import validate_bindings
+from ..template.validation import validate_package
 
 LOGGER = logging.getLogger(__name__)
 

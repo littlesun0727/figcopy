@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 from PIL import Image
 
-from .errors import CollageError
+from ..core.errors import CollageError
 
 
 @dataclass(frozen=True, slots=True)

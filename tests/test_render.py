@@ -7,14 +7,14 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from collage.errors import CollageError
-from collage.io_utils import (
+from collage.core.errors import CollageError
+from collage.core.io import (
     atomic_save_image,
     atomic_write_json,
     read_json,
     sha256_file,
 )
-from collage.render import (
+from collage.rendering.composer import (
     PreparedBinding,
     _fit_to_rect,
     _render_text_slot,

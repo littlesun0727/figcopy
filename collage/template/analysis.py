@@ -10,8 +10,8 @@ from typing import Any
 
 from PIL import ImageDraw
 
-from .errors import CollageError
-from .io_utils import (
+from ..core.errors import CollageError
+from ..core.io import (
     atomic_save_image,
     atomic_write_bytes,
     atomic_write_json,
@@ -19,9 +19,9 @@ from .io_utils import (
     sha256_file,
     stable_hash,
 )
-from .prepare import normalize_image, rect_to_box
-from .providers import ProviderAudit, VisionProvider
-from .schema import validate_draft
+from ..imaging.operations import normalize_image, rect_to_box
+from ..providers import ProviderAudit, VisionProvider
+from ..schema import validate_draft
 
 LOGGER = logging.getLogger(__name__)
 PROMPT_VERSION = "collage-draft/1"

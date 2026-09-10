@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from PIL import Image, ImageDraw
 
-from collage.errors import CollageError
+from collage.core.errors import CollageError
 from collage.providers import CutoutProvider, load_provider
 from collage.providers import birefnet as birefnet_module
 from collage.providers.birefnet import (

@@ -12,11 +12,9 @@ from typing import Any
 
 from PIL import Image, ImageDraw
 
-from . import __version__
-from .cache import NodeCache, WorkflowState
-from .errors import CollageError
-from .geometry import AffineRectTransform, pad_for_model, restore_from_model
-from .io_utils import (
+from .. import __version__
+from ..core.errors import CollageError
+from ..core.io import (
     atomic_save_image,
     atomic_write_bytes,
     atomic_write_json,
@@ -26,7 +24,9 @@ from .io_utils import (
     sha256_file,
     stable_hash,
 )
-from .prepare import (
+from ..core.state import NodeCache, WorkflowState
+from ..imaging.geometry import AffineRectTransform, pad_for_model, restore_from_model
+from ..imaging.operations import (
     alpha_is_meaningful,
     choose_chroma_key,
     clean_chroma_edges,
@@ -40,9 +40,9 @@ from .prepare import (
     remove_chroma_key,
     trim_transparent,
 )
-from .providers import GeneratedImage, ImageProvider, ProviderAudit
-from .schema import validate_reviewed_spec, validate_template_spec
-from .validate import validate_package
+from ..providers import GeneratedImage, ImageProvider, ProviderAudit
+from ..schema import validate_reviewed_spec, validate_template_spec
+from .validation import validate_package
 
 LOGGER = logging.getLogger(__name__)
 BACKGROUND_PROMPT_VERSION = "clean-background/1"

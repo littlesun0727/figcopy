@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from collage.logging_config import configure_logging
+from collage.core.logging import configure_logging
 
 
 def test_verbose_keeps_project_debug_but_suppresses_noisy_http_logs() -> None:

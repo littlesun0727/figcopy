@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 from PIL import Image
 
-from collage.io_utils import atomic_save_image, atomic_write_json, sha256_file
+from collage.core.io import atomic_save_image, atomic_write_json, sha256_file
 
 
 @pytest.fixture

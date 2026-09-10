@@ -16,7 +16,7 @@ from typing import Any, Protocol
 
 from PIL import Image
 
-from ..errors import CollageError
+from ..core.errors import CollageError
 from .base import ProviderAudit
 
 LOGGER = logging.getLogger(__name__)

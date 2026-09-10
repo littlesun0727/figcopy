@@ -15,10 +15,9 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from collage.analyze import analyze_reference
-from collage.errors import CollageError
-from collage.io_utils import atomic_write_json, read_json
-from collage.review_ui import (
+from collage.core.errors import CollageError
+from collage.core.io import atomic_write_json, read_json
+from collage.studio.review_server import (
     HTML,
     _automatic_remove_mask,
     _automatic_review_notes,
@@ -27,6 +26,7 @@ from collage.review_ui import (
     _validate_review_decisions,
     serve_review_ui,
 )
+from collage.template.analysis import analyze_reference
 
 
 def _complex_draft() -> dict:

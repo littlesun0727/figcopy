@@ -6,15 +6,15 @@ from pathlib import Path
 
 import pytest
 
-from collage.errors import SpecValidationError
-from collage.io_utils import atomic_write_json, read_json
+from collage.core.errors import SpecValidationError
+from collage.core.io import atomic_write_json, read_json
 from collage.schema import (
     draft_has_release_blockers,
     validate_bindings,
     validate_draft,
     validate_template_spec,
 )
-from collage.validate import validate_package
+from collage.template.validation import validate_package
 
 
 def test_unknown_mode_and_question_are_release_blockers() -> None:

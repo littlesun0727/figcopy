@@ -7,9 +7,9 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-from .build import build_template
-from .io_utils import atomic_save_image, atomic_write_json, sha256_file
-from .render import render_from_files
+from ..core.io import atomic_save_image, atomic_write_json, sha256_file
+from ..rendering.composer import render_from_files
+from ..template.builder import build_template
 
 LOGGER = logging.getLogger(__name__)
 

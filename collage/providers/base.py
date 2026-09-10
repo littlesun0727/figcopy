@@ -8,7 +8,7 @@ from typing import Any, Protocol, runtime_checkable
 
 from PIL import Image
 
-from ..errors import CollageError
+from ..core.errors import CollageError
 
 
 @dataclass(frozen=True, slots=True)
