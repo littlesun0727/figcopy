@@ -149,7 +149,6 @@ def test_workflow_waits_for_bindings_and_imports_customer_images(
 
     customer_dir = tmp_path / "customer-source"
     customer_dir.mkdir()
-    Image.new("RGB", (20, 20), "#2288CC").save(customer_dir / "photo.jpg")
     external_bindings = customer_dir / "bindings.json"
     atomic_write_json(
         external_bindings,
@@ -157,13 +156,29 @@ def test_workflow_waits_for_bindings_and_imports_customer_images(
             "version": "collage-bindings/1",
             "slots": {
                 "photo": {
-                    "path": "photo.jpg",
+                    "path": "missing.jpg",
                     "scale": 1.0,
                     "offset_px": [0, 0],
                 }
             },
         },
     )
+    with pytest.raises(CollageError) as caught:
+        workflow.resume(
+            "binding-flow",
+            bindings_path=external_bindings,
+            open_review=False,
+        )
+    assert caught.value.code == "FILE_NOT_FOUND"
+    project = store.open("binding-flow")
+    assert str(customer_dir.resolve()) not in project.manifest.read_text(
+        encoding="utf-8"
+    )
+
+    Image.new("RGB", (20, 20), "#2288CC").save(customer_dir / "photo.jpg")
+    bindings_payload = read_json(external_bindings)
+    bindings_payload["slots"]["photo"]["path"] = "photo.jpg"
+    atomic_write_json(external_bindings, bindings_payload)
 
     rendered = workflow.resume(
         "binding-flow",
@@ -171,7 +186,6 @@ def test_workflow_waits_for_bindings_and_imports_customer_images(
         open_review=False,
     )
 
-    project = store.open("binding-flow")
     imported = read_json(project.renders / "bindings.json")
     assert rendered["stage"] == "awaiting_approval"
     assert imported["slots"]["photo"]["path"].startswith("../inputs/customer/")
