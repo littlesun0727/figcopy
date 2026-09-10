@@ -79,6 +79,11 @@ class ProjectStore:
         self._read_manifest(project)
         return project
 
+    def get_manifest(self, project_id: str) -> dict[str, Any]:
+        """Return the current project manifest after validating its identity."""
+
+        return self._read_manifest(self.paths.project(project_id))
+
     def list(self) -> list[dict[str, Any]]:
         if not self.paths.projects.exists():
             return []
@@ -103,6 +108,31 @@ class ProjectStore:
         project = self.open(project_id)
         manifest = self._read_manifest(project)
         manifest["status"] = status
+        manifest["updated_at"] = _utc_now()
+        atomic_write_json(project.manifest, manifest)
+        return manifest
+
+    def update_workflow(
+        self,
+        project_id: str,
+        workflow: dict[str, Any],
+        *,
+        status: str,
+    ) -> dict[str, Any]:
+        """Atomically persist workflow progress together with project status."""
+
+        if status not in PROJECT_STATUSES:
+            raise CollageError(
+                "INVALID_PROJECT_STATUS",
+                "项目状态不受支持",
+                details={"project_id": project_id, "status": status},
+            )
+        if not isinstance(workflow, dict):
+            raise CollageError("INVALID_WORKFLOW_STATE", "workflow 必须是 JSON object")
+        project = self.open(project_id)
+        manifest = self._read_manifest(project)
+        manifest["status"] = status
+        manifest["workflow"] = workflow
         manifest["updated_at"] = _utc_now()
         atomic_write_json(project.manifest, manifest)
         return manifest

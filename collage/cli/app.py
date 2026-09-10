@@ -30,9 +30,14 @@ from ..template.build import approve_template, build_template
 from ..template.guide import create_upload_guide
 from ..template.review import confirm_draft
 from ..template.validation import validate_package
+from ..workflows import (
+    DEFAULT_CUTOUT_PROVIDER,
+    DEFAULT_IMAGE_PROVIDER,
+    DEFAULT_VISION_PROVIDER,
+    WorkflowService,
+)
 
 LOGGER = logging.getLogger(__name__)
-DEFAULT_CUTOUT_PROVIDER = "collage.providers.birefnet:BiRefNetLiteMattingProvider"
 
 
 def _path(value: str) -> Path:
@@ -46,6 +51,95 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument("--verbose", action="store_true", help="输出 debug 日志")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    run = subparsers.add_parser("run", help="创建项目并端到端推进到下一个人工门禁")
+    run.add_argument("--project", required=True, help="项目 ID")
+    run.add_argument("--data-dir", type=_path, help="Figcopy 外部数据根目录")
+    run.add_argument("--name", help="可选项目显示名称")
+    run.add_argument("--reference", type=_path, required=True, help="参考拼贴图")
+    run.add_argument("--reviewer", required=True, help="审核人名称")
+    run.add_argument("--manual-draft", type=_path, help="可选人工 Draft JSON")
+    run.add_argument("--policy", type=_path, help="可选 product_policy JSON")
+    run.add_argument("--background-candidate", type=_path, help="可选清版背景")
+    run.add_argument("--mask", type=_path, help="可选初始删除蒙版")
+    run.add_argument("--allowed-mask", type=_path, help="可选允许编辑区域蒙版")
+    run.add_argument("--bindings", type=_path, help="可提前导入客户 Bindings")
+    run.add_argument(
+        "--vision-provider",
+        help=f"VLM provider；默认 {DEFAULT_VISION_PROVIDER}",
+    )
+    run_image = run.add_mutually_exclusive_group()
+    run_image.add_argument(
+        "--image-provider",
+        help=f"图片 provider；默认 {DEFAULT_IMAGE_PROVIDER}",
+    )
+    run_image.add_argument(
+        "--fixture-provider",
+        action="store_true",
+        help="仅用于离线流程验证",
+    )
+    run.add_argument(
+        "--cutout-provider",
+        help=f"抠图 provider；默认 {DEFAULT_CUTOUT_PROVIDER}",
+    )
+    run.add_argument("--allow-cloud-upload", action="store_true")
+    run.add_argument("--review-port", type=int, default=8765)
+    run.add_argument(
+        "--no-review-ui",
+        action="store_true",
+        help="分析后暂停，不在本次命令启动审核页",
+    )
+
+    resume = subparsers.add_parser("resume", help="从项目记录的阶段继续执行")
+    resume.add_argument("--project", required=True, help="项目 ID")
+    resume.add_argument("--data-dir", type=_path, help="Figcopy 外部数据根目录")
+    resume.add_argument("--bindings", type=_path, help="导入客户 Bindings 及图片")
+    resume.add_argument("--background-candidate", type=_path, help="补充清版背景")
+    resume.add_argument("--mask", type=_path, help="替换初始删除蒙版")
+    resume.add_argument("--allowed-mask", type=_path, help="替换允许编辑区域蒙版")
+    resume.add_argument("--reviewer", help="更新审核人名称")
+    resume.add_argument("--vision-provider", help="更新 VLM provider")
+    resume_image = resume.add_mutually_exclusive_group()
+    resume_image.add_argument("--image-provider", help="更新图片 provider")
+    resume_image.add_argument(
+        "--fixture-provider",
+        action="store_const",
+        const=True,
+        default=None,
+        help="改用离线 fixture 图片 provider",
+    )
+    resume.add_argument("--cutout-provider", help="更新抠图 provider")
+    cloud_permission = resume.add_mutually_exclusive_group()
+    cloud_permission.add_argument(
+        "--allow-cloud-upload",
+        dest="allow_cloud_upload",
+        action="store_const",
+        const=True,
+        default=None,
+    )
+    cloud_permission.add_argument(
+        "--no-cloud-upload",
+        dest="allow_cloud_upload",
+        action="store_const",
+        const=False,
+    )
+    resume.add_argument("--review-port", type=int)
+    resume.add_argument("--no-review-ui", action="store_true")
+    resume.add_argument(
+        "--approve",
+        action="store_true",
+        help="检查结果图后显式批准模板",
+    )
+    resume.add_argument("--approval-notes", default="")
+    resume.add_argument(
+        "--allow-fixture-approval",
+        action="store_true",
+        help="仅允许明确发布演示用 fixture 模板",
+    )
+
+    status = subparsers.add_parser("status", help="查看项目阶段和下一步操作")
+    status.add_argument("--project", required=True, help="项目 ID")
+    status.add_argument("--data-dir", type=_path, help="Figcopy 外部数据根目录")
 
     analyze = subparsers.add_parser("analyze", help="规范化参考图并生成候选 Draft")
     analyze.add_argument("--reference", type=_path, required=True)
@@ -159,6 +253,50 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _run(args: argparse.Namespace) -> Any:
+    if args.command == "run":
+        workflow = WorkflowService(ProjectStore(DataPaths.resolve(args.data_dir)))
+        return workflow.start(
+            args.project,
+            args.reference,
+            reviewer=args.reviewer,
+            name=args.name,
+            manual_draft_path=args.manual_draft,
+            product_policy_path=args.policy,
+            background_candidate_path=args.background_candidate,
+            initial_mask_path=args.mask,
+            allowed_mask_path=args.allowed_mask,
+            bindings_path=args.bindings,
+            vision_provider_spec=args.vision_provider,
+            image_provider_spec=args.image_provider,
+            cutout_provider_spec=args.cutout_provider,
+            fixture_provider=args.fixture_provider,
+            allow_cloud_upload=args.allow_cloud_upload,
+            review_port=args.review_port,
+            open_review=not args.no_review_ui,
+        )
+    if args.command == "resume":
+        workflow = WorkflowService(ProjectStore(DataPaths.resolve(args.data_dir)))
+        return workflow.resume(
+            args.project,
+            bindings_path=args.bindings,
+            background_candidate_path=args.background_candidate,
+            initial_mask_path=args.mask,
+            allowed_mask_path=args.allowed_mask,
+            reviewer=args.reviewer,
+            vision_provider_spec=args.vision_provider,
+            image_provider_spec=args.image_provider,
+            cutout_provider_spec=args.cutout_provider,
+            fixture_provider=args.fixture_provider,
+            allow_cloud_upload=args.allow_cloud_upload,
+            review_port=args.review_port,
+            open_review=not args.no_review_ui,
+            approve=args.approve,
+            approval_notes=args.approval_notes,
+            allow_fixture_approval=args.allow_fixture_approval,
+        )
+    if args.command == "status":
+        workflow = WorkflowService(ProjectStore(DataPaths.resolve(args.data_dir)))
+        return workflow.status(args.project)
     if args.command == "analyze":
         provider = (
             load_provider(args.provider, VisionProvider) if args.provider else None
@@ -276,6 +414,8 @@ def main(argv: list[str] | None = None) -> int:
             print(result.resolve())
         elif isinstance(result, tuple):
             print("\n".join(str(Path(item).resolve()) for item in result))
+        elif isinstance(result, dict):
+            print(json.dumps(result, ensure_ascii=False, indent=2))
         else:
             print(json.dumps({"ok": True}, ensure_ascii=False))
         return 0
