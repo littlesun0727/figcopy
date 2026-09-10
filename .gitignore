@@ -5,6 +5,7 @@ __pycache__/
 .ruff_cache/
 *.egg-info/
 .tmp_demo/
+/.tmp_preview/
 /artifacts/
 /templates/
 /work/
