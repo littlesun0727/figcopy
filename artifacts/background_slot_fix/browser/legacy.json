@@ -1,0 +1,75 @@
+{
+  "slots": [
+    {
+      "id": "cover_photo",
+      "label": "背景照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        0,
+        0,
+        40,
+        30
+      ],
+      "target_rect": [
+        0,
+        0,
+        40,
+        30
+      ],
+      "upload_hint": "上传背景照片",
+      "review_notes": ""
+    }
+  ],
+  "overlays": [
+    {
+      "id": "frame",
+      "label": "边框",
+      "source_rect": [
+        5,
+        5,
+        15,
+        10
+      ],
+      "target_rect": [
+        5,
+        5,
+        15,
+        10
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "",
+      "shape": {
+        "kind": "rectangle",
+        "fill": null,
+        "outline": "#FF0000",
+        "width": 2,
+        "radius": 0,
+        "dash": 1,
+        "gap": 0
+      }
+    }
+  ],
+  "background": {
+    "background_brief": "fixture fixed base",
+    "review_notes": ""
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "cover_photo"
+    },
+    {
+      "type": "overlay",
+      "id": "frame"
+    }
+  ],
+  "questions": [
+    "背景是否替换？"
+  ]
+}

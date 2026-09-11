@@ -1,0 +1,83 @@
+{
+  "slots": [],
+  "overlays": [
+    {
+      "id": "circle",
+      "label": "独立圆形",
+      "source_rect": [
+        60,
+        120,
+        150,
+        150
+      ],
+      "target_rect": [
+        60,
+        120,
+        150,
+        150
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "synthetic fixture",
+      "shape": {
+        "kind": "ellipse",
+        "fill": "#EE8F61",
+        "outline": "#EE8F61",
+        "width": 5,
+        "radius": 0,
+        "dash": 14,
+        "gap": 8
+      }
+    },
+    {
+      "id": "frame",
+      "label": "独立边框",
+      "source_rect": [
+        280,
+        300,
+        200,
+        180
+      ],
+      "target_rect": [
+        280,
+        300,
+        200,
+        180
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "synthetic fixture",
+      "shape": {
+        "kind": "dashed_rectangle",
+        "fill": null,
+        "outline": "#6CC9C4",
+        "width": 5,
+        "radius": 0,
+        "dash": 14,
+        "gap": 8
+      }
+    }
+  ],
+  "questions": [
+    "这两件装饰需要分开移动吗？"
+  ],
+  "background": {
+    "background_brief": "plain",
+    "review_notes": "fixture"
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "overlay",
+      "id": "circle"
+    },
+    {
+      "type": "overlay",
+      "id": "frame"
+    }
+  ]
+}

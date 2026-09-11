@@ -4,7 +4,7 @@
 
 ## 先用这一条主流程
 
-完成下面“环境准备”和 Yibu 配置后，普通使用只需启动本机工作台：
+完成下面“环境准备”后，普通使用只需启动本机工作台：
 
 ```powershell
 cd D:\codes\figcopy
@@ -27,6 +27,8 @@ figcopy studio --data-dir D:\datas\figcopy
 ```
 
 默认会自动打开浏览器；`--no-open` 禁止自动打开，`--port 8899` 可更换端口。服务固定只接受本机回环访问；写操作需要页面启动令牌，并拒绝非本机 Host/Origin。单次上传总量限制为 128 MiB。
+
+启动 Yibu 审计代理后，点击页面右上角“Provider 设置”即可在密码框输入 API Key，并配置 VLM、图片编辑模型和本地 BiRefNet。Key 只保存在当前 `studio` 进程内存中，不进入项目文件、日志或浏览器存储；关闭该进程后会清除。流程若因缺少配置而阻塞，设置页可在保存后直接重试当前项目。
 
 没有 VLM 或图片模型时，在“新建项目 → 高级设置”上传人工 Draft JSON 与清版背景图。需要 `cutout` 的普通不透明照片时，安装 BiRefNet 可选依赖，或在高级设置中指定其他抠图 Provider。
 
@@ -117,7 +119,9 @@ python D:\codes\yibu-audit-proxy\run.py status
 
 ### 3.2 配置模型与凭据来源
 
-回到项目目录，运行仓库内的配置脚本：
+Web 工作台用户直接点击右上角“Provider 设置”：在 Yibu API Key 密码框输入 Key，或填写已有 `shared.py` 路径；模型字段会显示当前进程使用的值。VLM 与图片编辑共享同一份 Yibu 凭据和审计代理。设置只影响当前工作台进程，且不会回传或持久化 Key。
+
+命令行、自动化或希望启动时预先配置的用户，可以回到项目目录运行仓库内的配置脚本：
 
 ```powershell
 cd D:\codes\figcopy
@@ -134,13 +138,15 @@ $env:YIBU_SHARED_PATH = "D:\codes\creative-video-editor\shared.py"
 $env:YIBU_AUDIT_BASE_URL = "http://127.0.0.1:17860"
 $env:YIBU_VLM_MODEL = "kimi-k3"
 $env:YIBU_VLM_MAX_TOKENS = "16384"
-$env:YIBU_VLM_REASONING_EFFORT = "max"
-$env:YIBU_IMAGE_MODEL = "gemini-3-pro-image-preview"
-$env:YIBU_IMAGE_SIZE = "1K"
+$env:YIBU_VLM_REASONING_EFFORT = "high"
+$env:YIBU_IMAGE_MODEL = "doubao-seedream-5-0-260128"
+$env:YIBU_IMAGE_SIZE = "2K"
 $env:YIBU_TIMEOUT_SECONDS = "900"
 ```
 
-`kimi-k3` 会默认启用 `max` 推理强度，并以 `16384` 作为思考与 Draft 共用的输出硬上限。达到上限时程序会停止并报告 `PROVIDER_OUTPUT_TRUNCATED`，不会把残缺 JSON 当成成功结果。若切回 Opus，可把 `YIBU_VLM_MODEL` 设为 `opus-4.8`；provider 会将它映射为 Yibu 的实际模型 ID `claude-opus-4-8`。
+`kimi-k3` 会默认启用 `high` 推理强度，并以 `16384` 作为思考与 Draft 共用的输出硬上限。达到上限时程序会停止并报告 `PROVIDER_OUTPUT_TRUNCATED`，不会把残缺 JSON 当成成功结果。若切回 Opus，可把 `YIBU_VLM_MODEL` 设为 `opus-4.8`；provider 会将它映射为 Yibu 的实际模型 ID `claude-opus-4-8`。
+
+已有环境变量或工作台中显式设置的 `max` 仍会保留；如需使用 `high`，请修改该设置或重新加载配置脚本。修改代码默认值后，已启动的工作台需要重启才能加载新默认值。
 
 如果以后不想读取旧项目文件，可以改设当前进程的 `$env:YIBU_API_KEY`；它的优先级高于 `YIBU_SHARED_PATH`。不要把真实 Key 写进仓库、命令示例、日志或模板 JSON。
 
@@ -149,11 +155,11 @@ $env:YIBU_TIMEOUT_SECONDS = "900"
 | 环境变量 | 默认值 | 说明 |
 |---|---|---|
 | `YIBU_AUDIT_BASE_URL` | `http://127.0.0.1:17860` | 只允许本机回环审计代理 |
-| `YIBU_VLM_MODEL` | `claude-opus-4-8` | `opus-4.8` 会自动映射 |
+| `YIBU_VLM_MODEL` | `kimi-k3` | `opus-4.8` 会自动映射到 `claude-opus-4-8` |
 | `YIBU_VLM_MAX_TOKENS` | Kimi 为 `16384`，其他为 `8192` | VLM 思考与 Draft 共用的最大输出预算 |
-| `YIBU_VLM_REASONING_EFFORT` | Kimi 为 `max`，其他不传 | 可选 `low`、`high`、`max`；留空则由模型决定 |
-| `YIBU_IMAGE_MODEL` | `gemini-3-pro-image-preview` | Gemini 原生 `generateContent` 路由 |
-| `YIBU_IMAGE_SIZE` | `1K` | 可选 `1K`、`2K`、`4K` |
+| `YIBU_VLM_REASONING_EFFORT` | Kimi 为 `high`，其他不传 | 可选 `low`、`high`、`max`；留空则由模型决定 |
+| `YIBU_IMAGE_MODEL` | `doubao-seedream-5-0-260128` | Seedream 图生图使用 `/v1/images/generations` 的 `image` 字段；Gemini 模型仍自动使用原生 `generateContent` |
+| `YIBU_IMAGE_SIZE` | `2K` | 可选 `1K`、`2K`、`4K`；当前 Seedream Lite 最低为 2K，配置 1K 时会明确记录警告并使用 2K |
 | `YIBU_TIMEOUT_SECONDS` | Kimi 为 `900`，其他为 `600` | 单次上游请求超时秒数 |
 
 ### 3.3 实际运行 VLM 与图片模型
@@ -180,7 +186,7 @@ python -m collage review-ui `
 
 确认页会把所有槽位和独立装饰的 `source_rect` 合并，并按区域大小加少量边距，自动生成白色清版蒙版；一般不再需要手涂，明显不准确时才补画或擦除，也可一键恢复自动结果。显式传入 `--mask` 时仍以该文件为准。
 
-文字槽会优先使用 Draft 的 `default_text`；若它为空但槽位名称中已经带有识别文字（例如 `文字「hello」`），确认页会直接回填该文字。未指定字体时自动批准本地通用字体，不要求用户寻找字体路径。缺少透明素材的固定装饰默认按参考图近似制作，不再询问素材路径；Draft 待确认问题按当前页面设置处理并写入审核记录，不要求输入长答案。只有自动蒙版确实为空时才需明确确认无需清版。
+文字槽会优先使用 Draft 的 `default_text`；若它为空但槽位名称中已经带有识别文字（例如 `文字「hello」`），确认页会直接回填该文字。未指定字体时自动批准本地通用字体，不要求用户寻找字体路径。复杂固定装饰默认按参考图生成完整素材；有语义的固定文字必须逐字核对。Draft 待确认问题必须回答，并与可选的“其他错误或补充说明”一起提交给 VLM 纠正。查看纠正稿后手动勾选确认，才能开始制作。只有自动蒙版确实为空时才需明确确认无需清版。
 
 确认稿没有导入 `background.candidate_path`、且确实需要模型生成背景时，显式传图片 provider：
 
@@ -489,6 +495,19 @@ python -m collage --verbose render `
 | `PROVIDER_IMAGE_RECITATION` | Gemini 因复现相似性限制拒绝生成；把提示改得更原创后再发起新请求 |
 | `PROVIDER_CONTENT_BLOCKED` | Gemini 内容策略阻止生成；检查参考图和制作要求，不要自动重试 |
 
+### 背景接缝、贴纸裁断与人物显小
+
+确认页提供“背景制作方式”：
+
+- **局部保护**（默认）：按删除区和融合边带拼回候选背景，区外保留参考图。扩张与羽化都为 0 时是硬边拼接；羽化能柔化边界，但不能纠正模型重画后的纹理错位。
+- **整张重建**：直接采用映射到画布的完整清版候选，适合大面积移除照片、只要求近似纸纹的拼贴。已有局部 `allowed_mask` 时不能使用此模式。
+
+`review` 和 `review-ui` 也支持 `--background-composition full_candidate`；ReviewedSpec 对应字段为 `background.composition_mode`。可配合 `--background-candidate` 复用已满意的完整背景，避免重复生成。
+
+装饰素材采用等比补边保留完整模型输出，生成后的内容不能按参考图输入的补边窗口再次裁切。提示词要求先补全轮廓，超画布效果在最终排版时处理。旧版本缓存已丢失的上下内容无法通过改缩放恢复，修改后需重新构建相应装饰。
+
+参考效果是大幅照片柔边融合时，槽位选 `photo_feather + cover` 并绑定原照片。`cutout` 会去掉照片环境，不适合替代这类处理；抠图模式按可见 alpha 范围缩放，透明留白不再把人物压小。半身照用于特写槽时仍需调 `scale` 与 `offset_px`，槽位铺满不代表脸部大小已匹配。渲染过程只使用本地图片，不会生成或修改人脸。
+
 ## 10. 最短操作清单
 
 日常给已发布模板换图时，只需：
@@ -498,3 +517,15 @@ python -m collage --verbose render `
 3. 必要时调 `scale` 和 `offset_px`；
 4. 运行 `python -m collage render ...`；
 5. 查看 PNG 和同名 `.render.json`。
+
+## 制作后调整独立装饰
+
+在素材上传页、待验收结果页或已发布结果页点击“调整独立装饰图层”。
+
+- 在画面或列表中选择一件装饰，拖动位置；输入宽高和旋转角度，使用“上移一层／下移一层”调整遮挡关系。
+- “本地精确预览”调用正式 Renderer；未绑定照片时使用明确标记的占位照片，不代表真实换图效果。
+- “保存为新版本”创建新的布局修订项目，复制固定素材并保留哈希，原项目继续保留。已有可用客户素材时直接在本地生成新预览，否则等待补充素材。
+- 新版本需要重新验收。位置调整不会重新生成固定装饰。
+- 结构复核的问答记录在项目 analysis/feedback 下，最终确认绑定当前 Draft 哈希；生成失败的单件记录在 workspace/overlay_attempts 下。请依据业务 code 检查，未知网络结果不会自动重复计费。
+
+本轮验证入口见 [实现记录](artifacts/pipeline_interactive_verified/README.md)。

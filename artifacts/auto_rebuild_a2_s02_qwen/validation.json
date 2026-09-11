@@ -1,0 +1,30 @@
+{
+  "version": "auto-trial-validation/1",
+  "kind": "local_automated_tests_not_real_model_acceptance",
+  "date": "2026-09-11",
+  "pytest": {
+    "passed": 157,
+    "elapsed_seconds": 22.31,
+    "command": "python -B -X utf8 -m pytest -q -p no:cacheprovider --tb=short --show-capture=no --basetemp <unique system temporary directory>"
+  },
+  "ruff": {
+    "touched_python_files": 11,
+    "check": "passed",
+    "format_check": "passed"
+  },
+  "git_diff_check": "passed",
+  "production_acceptance": false,
+  "additional_targeted_run": {
+    "passed": 21,
+    "elapsed_seconds": 1.06,
+    "file": "tests/test_auto_trial.py"
+  },
+  "checks_added": [
+    "HTTP address preserved while local path is redacted",
+    "failure record contains model and timing without credentials",
+    "unresolved structure receives one semantic repair and still blocks on remaining uncertainty",
+    "diagnostic build keeps unresolved items and cannot be released",
+    "explicit continuation record required",
+    "completed structure evidence must match saved model result"
+  ]
+}

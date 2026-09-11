@@ -109,7 +109,11 @@ class _YibuAuditClient:
             raise CollageError(
                 code,
                 f"yibu 请求失败：HTTP {exc.code}",
-                details={"operation": operation, "response": detail},
+                details={
+                    "operation": operation,
+                    "response": detail,
+                    "http_status": exc.code,
+                },
             ) from exc
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             raise CollageError(

@@ -1,0 +1,26 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="figcopy-csrf-token" content="__FIGCOPY_CSRF_TOKEN__">
+<title>调整独立装饰图层</title>
+<link rel="stylesheet" href="/static/review.css">
+<main>
+  <div class="stage"><div class="canvas-wrap"><canvas id="view"></canvas><img id="exactPreview" hidden alt="本地精确合成预览"></div></div>
+  <aside>
+    <a id="returnLink" class="return-link">← 返回项目</a>
+    <h1>调整装饰图层</h1>
+    <p class="muted">选择一件装饰后拖动，或修改位置、大小和角度。上面的图层会遮住下面的图层。照片框沿用已确认的结构。</p>
+    <div id="layers"></div>
+    <h2 id="selection">请选择装饰</h2>
+    <fieldset id="controls" disabled>
+      <div class="row"><label>X <input id="x" type="number" step="1"></label><label>Y <input id="y" type="number" step="1"></label></div>
+      <div class="row"><label>宽 <input id="width" type="number" min="1"></label><label>高 <input id="height" type="number" min="1"></label></div>
+      <label><input id="keepAspect" type="checkbox" checked>缩放时保持比例</label>
+      <label class="stack">顺时针旋转（度）<input id="rotation" type="number" min="-3600" max="3600" step="1"></label>
+      <div class="row"><button id="up">上移一层</button><button id="down">下移一层</button></div>
+    </fieldset>
+    <div class="row"><button id="preview">本地精确预览</button><button id="save" class="primary">保存为新版本</button></div>
+    <p class="muted">缺少客户素材时用标记照片预览布局。保存会保留原版本，复用装饰素材，重新检查新布局后再发布。</p>
+    <div id="status" class="status">正在载入…</div>
+  </aside>
+</main>
+<script src="/static/layers.js"></script>

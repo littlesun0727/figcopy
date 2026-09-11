@@ -1,0 +1,48 @@
+{
+  "status": "generation_failed",
+  "asset_success": false,
+  "fixture": false,
+  "customer_photos_used": false,
+  "image_requests_with_results": 4,
+  "inspection_requests_with_results": 1,
+  "trials": [
+    {
+      "fixture": false,
+      "scope": "single_nontext_asset_probe",
+      "production_acceptance": false,
+      "customer_photos_used": false,
+      "source_sha256": "e7c2f75ad7481a4306d4ca515f3d3dbb71573431abb9017fa1d3125c4cfdc16e",
+      "vision_model": "qwen3.8-max",
+      "image_model": "doubao-seedream-5-0-260128",
+      "status": "failed",
+      "error_code": "OVERLAY_COMPLETENESS_FAILED",
+      "details": {
+        "overlay_id": "paperclip",
+        "issues": [
+          "OVERLAY_EDGE_CLIPPED"
+        ]
+      },
+      "image_requests_with_results": 2,
+      "inspection_requests_with_results": 0
+    },
+    {
+      "fixture": false,
+      "scope": "single_nontext_asset_probe",
+      "production_acceptance": false,
+      "customer_photos_used": false,
+      "prompt_version": "reference-overlay/5",
+      "status": "failed",
+      "error_code": "OVERLAY_COMPLETENESS_FAILED",
+      "details": {
+        "overlay_id": "paperclip",
+        "issues": [
+          "OVERLAY_EDGE_CLIPPED"
+        ]
+      },
+      "image_requests_with_results": 2,
+      "inspection_requests_with_results": 1
+    }
+  ],
+  "production_acceptance": false,
+  "gate_enforced": true
+}

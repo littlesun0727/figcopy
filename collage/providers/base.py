@@ -60,6 +60,7 @@ class GeneratedImage:
     image: Image.Image
     audit: ProviderAudit
     transform: dict[str, Any] | None = None
+    raw_image: Image.Image | None = None
 
 
 @runtime_checkable

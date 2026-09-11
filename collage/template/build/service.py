@@ -20,7 +20,8 @@ from ...core.io import (
 from ...core.state import NodeCache, WorkflowState
 from ...imaging.operations import crop_source
 from ...providers import ImageProvider
-from ...schemas import validate_reviewed_spec, validate_template_spec
+from ...schemas import validate_build_spec, validate_template_spec
+from ...schemas.background import background_slot_id
 from ..validation import validate_package
 from .background import _build_background
 from .common import _utc_now
@@ -39,7 +40,7 @@ def build_template(
     image_provider: ImageProvider | None = None,
     force: bool = False,
 ) -> Path:
-    """构建 needs_review 模板包；只有 approve 能把状态改成 ready。"""
+    """构建待验收模板；自动来源与人工确认来源分别记录。"""
 
     spec_path = spec_path.resolve()
     output_dir = output_dir.resolve()
@@ -59,7 +60,14 @@ def build_template(
             raise CollageError(
                 "OUTPUT_EXISTS", "模板构建结果已存在；断点重建请显式使用 --force"
             )
-    spec = validate_reviewed_spec(read_json(spec_path))
+    spec = validate_build_spec(read_json(spec_path))
+    version2 = spec["version"] in {"collage-build/2", "collage-build/3"}
+    photo_background = background_slot_id(spec)
+    pending_status = (
+        "needs_validation"
+        if version2 and spec["provenance"]["kind"] != "human"
+        else "needs_review"
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "assets").mkdir(parents=True, exist_ok=True)
     (output_dir / "masks").mkdir(parents=True, exist_ok=True)
@@ -69,7 +77,7 @@ def build_template(
     state = WorkflowState(work_dir / "state.json")
     cache = NodeCache(work_dir / "cache")
     state.transition("building")
-    LOGGER.info("开始构建模板 | spec=%s out=%s", spec_path, output_dir)
+    LOGGER.info("开始构建模板 | version=%s", spec["version"])
     try:
         reference_path = resolve_input_path(spec_path, spec["reference"]["path"])
         if sha256_file(reference_path) != spec["reference"]["sha256"]:
@@ -87,29 +95,55 @@ def build_template(
         crops: dict[str, Image.Image] = {}
         for overlay in spec["overlays"]:
             if overlay["action"] == "reference_generate":
-                crop = crop_source(reference, overlay["source_rect"])
+                x, y, width, height = overlay["source_rect"]
+                padding = max(2, round(min(width, height) * 0.15))
+                left, top = max(0, x - padding), max(0, y - padding)
+                right, bottom = (
+                    min(reference.width, x + width + padding),
+                    min(reference.height, y + height + padding),
+                )
+                crop = crop_source(reference, [left, top, right - left, bottom - top])
                 crops[overlay["id"]] = crop
                 atomic_save_image(crop, work_dir / "crops" / f"{overlay['id']}.png")
         state.node("overlay_crops", "complete", count=len(crops))
         LOGGER.info("原图 overlay crop 已保存 | count=%s", len(crops))
 
-        state.node("background", "running", input_sha256=spec["reference"]["sha256"])
-        background_asset, background_audit = _build_background(
-            spec, spec_path, reference, output_dir, work_dir, cache, image_provider
-        )
-        audits = [background_audit.as_dict(node="background")]
-        state.node(
-            "background",
-            "complete",
-            audit=audits[-1],
-            outputs=[
-                "background_candidate.png",
-                "background.png",
-                "remove_mask.png",
-                "blend_mask.png",
-            ],
-        )
-        assets = [background_asset]
+        assets = []
+        audits = []
+        if photo_background:
+            # The mandatory customer photo supplies the entire base; no hidden image is reconstructed.
+            state.node(
+                "background",
+                "skipped",
+                code="BACKGROUND_PROVIDED_BY_SLOT",
+                slot_id=photo_background,
+                outputs=[],
+                audit=None,
+            )
+            LOGGER.info(
+                "跳过固定背景制作 | code=BACKGROUND_PROVIDED_BY_SLOT slot=%s",
+                photo_background,
+            )
+        else:
+            state.node(
+                "background", "running", input_sha256=spec["reference"]["sha256"]
+            )
+            background_asset, background_audit = _build_background(
+                spec, spec_path, reference, output_dir, work_dir, cache, image_provider
+            )
+            audits.append(background_audit.as_dict(node="background"))
+            state.node(
+                "background",
+                "complete",
+                audit=audits[-1],
+                outputs=[
+                    "background_candidate.png",
+                    "background.png",
+                    "remove_mask.png",
+                    "blend_mask.png",
+                ],
+            )
+            assets.append(background_asset)
         visible_regions: dict[str, list[int] | None] = {}
         for overlay in spec["overlays"]:
             state.node(
@@ -141,8 +175,12 @@ def build_template(
             )
         slots = _package_slots(spec, spec_path, output_dir)
         template = {
-            "version": "collage-template/1",
-            "status": "needs_review",
+            "version": (
+                "collage-template/3"
+                if photo_background
+                else "collage-template/2" if version2 else "collage-template/1"
+            ),
+            "status": pending_status,
             "canvas": spec["canvas"],
             "assets": assets,
             "slots": slots,
@@ -151,7 +189,11 @@ def build_template(
                 "source_sha256": spec["reference"]["sha256"],
                 "created_at": _utc_now(),
                 "tool_version": __version__,
-                "fixture_used": any(item["fixture"] for item in audits),
+                "fixture_used": any(item["fixture"] for item in audits)
+                or spec.get("audit", {})
+                .get("analysis_provider", {})
+                .get("fixture", False)
+                or (version2 and spec["provenance"]["kind"] == "fixture"),
                 "providers": audits,
             },
             "review": {
@@ -162,16 +204,16 @@ def build_template(
                 "evidence_sha256": [],
             },
         }
+        if version2:
+            template["provenance"] = spec["provenance"]
+        if photo_background:
+            template["background"] = {"mode": "slot", "slot_id": photo_background}
         validate_template_spec(template, require_ready=False)
         atomic_write_json(manifest_path, template)
         validate_package(output_dir, require_ready=False)
         _write_inspection_report(work_dir, output_dir, spec, audits)
-        state.transition("needs_review")
-        LOGGER.info(
-            "模板构建完成，等待人工视觉验收 | manifest=%s report=%s",
-            manifest_path,
-            work_dir / "inspection.html",
-        )
+        state.transition(pending_status)
+        LOGGER.info("模板构建完成，等待验收 | status=%s", pending_status)
         return manifest_path
     except CollageError as exc:
         blocked_codes = {

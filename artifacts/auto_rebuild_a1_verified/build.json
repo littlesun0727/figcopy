@@ -1,0 +1,240 @@
+{
+  "version": "collage-build/2",
+  "status": "planned",
+  "provenance": {
+    "kind": "fixture",
+    "policy_version": "auto-rebuild-policy/1",
+    "evidence_sha256": [
+      "e90ab3cfa9871d7e83991b9102ee3120e89147a649a5177a3260675a387664fe"
+    ],
+    "unresolved": []
+  },
+  "reference": {
+    "path": "inputs/reference.png",
+    "sha256": "89b99cbd3f06f47cc46145846f0477926e6144860b0011df30561ca4659415d6"
+  },
+  "canvas": {
+    "width": 480,
+    "height": 360,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "slots": [
+    {
+      "id": "main_photo",
+      "label": "main_photo",
+      "type": "image",
+      "required": true,
+      "mode": "photo",
+      "source_rect": [
+        0,
+        0,
+        480,
+        360
+      ],
+      "target_rect": [
+        0,
+        0,
+        480,
+        360
+      ],
+      "upload_hint": "程序探针，仅供离线评测",
+      "review_notes": "synthetic fixture",
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": "inputs/main_photo_clip.png",
+      "edge_fade_px": 0
+    },
+    {
+      "id": "photo_left",
+      "label": "photo_left",
+      "type": "image",
+      "required": true,
+      "mode": "photo",
+      "source_rect": [
+        32,
+        48,
+        140,
+        104
+      ],
+      "target_rect": [
+        32,
+        48,
+        140,
+        104
+      ],
+      "upload_hint": "程序探针，仅供离线评测",
+      "review_notes": "synthetic fixture",
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": "inputs/photo_left_clip.png",
+      "edge_fade_px": 0
+    },
+    {
+      "id": "photo_right",
+      "label": "photo_right",
+      "type": "image",
+      "required": true,
+      "mode": "photo",
+      "source_rect": [
+        294,
+        38,
+        144,
+        108
+      ],
+      "target_rect": [
+        294,
+        38,
+        144,
+        108
+      ],
+      "upload_hint": "程序探针，仅供离线评测",
+      "review_notes": "synthetic fixture",
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": "inputs/photo_right_clip.png",
+      "edge_fade_px": 0
+    },
+    {
+      "id": "photo_bottom",
+      "label": "photo_bottom",
+      "type": "image",
+      "required": true,
+      "mode": "photo",
+      "source_rect": [
+        250,
+        222,
+        160,
+        104
+      ],
+      "target_rect": [
+        250,
+        222,
+        160,
+        104
+      ],
+      "upload_hint": "程序探针，仅供离线评测",
+      "review_notes": "synthetic fixture",
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": "inputs/photo_bottom_clip.png",
+      "edge_fade_px": 0
+    }
+  ],
+  "overlays": [
+    {
+      "id": "tape",
+      "label": "opaque and translucent tape",
+      "source_rect": [
+        0,
+        0,
+        480,
+        360
+      ],
+      "target_rect": [
+        0,
+        0,
+        480,
+        360
+      ],
+      "action": "preserve",
+      "generation_brief": "",
+      "requires_exact_content": true,
+      "review_notes": "synthetic foreground",
+      "rotation_deg": 0,
+      "prepared_asset": "inputs/foreground.png",
+      "background_mode": "alpha",
+      "chroma_key": null,
+      "chroma_tolerance": 40,
+      "shape": null
+    },
+    {
+      "id": "frame",
+      "label": "programmatic dashed frame",
+      "source_rect": [
+        24,
+        40,
+        156,
+        120
+      ],
+      "target_rect": [
+        24,
+        40,
+        156,
+        120
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "synthetic frame",
+      "rotation_deg": 0,
+      "prepared_asset": null,
+      "background_mode": "alpha",
+      "chroma_key": null,
+      "chroma_tolerance": 40,
+      "shape": {
+        "kind": "dashed_rectangle",
+        "fill": null,
+        "outline": "#FFFFFF",
+        "width": 3,
+        "radius": 0,
+        "dash": 10,
+        "gap": 6
+      }
+    }
+  ],
+  "background": {
+    "background_brief": "synthetic paper",
+    "review_notes": "fixture",
+    "remove_mask": "inputs/remove.png",
+    "allowed_mask": null,
+    "candidate_path": "inputs/background.png",
+    "expand_px": 0,
+    "feather_px": 0
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "main_photo"
+    },
+    {
+      "type": "slot",
+      "id": "photo_left"
+    },
+    {
+      "type": "slot",
+      "id": "photo_right"
+    },
+    {
+      "type": "slot",
+      "id": "photo_bottom"
+    },
+    {
+      "type": "overlay",
+      "id": "frame"
+    },
+    {
+      "type": "overlay",
+      "id": "tape"
+    }
+  ]
+}

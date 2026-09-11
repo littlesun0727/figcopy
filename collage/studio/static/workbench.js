@@ -5,6 +5,9 @@ const state = {
   currentId: null,
   currentStatus: null,
   renderSignature: null,
+  providerStatus: null,
+  providerFormDirty: false,
+  returnToCreateAfterProvider: false,
 };
 
 const STAGES = [
@@ -232,7 +235,7 @@ function renderReview(status) {
     ? status.artifacts.draft_preview.url
     : status.artifacts.reference?.url;
   $('#actionPanel').innerHTML = `
-    ${actionHeader('HUMAN GATE 1 / 2', '确认识别区域与清除范围', '检查蓝色内容槽、粉色装饰层和白色清除区域。保存后会自动继续制作模板。')}
+    ${actionHeader('HUMAN GATE 1 / 2', '确认识别区域与清除范围', '回答识别疑问并提交纠正，检查新结果后手动确认，再继续制作模板。')}
     ${preview(image, 'Draft 框选预览')}
     <div class="action-row">
       <a class="button primary large" href="/projects/${encodeURIComponent(status.project_id)}/review">打开 Draft 审核页</a>
@@ -268,6 +271,7 @@ async function loadBindingForm(status) {
     }).join('');
     $('#actionPanel').innerHTML = `
       ${actionHeader('CUSTOMER INPUT', '放入这次要合成的素材', '每个槽位都按名称对应，不需要手改 Bindings JSON。缩放和偏移只影响当前预览。')}
+      <p><a class="button quiet" href="/projects/${encodeURIComponent(projectId)}/layers">调整独立装饰图层</a></p>
       <form id="bindingsForm">
         <div class="slot-list">${cards}</div>
         <details class="advanced-settings"><summary>抠图高级设置</summary>
@@ -326,6 +330,7 @@ function renderApproval(status, complete = false) {
   $('#actionPanel').innerHTML = `
     ${actionHeader(complete ? 'PUBLISHED' : 'HUMAN GATE 2 / 2', complete ? '模板已发布' : '检查最终合成效果', complete ? '本次模板已经通过人工验收，可以继续复用本地 Renderer。' : '重点检查旧素材残留、边缘接缝、层序、文字和主体遮挡。批准操作会写入审核记录。')}
     ${preview(result?.url, complete ? '已发布模板预览' : '待批准结果预览')}
+    <p><a class="button quiet" href="/projects/${encodeURIComponent(status.project_id)}/layers">调整独立装饰图层 · 保存新版本</a></p>
     ${complete ? `
       <div class="action-row"><a class="button primary" href="${escapeHtml(result?.url)}?download=1">下载结果 PNG</a></div>
     ` : `
@@ -364,6 +369,7 @@ function renderRetry(status) {
   const error = status.last_error || status.task?.error;
   $('#actionPanel').innerHTML = `
     ${actionHeader('RECOVERY', status.stage === 'blocked' ? '流程需要补充配置' : '这一步没有完成', error?.message || status.next_action)}
+    <div class='action-row provider-recovery'><button id='openProviderFromRetry' class='button primary' type='button'>配置 Key 与 Provider</button></div>
     <div class="notice warning"><strong>${escapeHtml(error?.code || 'WORKFLOW_PAUSED')}</strong><br>${escapeHtml(error?.message || status.next_action)}</div>
     <form id="retryForm" class="retry-form">
       <label>VLM Provider<input id="retryVision" placeholder="module:object（留空沿用原设置）"></label>
@@ -373,6 +379,7 @@ function renderRetry(status) {
       <label class="check"><input id="retryCloud" type="checkbox"> 明确允许云端上传</label>
       <div><button id="retryButton" class="button primary" type="submit">按当前配置重试</button></div>
     </form>`;
+  $('#openProviderFromRetry').onclick = openProviderDialog;
   $('#retryForm').onsubmit = async event => {
     event.preventDefault();
     const button = $('#retryButton');
@@ -527,6 +534,206 @@ async function refreshAll() {
   }
 }
 
+function makeProviderCard(config, tone, label, detail) {
+  const card = document.createElement('article');
+  card.className = 'provider-card';
+  const head = document.createElement('div');
+  head.className = 'provider-card-head';
+  const title = document.createElement('strong');
+  title.textContent = config.name;
+  const badge = document.createElement('span');
+  badge.className = 'provider-state ' + tone;
+  badge.textContent = label;
+  head.append(title, badge);
+  const model = document.createElement('p');
+  model.textContent = config.model;
+  const provider = document.createElement('small');
+  provider.textContent = config.provider;
+  const note = document.createElement('small');
+  note.textContent = detail;
+  card.append(head, model, provider, note);
+  return card;
+}
+
+function renderProviderStatus(status) {
+  state.providerStatus = status;
+  const credentialReady = Boolean(status.credential.configured);
+  const auditReady = status.audit.state === 'online';
+  const yibuTone = !credentialReady ? 'error' : auditReady ? 'ready' : 'warning';
+  const yibuLabel = !credentialReady ? '缺少 Key' : auditReady ? '就绪' : '检查代理';
+  const cutoutConfigured = Boolean(status.cutout.configured);
+  const modelCached = Boolean(status.cutout.model_cached);
+  const cutoutReady = cutoutConfigured && modelCached;
+  const cutoutTone = !cutoutConfigured ? 'error' : cutoutReady ? 'ready' : 'warning';
+  const cutoutLabel = !cutoutConfigured ? '缺少依赖' : cutoutReady ? '本地就绪' : '模型待下载';
+  const missing = status.cutout.missing_dependencies || [];
+  const cutoutDetail = missing.length
+    ? '缺少：' + missing.join('、')
+    : modelCached
+      ? '固定版本权重已缓存；客户图片不会上传'
+      : '依赖已安装；首次使用需要下载固定版本模型';
+
+  $('#providerCards').replaceChildren(
+    makeProviderCard(status.vision, yibuTone, yibuLabel, '凭据：' + status.credential.source),
+    makeProviderCard(status.image, yibuTone, yibuLabel, '输出尺寸：' + status.image.image_size),
+    makeProviderCard(status.cutout, cutoutTone, cutoutLabel, cutoutDetail),
+  );
+
+  const allReady = credentialReady && auditReady && cutoutReady;
+  const headerTone = !credentialReady ? 'error' : allReady ? 'ready' : 'warning';
+  $('#providerDot').className = 'provider-dot ' + headerTone;
+  $('#providerLabel').textContent = allReady ? 'Provider 就绪' : 'Provider 设置';
+  $('#credentialHint').textContent = '当前：' + status.credential.source + '。新 Key 留空会沿用。';
+  const audit = $('#auditStatus');
+  audit.className = 'audit-status ' + (auditReady ? 'ready' : 'error');
+  audit.textContent = '审计代理 · ' + status.audit.url + ' · ' + status.audit.message;
+}
+
+function populateProviderForm(status) {
+  $('#auditBaseUrl').value = status.audit.url || 'http://127.0.0.1:17860';
+  $('#vlmModel').value = status.vision.model || '';
+  $('#vlmMaxTokens').value = status.vision.max_tokens || '';
+  $('#vlmReasoning').value = status.vision.reasoning_effort || '';
+  $('#timeoutSeconds').value = status.vision.timeout_seconds || '';
+  $('#imageModel').value = status.image.model || '';
+  $('#imageSize').value = status.image.image_size || '2K';
+  const device = status.cutout.device || 'auto';
+  const deviceSelect = $('#birefnetDevice');
+  if (![...deviceSelect.options].some(option => option.value === device)) {
+    const option = document.createElement('option');
+    option.value = device;
+    option.textContent = device;
+    deviceSelect.append(option);
+  }
+  deviceSelect.value = device;
+  $('#sharedPath').value = '';
+  $('#sharedPath').placeholder = status.credential.shared_path_configured
+    ? '当前已配置 shared.py；留空沿用'
+    : '例如 D:\\codes\\creative-video-editor\\shared.py';
+  $('#birefnetModelPath').value = '';
+  $('#clearCredentials').checked = false;
+}
+
+async function loadProviderStatus() {
+  try {
+    const status = await api('/api/provider-settings');
+    renderProviderStatus(status);
+    return status;
+  } catch (error) {
+    $('#providerDot').className = 'provider-dot error';
+    $('#providerLabel').textContent = 'Provider 状态异常';
+    throw error;
+  }
+}
+
+function showProviderError(error) {
+  const node = $('#providerError');
+  node.textContent = describeError(error);
+  node.hidden = false;
+}
+
+function openProviderDialog() {
+  const dialog = $('#providerDialog');
+  const canRetry = Boolean(
+    state.currentId && ['blocked', 'failed', 'invalid'].includes(state.currentStatus?.stage),
+  );
+  $('#providerError').hidden = true;
+  state.providerFormDirty = false;
+  $('#yibuApiKey').value = '';
+  $('#retryAfterSettingsLabel').hidden = !canRetry;
+  $('#retryAfterSettings').checked = canRetry;
+  if (state.providerStatus) populateProviderForm(state.providerStatus);
+  dialog.showModal();
+  loadProviderStatus()
+    .then(status => {
+      if (!state.providerFormDirty) populateProviderForm(status);
+    })
+    .catch(showProviderError);
+}
+
+function providerFormPayload() {
+  const payload = {};
+  const clearCredentials = $('#clearCredentials').checked;
+  const apiKey = $('#yibuApiKey').value.trim();
+  const sharedPath = $('#sharedPath').value.trim();
+  const credentialWillExist = !clearCredentials && Boolean(
+    apiKey || sharedPath || state.providerStatus?.credential.configured,
+  );
+
+  if (clearCredentials) {
+    payload.clear_credentials = true;
+  } else if (credentialWillExist) {
+    if (apiKey) payload.yibu_api_key = apiKey;
+    if (sharedPath) payload.shared_path = sharedPath;
+    payload.audit_base_url = $('#auditBaseUrl').value.trim();
+    payload.vlm_model = $('#vlmModel').value.trim();
+    payload.vlm_max_tokens = $('#vlmMaxTokens').value.trim();
+    payload.vlm_reasoning_effort = $('#vlmReasoning').value;
+    payload.timeout_seconds = $('#timeoutSeconds').value.trim();
+    payload.image_model = $('#imageModel').value.trim();
+    payload.image_size = $('#imageSize').value;
+  }
+
+  payload.birefnet_device = $('#birefnetDevice').value;
+  const modelPath = $('#birefnetModelPath').value.trim();
+  if (modelPath) payload.birefnet_model_path = modelPath;
+  return {payload, credentialWillExist};
+}
+
+async function submitProviderSettings(event) {
+  event.preventDefault();
+  if (event.submitter?.value === 'cancel') {
+    $('#providerDialog').close();
+    return;
+  }
+  const submit = $('#providerSubmit');
+  const retry = !$('#retryAfterSettingsLabel').hidden && $('#retryAfterSettings').checked;
+  const projectId = state.currentId;
+  const {payload, credentialWillExist} = providerFormPayload();
+  if (retry && !credentialWillExist) {
+    showProviderError(new ApiError({
+      code: 'YIBU_CREDENTIAL_MISSING',
+      message: '请输入 Yibu API Key，或指定已有 shared.py 后再重试项目',
+    }, 400));
+    return;
+  }
+
+  submit.disabled = true;
+  $('#providerError').hidden = true;
+  try {
+    const request = api('/api/provider-settings', {method: 'POST', body: payload});
+    $('#yibuApiKey').value = '';
+    if (payload.yibu_api_key) payload.yibu_api_key = '';
+    const status = await request;
+    renderProviderStatus(status);
+    state.providerFormDirty = false;
+    populateProviderForm(status);
+    if (retry && projectId) {
+      try {
+        await api('/api/projects/' + encodeURIComponent(projectId) + '/retry', {
+          method: 'POST',
+          body: {},
+        });
+      } catch (error) {
+        showProviderError(new ApiError({
+          code: error.code,
+          message: '设置已保存，但项目重试失败：' + error.message,
+          details: error.details,
+        }, error.status));
+        return;
+      }
+    }
+    $('#providerDialog').close();
+    toast(retry ? 'Provider 已配置，项目正在重试' : 'Provider 设置已应用到当前工作台');
+    await loadProjects();
+    await refreshCurrent(true);
+  } catch (error) {
+    showProviderError(error);
+  } finally {
+    submit.disabled = false;
+  }
+}
+
 function fallbackProjectId() {
   const now = new Date();
   const pad = value => String(value).padStart(2, '0');
@@ -541,11 +748,51 @@ function slugify(value) {
   return slug || fallbackProjectId();
 }
 
+function renderCreateProviderNotice() {
+  const form = $('#createForm');
+  let notice = $('#createProviderNotice');
+  const status = state.providerStatus;
+  const issues = [];
+  if (status && !status.credential.configured) {
+    issues.push('未配置 Yibu Key；只上传参考图会停在分析阶段。上传人工 Draft 仍可离线继续。');
+  } else if (status && status.audit.state !== 'online') {
+    issues.push('本机审计代理当前不可用；Yibu VLM 和图片编辑会暂停。');
+  }
+  if (status && !status.cutout.configured) {
+    issues.push('BiRefNet 可选依赖不完整；普通不透明图片的 cutout 槽会暂停。');
+  } else if (status && !status.cutout.model_cached) {
+    issues.push('BiRefNet 权重尚未缓存；首次使用 cutout 槽时需要下载模型。');
+  }
+  if (!issues.length) {
+    notice?.remove();
+    return;
+  }
+  if (!notice) {
+    notice = document.createElement('div');
+    notice.id = 'createProviderNotice';
+    notice.className = 'notice warning create-provider-notice';
+    form.querySelector('.file-drop').before(notice);
+  }
+  const message = document.createElement('span');
+  message.textContent = issues.join(' ');
+  const button = document.createElement('button');
+  button.className = 'button quiet';
+  button.type = 'button';
+  button.textContent = '先配置 Provider';
+  button.onclick = () => {
+    state.returnToCreateAfterProvider = true;
+    $('#createDialog').close();
+    openProviderDialog();
+  };
+  notice.replaceChildren(message, button);
+}
+
 function openCreateDialog() {
   const dialog = $('#createDialog');
   $('#createError').hidden = true;
   const reviewer = window.localStorage.getItem('figcopy-reviewer');
   if (reviewer) $('#createForm').elements.reviewer.value = reviewer;
+  renderCreateProviderNotice();
   dialog.showModal();
 }
 
@@ -583,6 +830,7 @@ async function submitCreate(event) {
 async function boot() {
   const config = await api('/api/config');
   $('#dataDirectory').textContent = config.data_dir;
+  await loadProviderStatus().catch(() => null);
   state.currentId = projectIdFromPath();
   await loadProjects();
   await refreshCurrent(true);
@@ -590,6 +838,16 @@ async function boot() {
 }
 
 $('#newProject').onclick = openCreateDialog;
+$('#providerSettings').onclick = openProviderDialog;
+$('#providerForm').onsubmit = submitProviderSettings;
+$('#providerForm').oninput = () => { state.providerFormDirty = true; };
+$('#providerDialog').addEventListener('close', () => {
+  const returnToCreate = state.returnToCreateAfterProvider;
+  state.returnToCreateAfterProvider = false;
+  $('#yibuApiKey').value = '';
+  $('#providerError').hidden = true;
+  if (returnToCreate) window.setTimeout(openCreateDialog, 0);
+});
 document.querySelectorAll('[data-open-create]').forEach(button => { button.onclick = openCreateDialog; });
 document.querySelectorAll('[data-home]').forEach(link => {
   link.onclick = event => { event.preventDefault(); navigate(null); };

@@ -9,7 +9,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 
-from ...core.errors import CollageError
+from ...core.errors import CollageError, SpecValidationError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -95,6 +95,14 @@ class JobRegistry:
                 exc.code,
                 exc.message,
             )
+            if isinstance(exc, SpecValidationError):
+                for issue in exc.issues[:5]:
+                    LOGGER.warning(
+                        "规格校验问题 | job=%s path=%s code=%s",
+                        job_id,
+                        issue.path,
+                        issue.code,
+                    )
             self._update(job_id, state="failed", error=exc.as_dict())
         except Exception as exc:  # pragma: no cover - final containment boundary
             LOGGER.exception("工作台任务发生未预期错误 | job=%s", job_id)

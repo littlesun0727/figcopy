@@ -16,11 +16,13 @@ from collage.imaging.geometry import (
 from collage.imaging.operations import (
     alpha_is_meaningful,
     choose_chroma_key,
+    chroma_alpha_is_clean,
     clean_chroma_edges,
     convert_remove_mask_polarity,
     make_blend_mask,
     normalize_image,
     protected_background_compose,
+    remove_chroma_background,
     remove_chroma_key,
 )
 
@@ -75,6 +77,38 @@ def test_alpha_and_adaptive_chroma_key() -> None:
     assert transparent.getpixel((0, 0))[3] == 0
     assert transparent.getpixel((2, 2))[3] == 255
     assert alpha_is_meaningful(transparent)
+
+
+def test_textured_chroma_background_is_removed_without_erasing_isolated_detail() -> (
+    None
+):
+    key = (0, 255, 0)
+    image = Image.new("RGB", (24, 18), (0, 72, 0))
+    for y in range(image.height):
+        for x in range(image.width):
+            green = 55 + ((x * 17 + y * 11) % 115)
+            image.putpixel((x, y), (3, green, 8))
+    for y in range(4, 14):
+        for x in range(5, 19):
+            image.putpixel((x, y), (245, 185, 205))
+    image.putpixel((12, 9), (0, 72, 0))
+
+    cleaned = remove_chroma_background(image, key, tolerance=20)
+
+    assert cleaned.getpixel((0, 0))[3] == 0
+    assert cleaned.getpixel((23, 17))[3] == 0
+    assert cleaned.getpixel((6, 5))[3] == 255
+    assert cleaned.getpixel((12, 9))[3] == 255
+    assert chroma_alpha_is_clean(cleaned)
+
+
+def test_chroma_quality_gate_rejects_tiny_or_only_partial_transparency() -> None:
+    dirty = Image.new("RGBA", (20, 12), (0, 120, 0, 128))
+    dirty.putpixel((0, 0), (0, 120, 0, 0))
+    dirty.putpixel((10, 6), (240, 180, 200, 255))
+
+    assert alpha_is_meaningful(dirty)
+    assert not chroma_alpha_is_clean(dirty)
 
 
 def test_chroma_edge_cleanup_erodes_alpha_without_changing_rgb() -> None:

@@ -1,0 +1,82 @@
+{
+  "status": "needs_validation",
+  "nodes": {
+    "overlay_crops": {
+      "status": "complete",
+      "count": 0
+    },
+    "background": {
+      "status": "complete",
+      "input_sha256": "89b99cbd3f06f47cc46145846f0477926e6144860b0011df30561ca4659415d6",
+      "audit": {
+        "node": "background",
+        "name": "imported-background",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "outputs": [
+        "background_candidate.png",
+        "background.png",
+        "remove_mask.png",
+        "blend_mask.png"
+      ]
+    },
+    "overlay:tape": {
+      "status": "complete",
+      "source_rect": [
+        0,
+        0,
+        480,
+        360
+      ],
+      "audit": {
+        "node": "overlay:tape",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        68,
+        30,
+        386,
+        65
+      ],
+      "output": "assets/overlay_tape.png"
+    },
+    "overlay:frame": {
+      "status": "complete",
+      "source_rect": [
+        24,
+        40,
+        156,
+        120
+      ],
+      "audit": {
+        "node": "overlay:frame",
+        "name": "local-basic-shape",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        0,
+        0,
+        156,
+        120
+      ],
+      "output": "assets/overlay_frame.png"
+    }
+  },
+  "last_error": null
+}

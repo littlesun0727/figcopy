@@ -1,0 +1,32 @@
+{
+  "version": "auto-rebuild-trial-config/1",
+  "reference_upload_scope": [
+    "S02"
+  ],
+  "sample_preview_scope": [
+    "S01",
+    "S02",
+    "S03",
+    "S04",
+    "S05",
+    "S06",
+    "S07",
+    "S08",
+    "S09",
+    "S10"
+  ],
+  "credential_source": "explicit_private_json_file",
+  "models": {
+    "vision": "kimi-k3",
+    "reasoning_effort": "high",
+    "image": "doubao-seedream-5-0-260128"
+  },
+  "total_budget_cny": null,
+  "customer_material_groups": [],
+  "status": "blocked",
+  "blockers": [
+    "TRIAL_BUDGET_REQUIRED",
+    "CUSTOMER_MATERIAL_GROUPS_REQUIRED"
+  ],
+  "real_model_calls": 0
+}

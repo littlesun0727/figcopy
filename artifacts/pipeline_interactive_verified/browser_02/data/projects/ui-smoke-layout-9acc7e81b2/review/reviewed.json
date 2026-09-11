@@ -1,0 +1,121 @@
+{
+  "version": "collage-reviewed/1",
+  "status": "reviewed",
+  "reference": {
+    "path": "../analysis/reference.png",
+    "sha256": "40ae70abc46da0f9264c25d2a93b0fd1b64a2297a8302735169de84cf451d255"
+  },
+  "canvas": {
+    "width": 600,
+    "height": 760,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "slots": [],
+  "overlays": [
+    {
+      "rotation_deg": 0,
+      "prepared_asset": null,
+      "background_mode": "alpha",
+      "chroma_key": null,
+      "chroma_tolerance": 40,
+      "shape": {
+        "kind": "ellipse",
+        "fill": "#EE8F61",
+        "outline": "#EE8F61",
+        "width": 5,
+        "radius": 0,
+        "dash": 14,
+        "gap": 8
+      },
+      "id": "circle",
+      "label": "独立圆形",
+      "source_rect": [
+        60,
+        120,
+        150,
+        150
+      ],
+      "target_rect": [
+        60,
+        120,
+        150,
+        150
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "synthetic fixture",
+      "text_content": null,
+      "text_confirmed": false
+    },
+    {
+      "rotation_deg": 0,
+      "prepared_asset": null,
+      "background_mode": "alpha",
+      "chroma_key": null,
+      "chroma_tolerance": 40,
+      "shape": {
+        "kind": "dashed_rectangle",
+        "fill": null,
+        "outline": "#6CC9C4",
+        "width": 5,
+        "radius": 0,
+        "dash": 14,
+        "gap": 8
+      },
+      "id": "frame",
+      "label": "独立边框",
+      "source_rect": [
+        280,
+        300,
+        200,
+        180
+      ],
+      "target_rect": [
+        280,
+        300,
+        200,
+        180
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "synthetic fixture",
+      "text_content": null,
+      "text_confirmed": false
+    }
+  ],
+  "background": {
+    "background_brief": "plain",
+    "review_notes": "fixture",
+    "remove_mask": "remove_mask.png",
+    "allowed_mask": null,
+    "candidate_path": "../inputs/background_candidate.png",
+    "expand_px": 0,
+    "feather_px": 0,
+    "composition_mode": "protected"
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "overlay",
+      "id": "circle"
+    },
+    {
+      "type": "overlay",
+      "id": "frame"
+    }
+  ],
+  "review": {
+    "reviewer": "fixture-tester",
+    "reviewed_at": "2026-09-11T11:05:32+00:00",
+    "notes": "确认页自动处理记录：\n- 无需额外自动决策。",
+    "questions_resolved": true
+  },
+  "audit": {
+    "source_draft_sha256": "5cc6c1d45eef091ba30bbf2dd9a7f0e697a8be09ae53371ad22c26a628497aaf"
+  }
+}

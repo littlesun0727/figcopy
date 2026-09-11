@@ -31,3 +31,11 @@ code{overflow-wrap:anywhere}
 /* Shared Draft review page used standalone and inside the project workbench. */
 .return-link { color: #8bd8ff; display: inline-block; margin-bottom: 8px; text-decoration: none; }
 .return-link[hidden] { display: none; }
+
+
+#exactPreview { display:block; max-width:100%; height:auto; }
+#exactPreview[hidden], #view[hidden] { display:none; }
+#layers button.card { display:block; width:100%; text-align:left; cursor:pointer; }
+fieldset { border:1px solid #d6dfe8; margin:12px 0; padding:12px; }
+input[type=number] { max-width:110px; }
+canvas { touch-action:none; }

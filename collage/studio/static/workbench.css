@@ -19,7 +19,7 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--bg); color: var(--text); }
-button, input, textarea { font: inherit; }
+button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
 
@@ -167,6 +167,45 @@ input:focus, textarea:focus { border-color: #697587 !important; box-shadow: 0 0 
 .toast { position: fixed; right: 22px; bottom: 22px; z-index: 50; max-width: 380px; border: 1px solid #3f4856; border-radius: 11px; background: #20252e; color: white; padding: 12px 15px; box-shadow: 0 12px 30px #0008; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+/* Provider credentials stay in the server process; this UI never persists them. */
+.provider-button { padding: 9px 13px; }
+.provider-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 4px rgba(146,155,170,.08); }
+.provider-dot.ready { background: #6ee7a5; box-shadow: 0 0 0 4px rgba(110,231,165,.1); }
+.provider-dot.warning { background: #ffc66d; box-shadow: 0 0 0 4px rgba(255,198,109,.1); }
+.provider-dot.error { background: var(--danger); box-shadow: 0 0 0 4px rgba(255,128,117,.1); }
+.provider-dialog { width: min(820px, calc(100vw - 28px)); }
+.settings-intro { color: var(--muted); line-height: 1.6; font-size: 13px; margin: -5px 0 18px; }
+.provider-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.provider-card { border: 1px solid var(--line); border-radius: 13px; background: #101319; padding: 14px; min-width: 0; }
+.provider-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 9px; }
+.provider-card strong { font-size: 13px; }
+.provider-card p { color: #c6ccd5; font-size: 12px; margin: 0 0 5px; overflow-wrap: anywhere; }
+.provider-card small { color: var(--muted); display: block; line-height: 1.45; }
+.provider-state { border-radius: 999px; padding: 4px 7px; color: var(--muted); background: #252a33; font-size: 10px; white-space: nowrap; }
+.provider-state.ready { color: #9cf0bd; background: rgba(110,231,165,.1); }
+.provider-state.warning { color: #ffd594; background: rgba(255,198,109,.1); }
+.provider-state.error { color: #ffaaa2; background: rgba(255,128,117,.1); }
+.audit-status { margin: 10px 0 20px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--muted); font-size: 12px; }
+.audit-status.ready { border-color: rgba(110,231,165,.28); color: #a4edc0; background: rgba(110,231,165,.045); }
+.audit-status.error { border-color: rgba(255,128,117,.3); color: #ffaaa2; background: rgba(255,128,117,.05); }
+.settings-section { border-top: 1px solid var(--line); padding-top: 18px; margin-top: 18px; }
+.settings-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+.settings-heading h3 { margin: 0; font-size: 15px; }
+.settings-heading span { color: var(--muted); font-size: 11px; }
+.provider-dialog select { width: 100%; border: 1px solid var(--line); border-radius: 10px; background: #0e1116; color: var(--text); padding: 10px 12px; outline: none; }
+.provider-dialog label > small { color: var(--muted); font-size: 10px; line-height: 1.45; }
+.provider-dialog .danger-check { color: #ffaaa2; margin-top: 4px; }
+.retry-after-settings { display: flex !important; align-items: center; border: 1px solid rgba(121,219,255,.25); background: rgba(121,219,255,.05); border-radius: 10px; padding: 11px 12px; margin-top: 18px; }
+.create-provider-notice { display: flex; align-items: center; justify-content: space-between; gap: 14px; font-size: 12px; }
+.create-provider-notice span { flex: 1; }
+.create-provider-notice .button { flex: none; }
+
+@media (max-width: 760px) {
+  .provider-cards { grid-template-columns: 1fr; }
+  .provider-button #providerLabel { display: none; }
+  .provider-button { padding: 11px; }
+  .create-provider-notice { align-items: stretch; flex-direction: column; }
+}
 @keyframes pulse { 50% { opacity: .35; } }
 
 @media (max-width: 900px) {

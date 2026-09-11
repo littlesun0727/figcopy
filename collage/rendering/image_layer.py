@@ -24,8 +24,15 @@ def _render_image_slot(
         raise CollageError("INVALID_BINDING", f"图片槽 {slot['id']} 没有图片")
     left, top, right, bottom = rect_to_box(slot["rect"])
     local_size = (right - left, bottom - top)
+    source = binding.image
+    if slot["mode"] == "cutout":
+        # cutout 的目标框描述可见主体，透明留白不应参与缩放。
+        visible_bbox = source.convert("RGBA").getchannel("A").getbbox()
+        if visible_bbox is None:
+            raise CollageError("CUTOUT_EMPTY_OR_OPAQUE", "抠图结果没有可见主体")
+        source = source.crop(visible_bbox)
     local = _fit_to_rect(
-        binding.image,
+        source,
         local_size,
         fit=slot["fit"],
         anchor=tuple(slot["anchor"]),

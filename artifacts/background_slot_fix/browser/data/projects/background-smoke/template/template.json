@@ -1,0 +1,103 @@
+{
+  "version": "collage-template/3",
+  "status": "needs_review",
+  "canvas": {
+    "width": 40,
+    "height": 30,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "assets": [
+    {
+      "id": "frame",
+      "path": "assets/overlay_frame.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "800dc550ef6c8aa945ac3ec2520f3faf49701077fbbddad580e30fbc44560b91"
+    }
+  ],
+  "slots": [
+    {
+      "id": "cover_photo",
+      "type": "image",
+      "label": "背景照片",
+      "required": true,
+      "upload_hint": "上传背景照片",
+      "rect": [
+        0,
+        0,
+        40,
+        30
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0,
+      "clip_mask_sha256": null
+    }
+  ],
+  "layers": [
+    {
+      "type": "slot",
+      "slot_id": "cover_photo"
+    },
+    {
+      "type": "asset",
+      "asset_id": "frame",
+      "rect": [
+        5,
+        5,
+        15,
+        10
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "build": {
+    "source_sha256": "58c375fead5789b5e88d8a7af244cbfcccc6dceedf5dc96229d36aa48cd9f098",
+    "created_at": "2026-09-11T11:50:43+00:00",
+    "tool_version": "0.1.0",
+    "fixture_used": true,
+    "providers": [
+      {
+        "node": "overlay:frame",
+        "name": "local-basic-shape",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      }
+    ]
+  },
+  "review": {
+    "visual_approved": false,
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": "",
+    "evidence_sha256": []
+  },
+  "provenance": {
+    "kind": "human",
+    "policy_version": "customer-photo-background/1",
+    "evidence_sha256": [
+      "e3dfbf375772072e9019d4e20c8d4ffb50e8222cd0dde5a9723340226c23597c"
+    ],
+    "unresolved": []
+  },
+  "background": {
+    "mode": "slot",
+    "slot_id": "cover_photo"
+  }
+}

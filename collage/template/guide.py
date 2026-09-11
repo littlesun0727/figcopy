@@ -9,6 +9,7 @@ from typing import Any
 
 from ..core.io import atomic_write_bytes, atomic_write_json
 from .validation import validate_package
+from ..schemas.background import background_slot_id
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,6 +33,8 @@ def create_upload_guide(
                 "photo_feather": "整张照片会应用模板边缘渐隐，不做人像抠图。",
                 "cutout": "需要透明 PNG，或先显式运行 cutout 准备步骤。",
             }[slot["mode"]]
+            if slot["id"] == background_slot_id(template):
+                mode_note = "全屏背景必填：请上传不透明照片，自动裁切铺满；调整位置时不能露出空白。"
             starter_slots[slot["id"]] = {
                 "path": f"REPLACE_{slot['id']}.png",
                 "scale": 1.0,

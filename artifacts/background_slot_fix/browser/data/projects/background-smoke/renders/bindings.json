@@ -1,0 +1,13 @@
+{
+  "version": "collage-bindings/1",
+  "slots": {
+    "cover_photo": {
+      "path": "REPLACE_cover_photo.png",
+      "scale": 1.0,
+      "offset_px": [
+        0,
+        0
+      ]
+    }
+  }
+}

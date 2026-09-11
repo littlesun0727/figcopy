@@ -13,6 +13,8 @@ dependencies = ["Pillow>=11,<13"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10"]
+browser-test = ["websocket-client>=1.8,<2"]
+auto-trial = ["numpy>=1.26,<3", "opencv-python-headless>=4.8,<6"]
 birefnet = [
     "einops>=0.8,<1",
     "kornia>=0.7,<1",

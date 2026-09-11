@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from ...core.io import atomic_write_bytes
+from ...schemas.background import background_slot_id
 
 
 def _write_inspection_report(
@@ -25,15 +26,39 @@ def _write_inspection_report(
         for item in audits
     )
     package_rel = Path(os.path.relpath(output_dir, work_dir)).as_posix()
+    composition = (
+        "整张重建：采用完整清版候选"
+        if spec["background"].get("composition_mode") == "full_candidate"
+        else "局部保护：仅在删除区与融合边带替换像素"
+    )
+    photo_background = background_slot_id(spec)
+    if photo_background:
+        background_section = (
+            "<h2>背景</h2><p>由客户上传的全屏照片提供，固定背景制作已跳过。</p>"
+        )
+    else:
+        background_section = (
+            f"<h2>背景制作</h2><p>{composition}</p>"
+            '<img src="remove_mask.png" alt="remove mask"><img src="blend_mask.png" alt="blend mask">'
+            '<img src="background_candidate.png" alt="background candidate"><img src="background.png" alt="protected background">'
+        )
+    automated = spec.get("provenance", {}).get("kind") in {
+        "automatic",
+        "fixture",
+        "diagnostic",
+    }
+    status_text = (
+        "needs_validation。制作来源已记录；探针和文件检查不能代替完整自动验收。"
+        if automated
+        else "needs_review。必须用新客户素材生成预览后，再执行 approve。"
+    )
     document = f"""<!doctype html>
 <!-- 本文件汇总模板制作产物，供人工视觉验收。 -->
 <meta charset="utf-8"><title>Collage build inspection</title>
 <style>body{{font:16px/1.5 system-ui;max-width:900px;margin:32px auto}}img{{max-width:44%;border:1px solid #aaa;margin:8px}}</style>
 <h1>模板制作检查</h1>
-<p>状态：needs_review。必须用新客户素材生成预览后，再执行 approve。</p>
-<h2>背景保护</h2>
-<img src="remove_mask.png" alt="remove mask"><img src="blend_mask.png" alt="blend mask">
-<img src="background_candidate.png" alt="background candidate"><img src="background.png" alt="protected background">
+<p>状态：{status_text}</p>
+{background_section}
 <h2>Overlay 边缘</h2><ul>{overlay_rows or "<li>无 overlay</li>"}</ul>
 <h2>调用审计</h2><ul>{provider_rows}</ul>
 <p>模板清单：<a href="{html.escape(package_rel)}/template.json">template.json</a></p>

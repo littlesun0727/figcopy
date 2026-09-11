@@ -6,7 +6,7 @@
 
 运行产物不再默认写入源码仓库。可通过 `--data-dir` 或 `FIGCOPY_DATA_DIR` 指定外部数据目录；未指定时使用系统用户数据目录。原有 `work/`、`templates/`、`artifacts/` 已归档到 `D:\datas\figcopy\archive\legacy-20260910-pre-cleanup`。
 
-实现遵循 [COLLAGE_MVP_PLAN.md](COLLAGE_MVP_PLAN.md)。仓库内置了强制经过本机审计代理的 Yibu VLM/图片 provider，以及完全本地运行的 BiRefNet_lite-matting 抠图 provider；二者都不会在仓库保存密钥或客户原图。无凭据时仍可完整运行本地合成、导入人工素材、人工审核和发布链路。
+新增改造遵循 [FIGCOPY_AUTO_REBUILD_IMPROVEMENT_PLAN.md](FIGCOPY_AUTO_REBUILD_IMPROVEMENT_PLAN.md)，原 MVP 保留为历史记录。仓库内置了强制经过本机审计代理的 Yibu VLM/图片 provider，以及完全本地运行的 BiRefNet_lite-matting 抠图 provider；二者都不会在仓库保存密钥或客户原图。无凭据时仍可完整运行本地合成、导入人工素材、人工审核和发布链路。
 
 ## 快速验证
 
@@ -21,9 +21,21 @@ python -m collage validate `
   --allow-unreviewed
 ```
 
-Yibu 接入可直接加载现有 `D:\codes\creative-video-editor\shared.py`；仓库配置脚本使用 `kimi-k3` 和 `gemini-3-pro-image-preview`。配置、审计代理启动、真实冒烟测试与完整命令见 [USAGE_GUIDE.md](USAGE_GUIDE.md#3-配置-yibuapi强制走审计)。
+Yibu 接入可直接加载现有 `D:\codes\creative-video-editor\shared.py`；仓库配置脚本使用 `kimi-k3` 和 `doubao-seedream-5-0-260128`。配置、审计代理启动、真实冒烟测试与完整命令见 [USAGE_GUIDE.md](USAGE_GUIDE.md#3-配置-yibuapi强制走审计)。
 
 `demo` 会程序构造参考图、底图、透明贴纸和两张客户测试图，然后构建 `needs_review` 模板并用新素材生成 `D:\datas\figcopy\projects\m1-demo\renders\result.png`。它不会自动冒充真人批准；查看结果后需显式运行 `approve`。整个演示不访问网络，也不把程序构造素材描述成真实模型效果。
+
+## 新计划 A0 / A1
+
+已加入 `benchmark-baseline`、`window-demo` 和 `probe`。`window-demo` 会生成完全本地的四窗口模板及检查报告；使用新的输出目录：
+
+```powershell
+python -B -m collage window-demo --out artifacts/auto_rebuild_a1
+```
+
+窗口检查与 v2 格式说明见 [自动重建基线与 A1 窗口检查](benchmarks/auto_rebuild/README.md)。自动制作来源独立记录为 `needs_validation`；探针结果不能代替完整的自动发布验收。现有人工工作台继续可用。
+
+JSON 凭据文件可通过 `YIBU_CREDENTIALS_FILE` 或 `examples/configure_yibu.ps1 -CredentialsFile` 指定，沿用本机审计代理。
 
 ## 推荐：本机 Web 工作台
 
@@ -38,6 +50,10 @@ python -m collage studio --data-dir D:\datas\figcopy
 - 在可视化审核页确认内容框和删除蒙版；
 - 按页面列出的命名槽位上传客户图片、填写文字；
 - 直接查看合成 PNG，并经过第二个人工门禁后发布。
+
+页头的“Provider 设置”可以直接输入 Yibu API Key、选择模型并查看三类能力状态；流程因配置缺失而阻塞时，保存后可立即重试当前项目。Key 使用密码框接收，只驻留当前 `studio` 进程内存，不写入 `project.json`、日志或浏览器存储，关闭工作台进程后需要重新输入。也可以继续填写已有 `shared.py` 的本机路径。
+
+默认 VLM 与图片编辑分别使用 `collage.providers.yibu:YibuVisionProvider` 和 `collage.providers.yibu:YibuImageProvider`，二者仍强制经过本机 Yibu 审计代理。抠图使用完全本地的 `collage.providers.birefnet:BiRefNetLiteMattingProvider`；设置页会显示可选依赖是否齐全，模型未缓存时首次抠图可能需要下载固定版本权重。
 
 VLM、图片生成和抠图在后台任务中运行，页面会自动刷新阶段。关闭浏览器标签不会丢进度；终端进程被关闭后，重新运行同一条 `studio` 命令即可读取 `project.json` 并从已保存阶段继续。工作台不会跳过 Draft 审核和最终结果批准两个真人门禁。
 
@@ -88,7 +104,7 @@ python -m collage review-ui `
   --background-candidate work/demo/imported_background.png
 ```
 
-页面会根据 Draft 中旧照片、旧文字和独立装饰的 `source_rect` 自动涂好白=删除的 `remove_mask`，通常只需检查内容框后直接保存；明显误差仍可补画、擦除或一键恢复自动涂层。`photo_feather` 会按框大小自动设置柔和边缘；文字会复用 Draft 已识别出的原文并自动批准本地通用字体；缺少透明素材的固定装饰按近似制作；Draft 待确认问题本轮按当前设置处理，不再要求逐题输入长答案。位置、文字样式、背景参数和层序收在折叠的“高级”区域。图片模式仍为 `unknown`，或确实没有任何可清除区域时，保存才需要额外确认。页面不会自动打开外部浏览器，也不会监听公网地址。
+页面会根据 Draft 的源区域自动生成白=删除的蒙版。客户先逐项回答识别疑问，也可在默认空白的“其他错误或补充说明”中指出遗漏；提交后 VLM 返回完整纠正稿。所有疑问解决后，手动确认当前版本才会开始制作。固定文字需逐字确认；简单图形由代码绘制，复杂装饰由图片模型制作并经过完整性检查。最终合成仍需人工验收。
 
 纯 CLI 确认方式：
 
@@ -215,3 +231,13 @@ provider 对象必须能以 `module:object` 加载；`object` 可以是无参类
 - 模板作者显式运行 `approve` 并记录 reviewer 与证据哈希。
 
 自动测试证明的是程序行为，不证明生成背景或装饰的视觉内容正确。真实 M2/M3/M4/M5 验收仍需要授权 provider、参考图、客户替换素材和人工视觉判断。
+
+## 问答复核与独立图层
+
+标准流程：识别 → 问答纠正 → 手动确认 → 独立素材生成与检查 → 放入客户素材 → 本地合成 → 最终验收。
+
+制作完成后，在素材页或结果页点击“调整独立装饰图层”，可分别拖动、缩放、旋转和排序。保存会创建一个布局修订项目，复用原素材；移动装饰不调用生成模型，原项目和验收记录保留。
+
+每件生成素材最多尝试两次。程序先在原始输出上检测空图、透明背景和边界问题，再检查最终尺寸下的组成与文字；失败和不确定的请求均有独立记录。此门禁用于拒收问题素材，不能保证模型永不漏检。
+
+[本轮实现、测试与真实试验记录](artifacts/pipeline_interactive_verified/README.md)。

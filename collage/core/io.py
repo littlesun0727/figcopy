@@ -51,7 +51,8 @@ def read_json(path: Path) -> Any:
 
 def _atomic_target(path: Path) -> tuple[int, Path]:
     path.parent.mkdir(parents=True, exist_ok=True)
-    return tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    # 保持同目录的原子替换，短前缀避免 SHA-256 文件名叠加随机后缀越过 Windows 路径限制。
+    return tempfile.mkstemp(prefix=".collage-", suffix=".tmp", dir=path.parent)
 
 
 def atomic_write_bytes(path: Path, data: bytes) -> None:

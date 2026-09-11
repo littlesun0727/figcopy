@@ -1,0 +1,78 @@
+{
+  "version": "figcopy-project/1",
+  "id": "background-smoke",
+  "name": "background-smoke",
+  "status": "needs_review",
+  "created_at": "2026-09-11T11:50:40.830137+00:00",
+  "updated_at": "2026-09-11T11:50:43.663234+00:00",
+  "workflow": {
+    "version": "figcopy-workflow/1",
+    "stage": "awaiting_bindings",
+    "resume_stage": null,
+    "started_at": "2026-09-11T11:50:40.827634+00:00",
+    "stage_updated_at": "2026-09-11T11:50:43.654466+00:00",
+    "options": {
+      "reviewer": "fixture-tester",
+      "vision_provider": null,
+      "image_provider": "collage.providers.yibu:YibuImageProvider",
+      "cutout_provider": "collage.providers.birefnet:BiRefNetLiteMattingProvider",
+      "fixture_provider": false,
+      "allow_cloud_upload": false,
+      "review_port": 8765
+    },
+    "artifacts": {
+      "reference": "inputs/reference.png",
+      "manual_draft": "inputs/manual_draft.json",
+      "product_policy": "inputs/product_policy.json",
+      "background_candidate": "inputs/background_candidate.png",
+      "initial_mask": "inputs/initial_remove_mask.png",
+      "allowed_mask": "inputs/allowed_mask.png",
+      "draft": "analysis/draft.json",
+      "draft_preview": "analysis/draft_preview.png",
+      "reviewed": "review/reviewed.json",
+      "remove_mask": "review/remove_mask.png",
+      "template_manifest": "template/template.json",
+      "inspection_report": "workspace/inspection.html",
+      "upload_guide": "reports/upload_guide.html",
+      "bindings_example": "renders/bindings.example.json",
+      "bindings": "renders/bindings.json",
+      "render": "renders/result.png",
+      "render_audit": "renders/result.png.render.json"
+    },
+    "wait": {
+      "code": "BINDING_FILES_REQUIRED",
+      "message": "请替换 Bindings 占位路径并提供对应客户素材",
+      "details": {
+        "missing": [
+          {
+            "slot": "cover_photo",
+            "field": "path"
+          }
+        ]
+      }
+    },
+    "last_error": null,
+    "history": [
+      {
+        "stage": "analyzing",
+        "at": "2026-09-11T11:50:40.827634+00:00"
+      },
+      {
+        "stage": "awaiting_review",
+        "at": "2026-09-11T11:50:40.869964+00:00"
+      },
+      {
+        "stage": "reviewed",
+        "at": "2026-09-11T11:50:43.543768+00:00"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T11:50:43.557326+00:00"
+      },
+      {
+        "stage": "awaiting_bindings",
+        "at": "2026-09-11T11:50:43.628427+00:00"
+      }
+    ]
+  }
+}

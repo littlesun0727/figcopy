@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-11",
+  "phase": "A0 partial / A1 offline verified",
+  "initial_tests": {
+    "passed": 115,
+    "seconds": 13.92
+  },
+  "final_tests": {
+    "passed": 136,
+    "failed": 0,
+    "seconds": 20.36,
+    "command": "python -B -X utf8 -m pytest -q -p no:cacheprovider --tb=short --show-capture=no --basetemp $figcopyRegressionTemp"
+  },
+  "static_checks": {
+    "ruff_check": "passed",
+    "ruff_format": "22 files already formatted",
+    "git_diff_check": "passed"
+  },
+  "capabilities": {
+    "credential_loaded": true,
+    "credential_source": "启动环境中的 JSON 凭据文件",
+    "vision_model": "kimi-k3",
+    "reasoning_effort": "high",
+    "image_model": "doubao-seedream-5-0-260128",
+    "audit_state": "online",
+    "cutout_weights_cached": true,
+    "real_model_calls": 0
+  },
+  "real_model_calls": 0,
+  "fixture_used": true,
+  "source_images_copied_into_repository": false,
+  "remaining": [
+    "precise annotations",
+    "calibrated thresholds",
+    "A2 implementation and real model evaluation",
+    "trial fee cap",
+    "three replacement material groups"
+  ]
+}

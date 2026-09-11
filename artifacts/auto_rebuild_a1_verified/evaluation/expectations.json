@@ -1,0 +1,15 @@
+{
+  "version": "collage-probe-expectations/1",
+  "purpose": "offline_evaluation",
+  "canvas_size": [
+    480,
+    360
+  ],
+  "alpha_tolerance": 1,
+  "slots": {
+    "main_photo": "masks/main_photo.png",
+    "photo_left": "masks/photo_left.png",
+    "photo_right": "masks/photo_right.png",
+    "photo_bottom": "masks/photo_bottom.png"
+  }
+}

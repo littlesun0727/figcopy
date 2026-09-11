@@ -1,0 +1,50 @@
+{
+  "version": "collage-review-feedback/2",
+  "status": "complete",
+  "base_revision": "9e096a377aedbd57fc2d3c6f3796d9dadac047ec33d732a7ab9ac1b19d045edb",
+  "submitted_at": "2026-09-11T11:50:40.913510+00:00",
+  "question_resolutions": [
+    {
+      "question": "背景是否替换？",
+      "answer": "改为客户全屏照片"
+    }
+  ],
+  "other_feedback": "",
+  "error_code": "SPEC_VALIDATION_FAILED",
+  "error": {
+    "code": "SPEC_VALIDATION_FAILED",
+    "message": "Draft 校验失败",
+    "details": {
+      "issues": [
+        {
+          "path": "$.layer_order",
+          "message": "第一层必须是 background",
+          "code": "INVALID_LAYER_ORDER"
+        },
+        {
+          "path": "$.layer_order",
+          "message": "background 必须且只能出现一次",
+          "code": "INVALID_LAYER_ORDER"
+        }
+      ]
+    }
+  },
+  "recovery": {
+    "method": "saved_response",
+    "recovered_at": "2026-09-11T11:50:41.793042+00:00",
+    "previous_status": "failed",
+    "response_sha256": "bfd30954c527f919330fd9bba359949b33b7b564f6aa8680985089e2938f8c8b",
+    "background_slot_id": "cover_photo",
+    "network_calls": 0
+  },
+  "revision": "11dd31ddcdfbeb6a47d98e575ee0e8a49b73a6389f926362b2d54bc48e61d3ac",
+  "audit": {
+    "name": "fixture-photo-background",
+    "requested_model": "fixture",
+    "actual_model": "fixture",
+    "request_id": "fixture-request",
+    "fixture": true,
+    "cache_hit": false,
+    "elapsed_ms": 1
+  }
+}

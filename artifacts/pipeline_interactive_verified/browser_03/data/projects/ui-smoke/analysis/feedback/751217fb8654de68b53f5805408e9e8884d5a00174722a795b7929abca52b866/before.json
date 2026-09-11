@@ -1,0 +1,108 @@
+{
+  "version": "collage-draft/1",
+  "status": "draft",
+  "source": {
+    "path": "reference.png",
+    "sha256": "40ae70abc46da0f9264c25d2a93b0fd1b64a2297a8302735169de84cf451d255",
+    "width": 600,
+    "height": 760
+  },
+  "canvas": {
+    "width": 600,
+    "height": 760,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "prompt_version": "collage-draft/3",
+  "provider": {
+    "name": "manual-import",
+    "requested_model": null,
+    "actual_model": null,
+    "request_id": null,
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 0
+  },
+  "created_at": "2026-09-11T11:22:34+00:00",
+  "slots": [],
+  "overlays": [
+    {
+      "id": "circle",
+      "label": "独立圆形",
+      "source_rect": [
+        60,
+        120,
+        150,
+        150
+      ],
+      "target_rect": [
+        60,
+        120,
+        150,
+        150
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "synthetic fixture",
+      "shape": {
+        "kind": "ellipse",
+        "fill": "#EE8F61",
+        "outline": "#EE8F61",
+        "width": 5,
+        "radius": 0,
+        "dash": 14,
+        "gap": 8
+      }
+    },
+    {
+      "id": "frame",
+      "label": "独立边框",
+      "source_rect": [
+        280,
+        300,
+        200,
+        180
+      ],
+      "target_rect": [
+        280,
+        300,
+        200,
+        180
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "synthetic fixture",
+      "shape": {
+        "kind": "dashed_rectangle",
+        "fill": null,
+        "outline": "#6CC9C4",
+        "width": 5,
+        "radius": 0,
+        "dash": 14,
+        "gap": 8
+      }
+    }
+  ],
+  "background": {
+    "background_brief": "plain",
+    "review_notes": "fixture"
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "overlay",
+      "id": "circle"
+    },
+    {
+      "type": "overlay",
+      "id": "frame"
+    }
+  ],
+  "questions": [
+    "这两件装饰需要分开移动吗？"
+  ]
+}

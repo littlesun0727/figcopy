@@ -1,0 +1,235 @@
+{
+  "version": "auto-rebuild-baseline/1",
+  "created_at": "2026-09-11T08:25:35.715305+00:00",
+  "catalog_sha256": "e2a72c95ec77f26c2c2d81bd808ececd686df17fb3b30bfbaf61f6a2a8f7e1ee",
+  "repository": {
+    "head": "d071a1e22e50853cbe39711bc016788f6f1cf500",
+    "dirty": true,
+    "status_sha256": "f642c58afb6703cf5c79a76cbc7f2a2a15d04f833ed3cfa163cd70501e9b0ab5",
+    "working_tree_sha256": "04bd0ae48f1de4e8bf09e9efa55305ff1cd6cd96d2295d0dcc4658fce3641eb2",
+    "untracked_file_count": 18
+  },
+  "capabilities": {
+    "python": "3.14.6",
+    "packages": {
+      "Pillow": "12.3.0",
+      "pytest": "9.0.3",
+      "torch": "2.14.0",
+      "torchvision": "0.29.0",
+      "transformers": "4.48.0",
+      "timm": "1.0.29",
+      "kornia": "0.8.3",
+      "einops": "0.8.2",
+      "numpy": "2.4.6",
+      "safetensors": "0.8.0"
+    },
+    "default_models": {
+      "vision": "kimi-k3",
+      "reasoning_effort": "high",
+      "image": "doubao-seedream-5-0-260128"
+    },
+    "credential_config_present_in_process": true,
+    "local_weights_path_configured": false,
+    "model_loading_tested": false,
+    "real_provider_tested": false,
+    "network_calls": 0
+  },
+  "samples": [
+    {
+      "id": "S01",
+      "filename": "20260908-192922.jpg",
+      "source_sha256": "21ca6c64e4294a37cb555796a86ebf48289cf047001f3b863ef002747ecb9054",
+      "source_bytes": 845271,
+      "source_size": [
+        1290,
+        2306
+      ],
+      "exif_orientation": 1,
+      "normalized_size": [
+        1290,
+        2306
+      ],
+      "normalized_mode": "RGBA",
+      "normalized_pixels_sha256": "4017c900bf67806b1a562e6066ccd8f3d7f6e512eb715b3fca6be24441c8973b",
+      "transform": "EXIF transpose; no resizing; RGBA",
+      "annotation_status": "coarse_inventory_complete"
+    },
+    {
+      "id": "S02",
+      "filename": "20260908-192946.jpg",
+      "source_sha256": "e7c2f75ad7481a4306d4ca515f3d3dbb71573431abb9017fa1d3125c4cfdc16e",
+      "source_bytes": 445767,
+      "source_size": [
+        1320,
+        1767
+      ],
+      "exif_orientation": 1,
+      "normalized_size": [
+        1320,
+        1767
+      ],
+      "normalized_mode": "RGBA",
+      "normalized_pixels_sha256": "38ca50d494ac9061b9d76e9d0a6ec40daf0efbbd3a9552dd3c79b7d260aeb9ce",
+      "transform": "EXIF transpose; no resizing; RGBA",
+      "annotation_status": "coarse_inventory_complete"
+    },
+    {
+      "id": "S03",
+      "filename": "拼贴1.jpg",
+      "source_sha256": "d7c9e8165b06d309be33194ed86377e9d518e2b575a254c5b91ef4b8844b5e4f",
+      "source_bytes": 192488,
+      "source_size": [
+        1080,
+        1438
+      ],
+      "exif_orientation": 1,
+      "normalized_size": [
+        1080,
+        1438
+      ],
+      "normalized_mode": "RGBA",
+      "normalized_pixels_sha256": "2dd51fa4c7ffa63d3ec7ddb34a570f722aedde9e4afb9b6399c120d8f29cff9f",
+      "transform": "EXIF transpose; no resizing; RGBA",
+      "annotation_status": "coarse_inventory_complete"
+    },
+    {
+      "id": "S04",
+      "filename": "拼贴2.jpg",
+      "source_sha256": "ca6f054b861abe1fd57f04bd3f23014d9f05e409b1edc4b71174f8df71870d2c",
+      "source_bytes": 208645,
+      "source_size": [
+        1080,
+        1435
+      ],
+      "exif_orientation": 1,
+      "normalized_size": [
+        1080,
+        1435
+      ],
+      "normalized_mode": "RGBA",
+      "normalized_pixels_sha256": "365685de9f0adb0de74aa08e3a908b25a790af5e46fae3bcbb35fb942d81ec49",
+      "transform": "EXIF transpose; no resizing; RGBA",
+      "annotation_status": "coarse_inventory_complete"
+    },
+    {
+      "id": "S05",
+      "filename": "拼贴3.jpg",
+      "source_sha256": "072917824d05fbbb5132e42e22c84c5817bcf2f6ea5b1b0f3dcf17d81f7ca586",
+      "source_bytes": 246392,
+      "source_size": [
+        1080,
+        1437
+      ],
+      "exif_orientation": 1,
+      "normalized_size": [
+        1080,
+        1437
+      ],
+      "normalized_mode": "RGBA",
+      "normalized_pixels_sha256": "f78d6eb2d01ee13183b28a8f34a2f51c1ca8278ca808c0515b4041c66460c81c",
+      "transform": "EXIF transpose; no resizing; RGBA",
+      "annotation_status": "coarse_inventory_complete"
+    },
+    {
+      "id": "S06",
+      "filename": "拼贴4.jpg",
+      "source_sha256": "e69f1ba7d8bf40820fd8aef92fdba06cdbf715006462571527c8d919af097b7f",
+      "source_bytes": 204044,
+      "source_size": [
+        1080,
+        1442
+      ],
+      "exif_orientation": 1,
+      "normalized_size": [
+        1080,
+        1442
+      ],
+      "normalized_mode": "RGBA",
+      "normalized_pixels_sha256": "03d551e5892fe3744399f226942403c6ea82a059d0b6bcb7efd3d06be3de63c7",
+      "transform": "EXIF transpose; no resizing; RGBA",
+      "annotation_status": "coarse_inventory_complete"
+    },
+    {
+      "id": "S07",
+      "filename": "拼贴5.jpg",
+      "source_sha256": "4f1eea5f27b4b9ca1509f938eeaba99e240d3c07adcc094b0460daebec2ed53e",
+      "source_bytes": 226291,
+      "source_size": [
+        1080,
+        1440
+      ],
+      "exif_orientation": 1,
+      "normalized_size": [
+        1080,
+        1440
+      ],
+      "normalized_mode": "RGBA",
+      "normalized_pixels_sha256": "249bd231bccb966b643d758eb20c322b7c4f149094a22d9fc2b2887c70247ccb",
+      "transform": "EXIF transpose; no resizing; RGBA",
+      "annotation_status": "coarse_inventory_complete"
+    },
+    {
+      "id": "S08",
+      "filename": "拼贴6.jpg",
+      "source_sha256": "c6f4f416f7e1c2769dafe481abba96a30818e029b6a776699cf45daffbbd0603",
+      "source_bytes": 179037,
+      "source_size": [
+        1080,
+        1477
+      ],
+      "exif_orientation": 1,
+      "normalized_size": [
+        1080,
+        1477
+      ],
+      "normalized_mode": "RGBA",
+      "normalized_pixels_sha256": "f2f04c32949405a1626ea6e925ece6123b9d889c146d36d9f06c4252cb298944",
+      "transform": "EXIF transpose; no resizing; RGBA",
+      "annotation_status": "coarse_inventory_complete"
+    },
+    {
+      "id": "S09",
+      "filename": "拼贴7.jpg",
+      "source_sha256": "f6b59f7bd816c5176a4bed45a42f2163da4cc24bfa464bf09a6e2883104d5308",
+      "source_bytes": 328868,
+      "source_size": [
+        1080,
+        1912
+      ],
+      "exif_orientation": 1,
+      "normalized_size": [
+        1080,
+        1912
+      ],
+      "normalized_mode": "RGBA",
+      "normalized_pixels_sha256": "c910fef379b787edd775dfffed7e5e4a039870108b074f1101a49f69cada42e8",
+      "transform": "EXIF transpose; no resizing; RGBA",
+      "annotation_status": "coarse_inventory_complete"
+    },
+    {
+      "id": "S10",
+      "filename": "海边人像拼图.jpg",
+      "source_sha256": "36acb360b79646651809b83eb1038fca61cc810a2ae40afec7c3299ebfe41e5f",
+      "source_bytes": 163596,
+      "source_size": [
+        1080,
+        1435
+      ],
+      "exif_orientation": 1,
+      "normalized_size": [
+        1080,
+        1435
+      ],
+      "normalized_mode": "RGBA",
+      "normalized_pixels_sha256": "ce120d187f9eee002da8ce1c8f3eef48dc689fedb21ae271598749a4d1db118e",
+      "transform": "EXIF transpose; no resizing; RGBA",
+      "annotation_status": "coarse_inventory_complete"
+    }
+  ],
+  "real_model_results": [],
+  "automatic_rebuild_coverage": null,
+  "blockers": [
+    "REAL_TRIAL_AUTHORIZATION_AND_BUDGET_PENDING",
+    "EVALUATION_ANNOTATIONS_PENDING"
+  ]
+}

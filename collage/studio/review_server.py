@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+import secrets
+from urllib.parse import urlsplit
 import threading
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -12,6 +14,8 @@ from pathlib import Path
 from typing import Any
 
 from ..core.errors import CollageError
+from ..providers import VisionProvider, load_provider
+from ..template.review.feedback import revise_draft, validate_feedback
 from .review_session import ReviewSession
 
 LOGGER = logging.getLogger(__name__)
@@ -53,6 +57,8 @@ def serve_review_ui(
     overlay_overrides_path: Path | None = None,
     background_expand_px: int = 0,
     background_feather_px: int = 0,
+    background_composition_mode: str = "protected",
+    vision_provider_spec: str | None = None,
     host: str = "127.0.0.1",
     port: int = 8765,
 ) -> None:
@@ -60,7 +66,7 @@ def serve_review_ui(
 
     if host not in {"127.0.0.1", "localhost", "::1"}:
         raise CollageError("UNSAFE_REVIEW_HOST", "确认界面只允许监听本机回环地址")
-    session = ReviewSession(
+    ReviewSession(
         draft_path,
         output_path,
         reviewer=reviewer,
@@ -71,7 +77,28 @@ def serve_review_ui(
         overlay_overrides_path=overlay_overrides_path,
         background_expand_px=background_expand_px,
         background_feather_px=background_feather_px,
+        background_composition_mode=background_composition_mode,
     )
+
+    from .workbench.jobs import JobRegistry
+
+    jobs = JobRegistry()
+    csrf_token = secrets.token_urlsafe(32)
+
+    def current_session() -> ReviewSession:
+        return ReviewSession(
+            draft_path,
+            output_path,
+            reviewer=reviewer,
+            initial_mask_path=initial_mask_path,
+            allowed_mask_path=allowed_mask_path,
+            background_candidate_path=background_candidate_path,
+            slot_overrides_path=slot_overrides_path,
+            overlay_overrides_path=overlay_overrides_path,
+            background_expand_px=background_expand_px,
+            background_feather_px=background_feather_px,
+            background_composition_mode=background_composition_mode,
+        )
 
     class Handler(BaseHTTPRequestHandler):
         server_version = "CollageReview/1"
@@ -84,15 +111,34 @@ def serve_review_ui(
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Frame-Options", "DENY")
+            self.send_header("X-Content-Type-Options", "nosniff")
             self.end_headers()
             self.wfile.write(body)
 
         def do_GET(self) -> None:
-            if self.path == "/":
+            hostname = urlsplit("//" + self.headers.get("Host", "")).hostname
+            if hostname not in {"127.0.0.1", "localhost", "::1"}:
+                self._send(
+                    HTTPStatus.FORBIDDEN,
+                    "application/json",
+                    b'{"code":"UNSAFE_REQUEST_HOST"}',
+                )
+                return
+            session = current_session()
+            if self.path == "/correction-status":
+                self._send(
+                    HTTPStatus.OK,
+                    "application/json",
+                    json.dumps(
+                        {"task": jobs.latest("review")}, ensure_ascii=False
+                    ).encode("utf-8"),
+                )
+            elif self.path == "/":
                 self._send(
                     HTTPStatus.OK,
                     "text/html; charset=utf-8",
-                    render_review_html().encode("utf-8"),
+                    render_review_html(csrf_token=csrf_token).encode("utf-8"),
                 )
             elif self.path == "/static/review.css":
                 self._send(
@@ -105,6 +151,14 @@ def serve_review_ui(
                     HTTPStatus.OK,
                     "text/javascript; charset=utf-8",
                     REVIEW_JS.encode("utf-8"),
+                )
+            elif self.path == "/session":
+                self._send(
+                    HTTPStatus.OK,
+                    "application/json",
+                    json.dumps(session.browser_state(), ensure_ascii=False).encode(
+                        "utf-8"
+                    ),
                 )
             elif self.path == "/draft":
                 self._send(
@@ -132,21 +186,58 @@ def serve_review_ui(
                 )
 
         def do_POST(self) -> None:
-            if self.path != "/save":
+            if self.path not in {"/save", "/revise"}:
                 self._send(
                     HTTPStatus.NOT_FOUND, "text/plain; charset=utf-8", b"not found"
                 )
                 return
             try:
+                hostname = urlsplit("//" + self.headers.get("Host", "")).hostname
+                origin = self.headers.get("Origin")
+                if hostname not in {"127.0.0.1", "localhost", "::1"}:
+                    raise CollageError(
+                        "UNSAFE_REQUEST_HOST", "请求 Host 不是本机回环地址"
+                    )
+                if self.headers.get("X-Figcopy-Token") != csrf_token:
+                    raise CollageError("INVALID_CSRF_TOKEN", "审核页请求令牌无效")
+                if origin and urlsplit(origin).hostname not in {
+                    "127.0.0.1",
+                    "localhost",
+                    "::1",
+                }:
+                    raise CollageError("UNSAFE_ORIGIN", "拒绝非本机页面请求")
                 length = int(self.headers.get("Content-Length", "0"))
                 if length <= 0 or length > MAX_REQUEST_BYTES:
                     raise CollageError("REQUEST_TOO_LARGE", "保存请求为空或超过 64 MiB")
                 payload = json.loads(self.rfile.read(length))
-                result = session.save(payload)
+                if self.path == "/revise":
+                    validate_feedback(current_session().draft, payload)
+                    from ..workflows.model import DEFAULT_VISION_PROVIDER
+
+                    result = {
+                        "task": jobs.submit(
+                            "review",
+                            "revise_review",
+                            lambda: revise_draft(
+                                draft_path,
+                                payload,
+                                provider=load_provider(
+                                    vision_provider_spec or DEFAULT_VISION_PROVIDER,
+                                    VisionProvider,
+                                ),
+                                reviewed_path=output_path,
+                            ),
+                        )
+                    }
+                else:
+                    if jobs.active_project_ids():
+                        raise CollageError("PROJECT_BUSY", "请等待纠正完成")
+                    result = current_session().save(payload)
                 body = json.dumps(result, ensure_ascii=False).encode("utf-8")
                 self._send(HTTPStatus.OK, "application/json", body)
-                threading.Thread(target=self.server.shutdown, daemon=True).start()
-            except (CollageError, KeyError, json.JSONDecodeError) as exc:
+                if self.path == "/save":
+                    threading.Thread(target=self.server.shutdown, daemon=True).start()
+            except (CollageError, KeyError, ValueError) as exc:
                 error = (
                     exc
                     if isinstance(exc, CollageError)

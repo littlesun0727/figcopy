@@ -26,7 +26,9 @@ from .common import (
     _unique_ids,
 )
 from .draft import _draft_layers
+from .background import validate_slot_background
 from .template import _validate_shape
+from .provenance import validate_provenance
 
 
 def _reviewed_slot(
@@ -65,9 +67,7 @@ def _reviewed_slot(
     required = common_required | (
         image_fields
         if slot_type == "image"
-        else text_fields
-        if slot_type == "text"
-        else set()
+        else text_fields if slot_type == "text" else set()
     )
     _keys(slot, required=required, optional=set(), path=path, issues=issues)
     _identifier(slot.get("id"), f"{path}.id", issues)
@@ -145,13 +145,19 @@ def _reviewed_slot(
             _issue(issues, path, "缺少字体时必须由模板作者明确批准 fallback")
 
 
-def validate_reviewed_spec(value: Any) -> dict[str, Any]:
-    """校验人工确认后的制作规格。"""
+def validate_build_spec(value: Any) -> dict[str, Any]:
+    """复用制作校验，区分旧人工确认稿与 v2 执行规格。"""
 
     issues: list[ValidationIssue] = []
     spec = _object(value, "$", issues)
     if spec is None:
         raise SpecValidationError(issues)
+    slot_background = spec.get("version") == "collage-build/3"
+    planned = spec.get("version") in {"collage-build/2", "collage-build/3"}
+    provenance = spec.get("provenance")
+    human = not planned or (
+        isinstance(provenance, dict) and provenance.get("kind") == "human"
+    )
     _keys(
         spec,
         required={
@@ -163,16 +169,24 @@ def validate_reviewed_spec(value: Any) -> dict[str, Any]:
             "overlays",
             "background",
             "layer_order",
-            "review",
+            *({"review"} if human else set()),
+            *({"provenance"} if planned else set()),
         },
         optional={"audit"},
         path="$",
         issues=issues,
     )
-    if spec.get("version") != "collage-reviewed/1":
-        _issue(issues, "$.version", "必须是 collage-reviewed/1")
-    if spec.get("status") != "reviewed":
-        _issue(issues, "$.status", "确认稿状态必须是 reviewed")
+    if spec.get("version") not in {
+        "collage-reviewed/1",
+        "collage-build/2",
+        "collage-build/3",
+    }:
+        _issue(issues, "$.version", "不支持的制作规格版本")
+    expected_status = "planned" if planned else "reviewed"
+    if spec.get("status") != expected_status:
+        _issue(issues, "$.status", f"制作规格状态必须是 {expected_status}")
+    if planned:
+        validate_provenance(provenance, "$.provenance", issues)
     canvas = _canvas(spec.get("canvas"), "$.canvas", issues)
     reference = _object(spec.get("reference"), "$.reference", issues)
     if reference is not None:
@@ -215,7 +229,7 @@ def validate_reviewed_spec(value: Any) -> dict[str, Any]:
                     "chroma_tolerance",
                     "shape",
                 },
-                optional=set(),
+                optional={"text_content", "text_confirmed"},
                 path=path,
                 issues=issues,
             )
@@ -229,7 +243,19 @@ def validate_reviewed_spec(value: Any) -> dict[str, Any]:
                 )
             _rect(overlay.get("target_rect"), f"{path}.target_rect", issues)
             action = overlay.get("action")
-            _enum(action, OVERLAY_ACTIONS, f"{path}.action", issues)
+            _enum(
+                action,
+                OVERLAY_ACTIONS | ({"preserve"} if planned else set()),
+                f"{path}.action",
+                issues,
+            )
+            if action == "preserve" and overlay.get("prepared_asset") is None:
+                _issue(
+                    issues,
+                    path,
+                    "保留动作必须有已分离的 prepared_asset",
+                    "PRESERVED_ASSET_REQUIRED",
+                )
             _string(
                 overlay.get("generation_brief"),
                 f"{path}.generation_brief",
@@ -288,9 +314,32 @@ def validate_reviewed_spec(value: Any) -> dict[str, Any]:
                 _issue(
                     issues, f"{path}.shape", "reference_generate 的 shape 必须为 null"
                 )
+            if "text_content" in overlay:
+                _string(
+                    overlay["text_content"],
+                    f"{path}.text_content",
+                    issues,
+                    nullable=True,
+                )
+            if "text_confirmed" in overlay:
+                _boolean(overlay["text_confirmed"], f"{path}.text_confirmed", issues)
+            if (
+                overlay.get("text_content")
+                and overlay.get("text_confirmed") is not True
+            ):
+                _issue(
+                    issues,
+                    path,
+                    "生成前必须人工确认完整文字",
+                    "TEXT_CONFIRMATION_REQUIRED",
+                )
             if (
                 overlay.get("requires_exact_content") is True
                 and overlay.get("prepared_asset") is None
+                and not (
+                    overlay.get("text_content")
+                    and overlay.get("text_confirmed") is True
+                )
             ):
                 _issue(
                     issues,
@@ -303,12 +352,22 @@ def validate_reviewed_spec(value: Any) -> dict[str, Any]:
     overlay_ids = _unique_ids(overlays, "$.overlays", issues)
     for collision in sorted(slot_ids & overlay_ids):
         _issue(issues, "$", f"slot 与 overlay 的 ID 冲突：{collision}", "DUPLICATE_ID")
+    background_slot = (
+        validate_slot_background(spec.get("background"), slots, canvas, issues)
+        if slot_background
+        else None
+    )
     _draft_layers(
-        spec.get("layer_order"), "$.layer_order", issues, slot_ids, overlay_ids
+        spec.get("layer_order"),
+        "$.layer_order",
+        issues,
+        slot_ids,
+        overlay_ids,
+        background_slot,
     )
 
     background = _object(spec.get("background"), "$.background", issues)
-    if background is not None:
+    if background is not None and not slot_background:
         _keys(
             background,
             required={
@@ -320,9 +379,15 @@ def validate_reviewed_spec(value: Any) -> dict[str, Any]:
                 "expand_px",
                 "feather_px",
             },
-            optional=set(),
+            optional={"composition_mode"},
             path="$.background",
             issues=issues,
+        )
+        _enum(
+            background.get("composition_mode", "protected"),
+            {"protected", "full_candidate"},
+            "$.background.composition_mode",
+            issues,
         )
         _string(
             background.get("background_brief"),
@@ -355,7 +420,7 @@ def validate_reviewed_spec(value: Any) -> dict[str, Any]:
             maximum=4096,
         )
 
-    review = _object(spec.get("review"), "$.review", issues)
+    review = _object(spec.get("review"), "$.review", issues) if human else None
     if review is not None:
         _keys(
             review,
@@ -375,3 +440,16 @@ def validate_reviewed_spec(value: Any) -> dict[str, Any]:
     if issues:
         raise SpecValidationError(issues, "ReviewedSpec 校验失败")
     return dict(spec)
+
+
+def validate_reviewed_spec(value: Any) -> dict[str, Any]:
+    """旧人工确认入口保持原有语义，不接受自动执行规格。"""
+
+    spec = validate_build_spec(value)
+    if spec["version"] != "collage-reviewed/1" and not (
+        spec["version"] == "collage-build/3" and spec["provenance"]["kind"] == "human"
+    ):
+        raise SpecValidationError(
+            [ValidationIssue("$.version", "人工确认入口只接受人工确认的制作规格")]
+        )
+    return spec

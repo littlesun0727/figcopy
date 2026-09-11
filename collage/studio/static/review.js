@@ -19,6 +19,7 @@ let mode = 'box';
 let selected = null;
 let drag = null;
 let initialMaskData = null;
+const photoBackgroundId = () => draft?.background?.mode === 'slot' ? draft.background.slot_id : null;
 
 function setMode(next) {
   mode = next;
@@ -31,6 +32,7 @@ $('#boxMode').onclick = () => setMode('box');
 $('#drawMode').onclick = () => setMode('draw');
 $('#eraseMode').onclick = () => setMode('erase');
 $('#resetMask').onclick = () => {
+  $('#finalConfirmed').checked = false;
   if (!initialMaskData) {
     return;
   }
@@ -97,6 +99,7 @@ function render() {
 function updateRect(kind, id, index, rawValue) {
   const list = kind === 'slot' ? draft.slots : draft.overlays;
   const item = list.find(candidate => candidate.id === id);
+  if (id === photoBackgroundId()) return;
   const oldSuggestion = kind === 'slot' && item.type === 'image'
     ? reviewOptions.edge_fade_suggestions[id]
     : null;
@@ -165,9 +168,18 @@ function textDecisionControls(item) {
 }
 
 function overlayDecisionControls(item) {
-  return item.action === 'reference_generate'
-    ? '<p class="auto">装饰会按参考图近似制作，无需上传透明素材。</p>'
-    : '<p class="auto">装饰会由程序自动绘制。</p>';
+  const settings = reviewOptions.overlays[item.id];
+  return (item.action === 'basic_shape'
+    ? '<p class="auto">简单图形由程序绘制，保持独立图层。</p>'
+    : '<p class="auto">装饰将根据参考图生成完整的独立素材，并检查边缘与内容。</p>')
+    + `<label class="stack">素材中的完整文字（无文字则留空）
+      <input type="text" maxlength="500" value="${escapeHtml(settings.text_content || '')}"
+        data-option-kind="overlay" data-item-id="${escapeHtml(item.id)}"
+        data-field="text_content" data-nullable="true">
+      </label>
+      <label><input type="checkbox" ${settings.text_confirmed ? 'checked' : ''}
+        data-option-kind="overlay" data-item-id="${escapeHtml(item.id)}"
+        data-field="text_confirmed">我已逐字核对上述文字</label>`;
 }
 
 function decisionControls(kind, item) {
@@ -192,7 +204,7 @@ function renderItems() {
   function itemCard(kind, item) {
     const rect = item.target_rect;
     const modeSelect = kind === 'slot' && item.type === 'image'
-      ? `<select data-mode="${escapeHtml(item.id)}">
+      ? `<select data-mode="${escapeHtml(item.id)}" ${item.id === photoBackgroundId() ? 'disabled' : ''}>
           ${['photo', 'photo_feather', 'cutout', 'unknown'].map(value =>
             `<option value="${value}" ${value === item.mode ? 'selected' : ''}>${modeLabels[value]}</option>`
           ).join('')}
@@ -200,7 +212,7 @@ function renderItems() {
       : '';
     const rectInputs = rect.map((value, index) =>
       `<input type="number" value="${value}" data-rect-kind="${kind}"
-        data-item-id="${escapeHtml(item.id)}" data-rect-index="${index}">`
+        data-item-id="${escapeHtml(item.id)}" data-rect-index="${index}" ${item.id === photoBackgroundId() ? 'disabled' : ''}>`
     );
     return `
       <div class="card ${item.id === selected ? 'selected' : ''}"
@@ -222,7 +234,7 @@ function renderItems() {
   const overlayCards = draft.overlays.map(item => itemCard('overlay', item)).join('');
   const overlays = draft.overlays.length
     ? `<details class="advanced">
-        <summary>固定装饰 ${draft.overlays.length} 项（已自动处理）</summary>
+        <summary>固定装饰 ${draft.overlays.length} 项（分别制作）</summary>
         ${overlayCards}
       </details>`
     : '';
@@ -298,6 +310,7 @@ function renderLayers() {
 }
 
 function move(index, direction) {
+  $('#finalConfirmed').checked = false;
   const target = index + direction;
   if (index === 0 || target <= 0 || target >= draft.layer_order.length) {
     return;
@@ -326,7 +339,7 @@ view.onpointerdown = event => {
       return x >= rect[0] && x <= rect[0] + rect[2]
         && y >= rect[1] && y <= rect[1] + rect[3];
     });
-    if (hit) {
+    if (hit && hit.item.id !== photoBackgroundId()) {
       selected = hit.item.id;
       drag = {
         item: hit.item,
@@ -389,6 +402,7 @@ function maskHasPixels() {
 }
 
 function updateMaskState() {
+  if (photoBackgroundId()) { $('#emptyMaskOption').hidden = true; return; }
   const hasPixels = maskHasPixels();
   $('#emptyMaskOption').hidden = hasPixels;
   if (hasPixels) {
@@ -414,11 +428,20 @@ function preflightErrors() {
   }
   for (const item of draft.overlays) {
     const settings = reviewOptions.overlays[item.id];
-    if (settings.requires_exact_content === true && !settings.prepared_asset) {
+    if (settings.requires_exact_content === true && !settings.prepared_asset
+      && !(settings.text_content && settings.text_confirmed)) {
       errors.push(`${item.label} 的高级配置要求精确素材，但没有提供素材`);
     }
   }
-  if (!maskHasPixels() && !$('#emptyMaskApproved').checked) {
+  if (draft.questions.length || $('#otherFeedback').value.trim() || questionAnswers().length) {
+    errors.push('请先提交问答或其他反馈，让 VLM 纠正当前结果');
+  }
+  if (!$('#finalConfirmed').checked) errors.push('请手动确认当前识别结果没有问题');
+  for (const item of draft.overlays) {
+    const settings = reviewOptions.overlays[item.id];
+    if (settings.text_content && !settings.text_confirmed) errors.push(item.label + ' 的完整文字尚未确认');
+  }
+  if (!photoBackgroundId() && !maskHasPixels() && !$('#emptyMaskApproved').checked) {
     errors.push('删除蒙版为空；请画出旧内容，或明确确认无需删除');
   }
   return errors;
@@ -429,12 +452,18 @@ async function load() {
     $('#returnLink').hidden = false;
     $('#returnLink').href = returnUrl;
   }
-  const [draftResponse, optionsResponse] = await Promise.all([
-    fetch(endpoint('/draft')),
-    fetch(endpoint('/review-options')),
-  ]);
-  draft = await draftResponse.json();
-  reviewOptions = await optionsResponse.json();
+  const response = await fetch(endpoint('/session'));
+  if (!response.ok) throw new Error('无法读取当前审核版本');
+  const snapshot = await response.json();
+  draft = snapshot.draft;
+  reviewOptions = snapshot.review_options;
+  const photoBackground = Boolean(photoBackgroundId());
+  $('#backgroundControls').hidden = photoBackground;
+  $('#photoBackgroundHint').hidden = !photoBackground;
+  for (const id of ['drawMode', 'eraseMode', 'resetMask', 'brushControl']) {
+    $('#' + id).hidden = photoBackground;
+  }
+  if (photoBackground) setMode('box');
 
   image = new Image();
   image.src = endpoint('/reference');
@@ -443,7 +472,7 @@ async function load() {
   view.height = mask.height = draft.canvas.height;
 
   const initial = new Image();
-  initial.src = endpoint('/mask');
+  initial.src = snapshot.mask_data_url;
   await initial.decode();
   const temporary = document.createElement('canvas');
   temporary.width = mask.width;
@@ -463,20 +492,28 @@ async function load() {
     ? '已根据照片、文字和装饰位置自动涂好；明显不对时再补画或擦除。'
     : '已载入指定的清除区域；明显不对时再补画或擦除。';
 
-  $('#backgroundBrief').value = draft.background.background_brief;
+  $('#backgroundBrief').value = draft.background.background_brief || '';
   $('#backgroundBrief').oninput = event => {
-    draft.background.background_brief = event.target.value;
+    if (!photoBackgroundId()) draft.background.background_brief = event.target.value;
   };
+  $('#backgroundComposition').value = reviewOptions.background.composition_mode || 'protected';
+  const updateBackgroundControls = () => {
+    const fullCandidate = $('#backgroundComposition').value === 'full_candidate';
+    $('#backgroundExpand').disabled = fullCandidate;
+    $('#backgroundFeather').disabled = fullCandidate;
+  };
+  $('#backgroundComposition').onchange = updateBackgroundControls;
+  updateBackgroundControls();
   $('#backgroundExpand').value = reviewOptions.background.expand_px;
   $('#backgroundFeather').value = reviewOptions.background.feather_px;
   selected = (draft.slots[0] || draft.overlays[0] || {}).id;
   renderItems();
   renderLayers();
-  $('#autoSummary').textContent = draft.questions.length
-    ? `${draft.questions.length} 个待确认问题本次按当前默认设置处理，无需填写。`
-    : '没有额外问题需要填写。';
+  renderQuestions();
+  await loadRecoveries();
+  $('#autoSummary').textContent = '纠正后请重新检查位置、数量、文字和图层关系。';
   render();
-  $('#status').textContent = '就绪；清除区域已自动生成，检查后可直接保存。';
+  $('#status').textContent = draft.questions.length ? '请回答下面的识别疑问。' : '请检查识别结果；有错误可在其他说明中填写。';
 }
 
 $('#save').onclick = async () => {
@@ -486,7 +523,6 @@ $('#save').onclick = async () => {
     return;
   }
   const copy = structuredClone(draft);
-  copy.questions = [];
   $('#status').textContent = '正在校验并保存…';
   const response = await fetch(endpoint('/save'), {
     method: 'POST',
@@ -499,8 +535,11 @@ $('#save').onclick = async () => {
       mask_png: mask.toDataURL('image/png'),
       slot_overrides: reviewOptions.slots,
       overlay_overrides: reviewOptions.overlays,
-      defer_questions: true,
+      revision: reviewOptions.revision,
+      final_confirmed: $('#finalConfirmed').checked,
+      other_feedback: $('#otherFeedback').value.trim(),
       empty_mask_approved: $('#emptyMaskApproved').checked,
+      background_composition_mode: $('#backgroundComposition').value,
       background_expand_px: Number($('#backgroundExpand').value),
       background_feather_px: Number($('#backgroundFeather').value),
     }),
@@ -514,6 +553,144 @@ $('#save').onclick = async () => {
   }
 };
 
-load().catch(error => {
+function feedbackKey() { return 'figcopy-feedback:' + apiBase + ':' + reviewOptions.revision; }
+
+function questionAnswers() {
+  return draft.questions.map((question, index) => ({
+    question, answer: $('#questions').querySelectorAll('textarea')[index].value.trim(),
+  }));
+}
+
+function renderQuestions() {
+  $('#questions').innerHTML = draft.questions.length
+    ? draft.questions.map((question, index) => `<label class="stack">${index + 1}. ${escapeHtml(question)}
+      <textarea maxlength="12000" aria-label="${escapeHtml(question)}" required></textarea></label>`).join('')
+    : '<p class="auto">模型没有留下疑问，请继续核对画面；发现遗漏可填写其他说明。</p>';
+  $('#otherFeedback').value = '';
+  $('#finalConfirmed').checked = false;
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(feedbackKey()) || 'null');
+    if (saved) {
+      $('#questions').querySelectorAll('textarea').forEach((node, index) => {
+        node.value = saved.answers?.[index]?.answer || '';
+      });
+      $('#otherFeedback').value = saved.other || '';
+    }
+  } catch (_) { /* Storage may be disabled; server retains submitted feedback. */ }
+  $('#revisionHint').textContent = '当前识别版本：' + reviewOptions.revision.slice(0, 12);
+}
+
+async function loadRecoveries() {
+  const container = $('#savedCorrections');
+  container.hidden = true;
+  container.replaceChildren();
+  if (!apiBase) return;
+  try {
+    const response = await fetch(endpoint('/recoveries'));
+    if (!response.ok) return;
+    const options = (await response.json()).recoveries || [];
+    container.hidden = !options.length;
+    for (const option of options.slice(0, 3)) {
+      const button = document.createElement('button');
+      button.textContent = option.background_slot_id
+        ? '使用全屏照片作为背景，恢复已保存的改稿'
+        : '恢复已保存的改稿（不调用模型）';
+      button.onclick = async () => {
+        busy(true);
+        try {
+          const response = await fetch(endpoint('/recover'), {
+            method: 'POST',
+            headers: {'content-type': 'application/json', ...(csrfToken ? {'X-Figcopy-Token': csrfToken} : {})},
+            body: JSON.stringify({...option, revision: reviewOptions.revision}),
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error('[' + result.code + '] ' + result.message);
+          await awaitCorrection(result.task);
+        } catch (error) {
+          $('#status').textContent = '恢复失败：' + error.message;
+        } finally { busy(false); }
+      };
+      container.append(button);
+    }
+  } catch (_) { /* Optional recovery list must not prevent reviewing the current Draft. */ }
+}
+
+function busy(value) {
+  document.querySelectorAll('aside button, aside input, aside textarea, aside select').forEach(node => {
+    node.disabled = value;
+  });
+  view.style.pointerEvents = value ? 'none' : '';
+  if (!value && photoBackgroundId()) {
+    document.querySelectorAll('[data-mode], [data-rect-kind]').forEach(node => {
+      if (node.dataset.mode === photoBackgroundId() || node.dataset.itemId === photoBackgroundId()) node.disabled = true;
+    });
+  }
+}
+
+async function awaitCorrection(task) {
+  while (task && ['queued', 'running'].includes(task.state)) {
+    $('#status').textContent = task.kind === 'recover_review' ? '正在恢复已保存的结果，无需调用模型…' : 'VLM 正在根据回答纠正识别，请稍候…';
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    const response = await fetch(endpoint('/correction-status'));
+    if (!response.ok) throw new Error('无法读取纠正进度，请刷新查看；不要重复提交');
+    task = (await response.json()).task;
+  }
+  if (!task || task.state !== 'succeeded') {
+    const issue = task?.error?.details?.issues?.[0];
+    throw new Error((task?.error?.message || '纠正未完成；当前回答和原识别稿已保留') + (issue ? '：' + issue.path + ' ' + issue.message : ''));
+  }
+  try { sessionStorage.removeItem(feedbackKey()); } catch (_) {}
+  await load();
+  $('#status').textContent = '已生成纠正后的结果。请再次检查，确认无误后手动勾选确认。';
+}
+
+$('#revise').onclick = async () => {
+  const answers = questionAnswers();
+  const other = $('#otherFeedback').value.trim();
+  if (answers.some(item => !item.answer)) {
+    $('#status').textContent = '请回答每个待确认问题。'; return;
+  }
+  if (!answers.length && !other) {
+    $('#status').textContent = '请填写需要纠正的错误说明。'; return;
+  }
+  $('#finalConfirmed').checked = false;
+  busy(true);
+  try {
+    const edited = structuredClone(draft);
+    for (const item of edited.overlays) {
+      item.text_content = reviewOptions.overlays[item.id].text_content;
+    }
+    const response = await fetch(endpoint('/revise'), {
+      method: 'POST',
+      headers: {'content-type': 'application/json', ...(csrfToken ? {'X-Figcopy-Token': csrfToken} : {})},
+      body: JSON.stringify({revision: reviewOptions.revision, draft: edited,
+        question_resolutions: answers, other_feedback: other}),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error('[' + result.code + '] ' + result.message);
+    await awaitCorrection(result.task);
+  } catch (error) {
+    $('#status').textContent = '纠正失败：' + error.message;
+    await loadRecoveries();
+  } finally { busy(false); }
+};
+
+document.querySelector('aside').addEventListener('input', event => {
+  if (event.target.id !== 'finalConfirmed') $('#finalConfirmed').checked = false;
+  if (draft && (event.target.id === 'otherFeedback' || event.target.closest('#questions'))) {
+    try { sessionStorage.setItem(feedbackKey(), JSON.stringify({answers: questionAnswers(), other: $('#otherFeedback').value})); } catch (_) {}
+  }
+});
+view.addEventListener('pointerdown', () => { $('#finalConfirmed').checked = false; });
+
+load().then(async () => {
+  const response = await fetch(endpoint('/correction-status'));
+  if (!response.ok) return;
+  const task = (await response.json()).task;
+  if (['revise_review', 'recover_review'].includes(task?.kind) && ['queued', 'running'].includes(task.state)) {
+    busy(true);
+    try { await awaitCorrection(task); } finally { busy(false); }
+  }
+}).catch(error => {
   $('#status').textContent = '载入失败：' + error;
 });

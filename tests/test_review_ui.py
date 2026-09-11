@@ -6,6 +6,7 @@ import base64
 import io
 import json
 import socket
+import re
 import threading
 import time
 import urllib.error
@@ -74,8 +75,12 @@ def test_review_options_supply_dynamic_visual_defaults() -> None:
     assert options["slots"]["photo"]["edge_fade_px"] == 64
     assert options["slots"]["caption"]["font_size"] == 55
     assert options["slots"]["caption"]["fallback_approved"] is True
-    assert options["overlays"]["ticket"]["requires_exact_content"] is False
-    assert options["background"] == {"expand_px": 6, "feather_px": 12}
+    assert options["overlays"]["ticket"]["requires_exact_content"] is True
+    assert options["background"] == {
+        "expand_px": 6,
+        "feather_px": 12,
+        "composition_mode": "protected",
+    }
 
 
 def test_remove_mask_is_automatically_painted_from_source_rects() -> None:
@@ -100,10 +105,7 @@ def test_review_decisions_accept_automatic_defaults_but_keep_advanced_gate() -> 
         background_expand_px=0,
         background_feather_px=0,
     )
-    validate_review_decisions(draft, options["slots"], options["overlays"])
-
-    # 高级覆盖若重新声明必须精确保真，仍然需要提供真实素材。
-    options["overlays"]["ticket"]["requires_exact_content"] = True
+    # 精确内容不能再被默认降级；只有明确选择近似制作才可继续。
     with pytest.raises(CollageError) as caught:
         validate_review_decisions(draft, options["slots"], options["overlays"])
     assert caught.value.code == "HUMAN_REVIEW_REQUIRED"
@@ -153,8 +155,29 @@ def test_automatic_notes_make_silent_defaults_auditable() -> None:
         questions_deferred=True,
     )
     assert "本地通用字体" in notes
-    assert "已改为近似制作" in notes
+    assert "已改为近似制作" not in notes
     assert "未要求逐题填写" in notes
+
+
+def test_automatic_notes_record_incomplete_basic_shape_fallback() -> None:
+    draft = _complex_draft()
+    draft["overlays"][0]["action"] = "basic_shape"
+    options = build_review_options(
+        draft,
+        None,
+        None,
+        background_expand_px=0,
+        background_feather_px=0,
+    )
+
+    notes = automatic_review_notes(
+        draft,
+        options["slots"],
+        options["overlays"],
+        questions_deferred=False,
+    )
+
+    assert "basic_shape 缺少可执行参数" in notes
 
 
 def test_review_page_hides_nonessential_path_and_question_inputs() -> None:
@@ -163,7 +186,11 @@ def test_review_page_hides_nonessential_path_and_question_inputs() -> None:
     assert 'src="/static/review.js"' in HTML
     assert "已按图片框大小自动设置" in page_source
     assert "字体样式已自动处理" in page_source
-    assert "无需上传透明素材" in page_source
+    assert "生成完整的独立素材" in page_source
+    assert 'id="questions"' in page_source
+    assert 'id="otherFeedback"' in page_source
+    assert 'id="finalConfirmed"' in page_source
+    assert "defer_questions: true" not in page_source
     assert "可选槽位 clip mask 路径" not in page_source
     assert "精确透明素材路径" not in page_source
     assert "data-question-index" not in page_source
@@ -237,9 +264,32 @@ def _wait_for_json(url: str) -> dict:
     raise AssertionError(f"review server did not start: {url}")
 
 
+@pytest.mark.parametrize("composition_mode", ["protected", "full_candidate"])
 def test_review_server_saves_complex_draft_with_automatic_decisions(
     tmp_path: Path,
+    composition_mode: str,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from collage.providers import ProviderAudit
+    import collage.studio.review_server as review_server
+
+    class CorrectionFixture:
+        name = "fixture-vision"
+        requested_model = "fixture"
+        fixture = True
+
+        def analyze(self, reference_bytes, **kwargs):
+            assert "接受近似" in kwargs["prompt"]
+            corrected = _full_manual_draft()
+            corrected["questions"] = []
+            corrected["overlays"][0]["requires_exact_content"] = False
+            return corrected, ProviderAudit(
+                self.name, "fixture", "fixture", None, True, 0
+            )
+
+    monkeypatch.setattr(
+        review_server, "load_provider", lambda *_args: CorrectionFixture()
+    )
     reference = tmp_path / "reference.png"
     manual = tmp_path / "manual.json"
     work = tmp_path / "work"
@@ -258,6 +308,34 @@ def test_review_server_saves_complex_draft_with_automatic_decisions(
     base_url = f"http://127.0.0.1:{port}"
     browser_draft = _wait_for_json(f"{base_url}/draft")
     options = _wait_for_json(f"{base_url}/review-options")
+    with urllib.request.urlopen(base_url, timeout=5) as response:
+        token = re.search(
+            r'name="figcopy-csrf-token" content="([^"]+)"', response.read().decode()
+        ).group(1)
+    correction = urllib.request.Request(
+        f"{base_url}/revise",
+        method="POST",
+        headers={"Content-Type": "application/json", "X-Figcopy-Token": token},
+        data=json.dumps(
+            {
+                "revision": options["revision"],
+                "question_resolutions": [
+                    {"question": browser_draft["questions"][0], "answer": "接受近似"}
+                ],
+            }
+        ).encode(),
+    )
+    with urllib.request.urlopen(correction, timeout=5) as response:
+        assert json.loads(response.read())["task"]["kind"] == "revise_review"
+    for _ in range(100):
+        task = _wait_for_json(f"{base_url}/correction-status")["task"]
+        if task["state"] not in {"queued", "running"}:
+            assert task["state"] == "succeeded", task
+            break
+        time.sleep(0.02)
+    browser_draft = _wait_for_json(f"{base_url}/draft")
+    options = _wait_for_json(f"{base_url}/review-options")
+    assert browser_draft["questions"] == []
     with urllib.request.urlopen(base_url, timeout=5) as response:
         assert b"/static/review.css" in response.read()
     with urllib.request.urlopen(f"{base_url}/static/review.css", timeout=5) as response:
@@ -279,15 +357,17 @@ def test_review_server_saves_complex_draft_with_automatic_decisions(
         + base64.b64encode(mask_buffer.getvalue()).decode("ascii"),
         "slot_overrides": options["slots"],
         "overlay_overrides": options["overlays"],
-        "defer_questions": True,
+        "revision": options["revision"],
+        "final_confirmed": True,
         "empty_mask_approved": False,
+        "background_composition_mode": composition_mode,
         "background_expand_px": 4,
         "background_feather_px": 8,
     }
     request = urllib.request.Request(
         f"{base_url}/save",
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", "X-Figcopy-Token": token},
         method="POST",
     )
     with urllib.request.urlopen(request, timeout=5) as response:
@@ -300,8 +380,12 @@ def test_review_server_saves_complex_draft_with_automatic_decisions(
     assert reviewed["slots"][0]["edge_fade_px"] == 6
     assert reviewed["slots"][1]["fallback_approved"] is True
     assert reviewed["overlays"][0]["requires_exact_content"] is False
+    assert reviewed["background"]["composition_mode"] == composition_mode
     assert reviewed["background"]["expand_px"] == 4
     assert reviewed["background"]["feather_px"] == 8
     assert "本地通用字体" in reviewed["review"]["notes"]
-    assert "已改为近似制作" in reviewed["review"]["notes"]
-    assert "未要求逐题填写" in reviewed["review"]["notes"]
+    assert (
+        read_json(work / "review_feedback.json")["question_resolutions"][0]["answer"]
+        == "接受近似"
+    )
+    assert "未要求逐题填写" not in reviewed["review"]["notes"]

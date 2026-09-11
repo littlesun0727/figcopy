@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import math
+from collections import deque
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -210,6 +211,122 @@ def remove_chroma_key(
             output.append((red, green, blue, alpha))
     rgba.putdata(output)
     return rgba
+
+
+def remove_chroma_background(
+    image: Image.Image,
+    key_rgb: tuple[int, int, int],
+    *,
+    tolerance: int = 40,
+    softness: int = 24,
+    hue_tolerance: int = 24,
+    minimum_saturation: int = 32,
+) -> Image.Image:
+    """去除模型生成的非均匀色键背景，同时保护不与边界连通的主体同色细节。"""
+
+    rgba = remove_chroma_key(
+        image,
+        key_rgb,
+        tolerance=tolerance,
+        softness=softness,
+    )
+    width, height = rgba.size
+    if width == 0 or height == 0:
+        return rgba
+
+    rgb = image.convert("RGB")
+    hsv = rgb.convert("HSV")
+    rgb_pixels = rgb.tobytes()
+    hsv_pixels = hsv.tobytes()
+    key_hue = Image.new("RGB", (1, 1), key_rgb).convert("HSV").getpixel((0, 0))[0]
+    soft_distance = max(0, tolerance) + max(1, softness)
+    soft_distance_squared = soft_distance * soft_distance
+    candidates = bytearray(width * height)
+    for index in range(width * height):
+        offset = index * 3
+        red, green, blue = rgb_pixels[offset : offset + 3]
+        hue, saturation = hsv_pixels[offset : offset + 2]
+        distance_squared = (
+            (red - key_rgb[0]) ** 2
+            + (green - key_rgb[1]) ** 2
+            + (blue - key_rgb[2]) ** 2
+        )
+        hue_distance = min(abs(hue - key_hue), 256 - abs(hue - key_hue))
+        if distance_squared <= soft_distance_squared or (
+            saturation >= minimum_saturation and hue_distance <= hue_tolerance
+        ):
+            candidates[index] = 1
+
+    # 仅移除与画面边界连通的候选色。这样模型把纯色键做成明暗纹理时仍能
+    # 清干净，同时主体内部偶然出现的同色小细节不会被整块挖掉。
+    connected = bytearray(width * height)
+    queue: deque[int] = deque()
+
+    def seed(index: int) -> None:
+        if candidates[index] and not connected[index]:
+            connected[index] = 1
+            queue.append(index)
+
+    for x in range(width):
+        seed(x)
+        seed((height - 1) * width + x)
+    for y in range(1, height - 1):
+        seed(y * width)
+        seed(y * width + width - 1)
+
+    while queue:
+        index = queue.popleft()
+        x = index % width
+        if x > 0:
+            seed(index - 1)
+        if x + 1 < width:
+            seed(index + 1)
+        if index >= width:
+            seed(index - width)
+        if index + width < width * height:
+            seed(index + width)
+
+    alpha_values = bytearray(rgba.getchannel("A").tobytes())
+    for index, is_background in enumerate(connected):
+        if is_background:
+            alpha_values[index] = 0
+    alpha = Image.new("L", rgba.size)
+    alpha.putdata(alpha_values)
+    rgba.putalpha(alpha)
+    return rgba
+
+
+def chroma_alpha_is_clean(
+    image: Image.Image,
+    *,
+    transparent_threshold: int = 16,
+    minimum_transparent_fraction: float = 0.01,
+    minimum_visible_fraction: float = 0.01,
+) -> bool:
+    """拒绝只有零星透明像素、边缘仍被色键背景占满的 overlay。"""
+
+    if not alpha_is_meaningful(image):
+        return False
+    alpha = image.convert("RGBA").getchannel("A")
+    width, height = alpha.size
+    values = alpha.tobytes()
+    total = len(values)
+    transparent = sum(value <= transparent_threshold for value in values) / total
+    visible = sum(value > transparent_threshold for value in values) / total
+    if transparent < minimum_transparent_fraction or visible < minimum_visible_fraction:
+        return False
+
+    sides = [
+        [alpha.getpixel((x, 0)) for x in range(width)],
+        [alpha.getpixel((x, height - 1)) for x in range(width)],
+        [alpha.getpixel((0, y)) for y in range(height)],
+        [alpha.getpixel((width - 1, y)) for y in range(height)],
+    ]
+    clear_sides = sum(
+        sum(value <= transparent_threshold for value in side) / len(side) >= 0.5
+        for side in sides
+    )
+    return clear_sides >= 2
 
 
 def clean_chroma_edges(

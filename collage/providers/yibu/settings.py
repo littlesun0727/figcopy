@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -18,9 +19,11 @@ from .constants import (
     _VLM_MODEL_ALIASES,
     DEFAULT_AUDIT_BASE_URL,
     DEFAULT_IMAGE_MODEL,
+    DEFAULT_IMAGE_SIZE,
     DEFAULT_VLM_MAX_TOKENS,
     DEFAULT_VLM_MODEL,
     KIMI_K3_MAX_TOKENS,
+    KIMI_K3_REASONING_EFFORT,
 )
 
 
@@ -52,17 +55,44 @@ def _load_shared_module(path: Path) -> ModuleType:
     return module
 
 
+def _key_from_credentials_file(path: Path) -> str:
+    """只从显式指定的 JSON 取第一把 Key；文件内 URL 不改变审计代理路由。"""
+
+    try:
+        if path.stat().st_size > 1024 * 1024:
+            raise CollageError("YIBU_CREDENTIAL_FILE_INVALID", "凭据文件过大")
+        document = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        # 异常对象可能带文件内容或私有路径，业务响应只给固定描述。
+        raise CollageError(
+            "YIBU_CREDENTIAL_FILE_INVALID", "无法读取有效的 JSON 凭据文件"
+        ) from exc
+    keys = document.get("api_keys") if isinstance(document, dict) else None
+    if (
+        not isinstance(keys, list)
+        or not keys
+        or any(not isinstance(key, str) or not key.strip() for key in keys)
+    ):
+        raise CollageError(
+            "YIBU_CREDENTIAL_FILE_INVALID", "凭据文件需包含非空字符串数组 api_keys"
+        )
+    return keys[0].strip()
+
+
 def _resolve_api_key() -> str:
-    """优先读取环境变量，否则从用户明确指定的 shared.py 取 Key。"""
+    """依次读取显式 Key、JSON 凭据文件或已有 shared.py。"""
 
     environment_key = os.environ.get("YIBU_API_KEY", "").strip()
     if environment_key:
         return environment_key
+    credentials_file = os.environ.get("YIBU_CREDENTIALS_FILE", "").strip()
+    if credentials_file:
+        return _key_from_credentials_file(Path(credentials_file).expanduser())
     shared_value = os.environ.get("YIBU_SHARED_PATH", "").strip()
     if not shared_value:
         raise CollageError(
             "YIBU_CREDENTIAL_MISSING",
-            "请设置 YIBU_API_KEY，或设置 YIBU_SHARED_PATH 指向已有 shared.py",
+            "请设置 YIBU_API_KEY、YIBU_CREDENTIALS_FILE 或 YIBU_SHARED_PATH",
         )
     module = _load_shared_module(Path(shared_value).expanduser().resolve())
     getter = getattr(module, "get_api_key", None)
@@ -126,11 +156,11 @@ def _vlm_max_tokens_from_env(model: str) -> int:
 
 
 def _vlm_reasoning_effort_from_env(model: str) -> str | None:
-    """读取推理强度；Kimi K3 默认使用用户要求的 max 档位。"""
+    """读取推理强度；Kimi K3 默认 high，显式配置仍可覆盖。"""
 
     configured = os.environ.get("YIBU_VLM_REASONING_EFFORT")
     if configured is None:
-        return "max" if model.lower() == "kimi-k3" else None
+        return KIMI_K3_REASONING_EFFORT if model.lower() == "kimi-k3" else None
     selected = configured.strip().lower()
     if not selected:
         return None
@@ -144,7 +174,7 @@ def _vlm_reasoning_effort_from_env(model: str) -> str | None:
 
 
 def _timeout_seconds_from_env(model: str) -> int:
-    """Kimi K3 max 推理可能较慢，为其提供更长的默认请求时间。"""
+    """保留 Kimi K3 的请求时限，推理强度与超时分别配置。"""
 
     default = 900 if model.lower() == "kimi-k3" else 600
     return _positive_int_env("YIBU_TIMEOUT_SECONDS", default)
@@ -161,12 +191,14 @@ class YibuSettings:
     vlm_max_tokens: int = DEFAULT_VLM_MAX_TOKENS
     vlm_reasoning_effort: str | None = None
     timeout_seconds: int = 600
-    image_size: str = "1K"
+    image_size: str = DEFAULT_IMAGE_SIZE
 
     @classmethod
     def from_env(cls) -> YibuSettings:
         vlm_model = _vlm_model_from_env()
-        image_size = os.environ.get("YIBU_IMAGE_SIZE", "1K").strip().upper()
+        image_size = (
+            os.environ.get("YIBU_IMAGE_SIZE", DEFAULT_IMAGE_SIZE).strip().upper()
+        )
         if image_size not in {"1K", "2K", "4K"}:
             raise CollageError(
                 "YIBU_CONFIG_INVALID", "YIBU_IMAGE_SIZE 必须是 1K、2K 或 4K"

@@ -90,10 +90,10 @@ class WorkflowService:
             else None
         )
 
-        vision_provider = (
-            None
-            if manual_draft_path is not None
-            else vision_provider_spec or DEFAULT_VISION_PROVIDER
+        # Manual import skips initial analysis, but an explicitly configured VLM
+        # remains available for customer-driven corrections of that imported draft.
+        vision_provider = vision_provider_spec or (
+            None if manual_draft_path is not None else DEFAULT_VISION_PROVIDER
         )
         image_provider = (
             None if fixture_provider else image_provider_spec or DEFAULT_IMAGE_PROVIDER

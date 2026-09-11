@@ -12,10 +12,17 @@ from typing import Any
 from ...core.errors import CollageError
 from ...core.io import atomic_write_json, read_json, resolve_input_path
 from ...projects import DataPaths, ProjectPaths, ProjectStore
+from ...providers import VisionProvider, load_provider
+from ...template.review.feedback import revise_draft, validate_feedback, review_revision
+from ...template.review.recovery import available_recoveries, recover_saved_correction
 from ...schemas import validate_bindings
 from ...template.validation import validate_package
 from ...workflows import WorkflowService
-from ...workflows.model import ARTIFACT_PATHS, validate_workflow
+from ...workflows.model import (
+    ARTIFACT_PATHS,
+    DEFAULT_VISION_PROVIDER,
+    validate_workflow,
+)
 from ..review_session import ReviewSession
 from .jobs import JobRegistry
 from .multipart import (
@@ -25,6 +32,7 @@ from .multipart import (
     optional_text,
     required_text,
 )
+from .provider_settings import ProviderRuntimeSettings
 
 _START_UPLOADS = {
     "reference",
@@ -44,11 +52,28 @@ class WorkbenchApplication:
         paths: DataPaths,
         *,
         jobs: JobRegistry | None = None,
+        provider_settings: ProviderRuntimeSettings | None = None,
     ) -> None:
         self.paths = paths.ensure()
         self.store = ProjectStore(self.paths)
         self.workflow = WorkflowService(self.store)
         self.jobs = jobs or JobRegistry()
+        self.provider_settings = provider_settings or ProviderRuntimeSettings()
+
+    def provider_status(self, *, probe_audit: bool = False) -> dict[str, Any]:
+        """Return public Provider readiness without exposing secret values or paths."""
+
+        return self.provider_settings.status(probe_audit=probe_audit)
+
+    def configure_providers(self, payload: Any) -> dict[str, Any]:
+        """Apply process-memory Provider settings while no background job is active."""
+
+        if self.jobs.active_project_ids():
+            raise CollageError(
+                "PROVIDER_SETTINGS_BUSY",
+                "有后台任务正在使用 Provider，请等待任务结束后再修改设置",
+            )
+        return self.provider_settings.configure(payload)
 
     def list_projects(self) -> list[dict[str, Any]]:
         """List valid projects plus transient jobs that have not created one yet."""
@@ -109,9 +134,11 @@ class WorkbenchApplication:
         artifacts = {
             name: {
                 "exists": details["exists"],
-                "url": f"/api/projects/{project_id}/artifacts/{name}"
-                if details["exists"]
-                else None,
+                "url": (
+                    f"/api/projects/{project_id}/artifacts/{name}"
+                    if details["exists"]
+                    else None
+                ),
             }
             for name, details in status["artifacts"].items()
         }
@@ -211,12 +238,75 @@ class WorkbenchApplication:
             background_candidate_path=optional_artifact("background_candidate"),
         )
 
+    def revise_review(self, project_id: str, payload: Any) -> dict[str, Any]:
+        """Queue one correction of the current Draft with explicit customer feedback."""
+        project = self.store.open(project_id)
+        workflow = validate_workflow(
+            self.store.get_manifest(project_id).get("workflow")
+        )
+        if workflow["stage"] != "awaiting_review":
+            raise CollageError("REVIEW_NOT_READY", "当前项目不在识别复核阶段")
+        session = self.review_session(project_id)
+        validate_feedback(session.draft, payload)
+        provider_spec = (
+            workflow["options"].get("vision_provider") or DEFAULT_VISION_PROVIDER
+        )
+        return self.jobs.submit(
+            project_id,
+            "revise_review",
+            lambda: revise_draft(
+                project.analysis / "draft.json",
+                payload,
+                provider=load_provider(provider_spec, VisionProvider),
+                reviewed_path=project.review / "reviewed.json",
+            ),
+        )
+
+    def review_recoveries(self, project_id: str) -> list[dict[str, Any]]:
+        """List local correction responses for this project's current Draft."""
+        project = self.store.open(project_id)
+        if (project.review / "reviewed.json").exists():
+            return []
+        return available_recoveries(project.analysis / "draft.json")
+
+    def recover_review(self, project_id: str, payload: Any) -> dict[str, Any]:
+        """Queue local recovery without loading a provider or advancing to build."""
+        project = self.store.open(project_id)
+        workflow = validate_workflow(
+            self.store.get_manifest(project_id).get("workflow")
+        )
+        if workflow["stage"] != "awaiting_review":
+            raise CollageError("REVIEW_NOT_READY", "当前项目不在识别复核阶段")
+        if not isinstance(payload, dict):
+            raise CollageError("INVALID_REQUEST", "恢复请求必须是 JSON object")
+        current = read_json(project.analysis / "draft.json")
+        if payload.get("revision") != review_revision(current):
+            raise CollageError("REVIEW_REVISION_CONFLICT", "识别结果已更新，请重新载入")
+        request_id = payload.get("request_id")
+        if not isinstance(request_id, str) or len(request_id) != 64:
+            raise CollageError("INVALID_REVIEW_REQUEST_ID", "纠正记录 ID 无效")
+        background_slot = payload.get("background_slot_id")
+        if background_slot is not None and not isinstance(background_slot, str):
+            raise CollageError("INVALID_BACKGROUND_SLOT", "背景槽 ID 无效")
+        return self.jobs.submit(
+            project_id,
+            "recover_review",
+            lambda: recover_saved_correction(
+                project.analysis / "draft.json",
+                request_id,
+                background_slot=background_slot,
+                reviewed_path=project.review / "reviewed.json",
+            ),
+        )
+
     def save_review(self, project_id: str, payload: Any) -> dict[str, Any]:
         """Persist human review and enqueue template construction."""
 
         project = self.store.open(project_id)
         if (project.review / "reviewed.json").exists():
             raise CollageError("REVIEW_ALREADY_SAVED", "该项目的 Draft 已经确认")
+        if project_id in self.jobs.active_project_ids():
+            raise CollageError("PROJECT_BUSY", "请等待当前任务结束后确认")
         self.review_session(project_id).save(payload)
         job = self.jobs.submit(
             project_id,
@@ -224,6 +314,28 @@ class WorkbenchApplication:
             lambda: self.workflow.resume(project_id, open_review=False),
         )
         return {"ok": True, "path": "review/reviewed.json", "task": job}
+
+    def layout(self, project_id: str) -> dict[str, Any]:
+        from .layout import layout_document
+
+        return layout_document(self.store.open(project_id))
+
+    def layout_layer(self, project_id: str, identifier: str) -> bytes:
+        from .layout import layer_image
+
+        return layer_image(self.store.open(project_id), identifier)
+
+    def preview_layout(self, project_id: str, payload: Any) -> bytes:
+        from .layout import preview_layout
+
+        return preview_layout(self.store.open(project_id), payload)
+
+    def save_layout(self, project_id: str, payload: Any) -> dict[str, Any]:
+        from .layout import fork_layout
+
+        if project_id in self.jobs.active_project_ids():
+            raise CollageError("PROJECT_BUSY", "请等待当前任务结束后保存布局")
+        return fork_layout(self.store, project_id, payload)
 
     def project_slots(self, project_id: str) -> list[dict[str, Any]]:
         """Describe customer inputs without returning local customer paths."""

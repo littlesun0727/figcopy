@@ -1,0 +1,9 @@
+{
+  "project_id": "s02-review-20260911-01",
+  "stage": "awaiting_review",
+  "status": "draft",
+  "next_action": "运行 resume 打开审核页并保存确认结果",
+  "fixture": false,
+  "production_acceptance": false,
+  "review_url": "/projects/s02-review-20260911-01/review"
+}

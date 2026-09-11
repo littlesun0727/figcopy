@@ -19,6 +19,7 @@ from ..core.io import (
 )
 from ..imaging.operations import rect_to_box
 from ..schemas import validate_bindings
+from ..schemas.background import background_slot_id
 from ..template.validation import validate_package
 from .bindings import prepare_bindings
 from .image_layer import _render_image_slot
@@ -39,6 +40,19 @@ def render_template(
 
     root = template_dir.resolve()
     template = validate_package(root, require_ready=require_ready)
+    LOGGER.info("开始本地合成 | layers=%s", len(template["layers"]))
+    result = _render_layers(root, template, prepared)
+    LOGGER.info("本地合成完成")
+    return result
+
+
+def _render_layers(
+    root: Path,
+    template: dict,
+    prepared: dict[str, PreparedBinding],
+) -> Image.Image:
+    """复用已校验的模板逐层合成，供本地探针重复测量。"""
+
     canvas = Image.new(
         "RGBA",
         (template["canvas"]["width"], template["canvas"]["height"]),
@@ -46,12 +60,6 @@ def render_template(
     )
     assets = {asset["id"]: asset for asset in template["assets"]}
     slots = {slot["id"]: slot for slot in template["slots"]}
-    LOGGER.info(
-        "开始本地合成 | canvas=%sx%s layers=%s",
-        canvas.width,
-        canvas.height,
-        len(template["layers"]),
-    )
     for index, layer in enumerate(template["layers"], start=1):
         if layer["type"] == "asset":
             asset = assets[layer["asset_id"]]
@@ -79,12 +87,20 @@ def render_template(
                 continue
             if slot["type"] == "image":
                 _render_image_slot(root, canvas, slot, binding)
+                # Check before overlays can hide holes: source alpha and crop offsets may expose the base.
+                if slot["id"] == background_slot_id(template) and canvas.getchannel(
+                    "A"
+                ).getextrema() != (255, 255):
+                    raise CollageError(
+                        "BACKGROUND_SLOT_COVERAGE_FAILED",
+                        "背景照片必须不透明并完整铺满画布；请调整裁切或更换图片",
+                        details={"slot_id": slot["id"]},
+                    )
             else:
                 _render_text_slot(root, canvas, slot, binding)
             LOGGER.debug(
                 "已合成图层 %s/%s | slot=%s", index, len(template["layers"]), slot["id"]
             )
-    LOGGER.info("本地合成完成")
     return canvas
 
 

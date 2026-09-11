@@ -36,7 +36,7 @@ from .common import (
 )
 
 LOGGER = logging.getLogger(__name__)
-BACKGROUND_PROMPT_VERSION = "clean-background/1"
+BACKGROUND_PROMPT_VERSION = "clean-background/2"
 
 
 def _provider_background(
@@ -129,12 +129,23 @@ def _build_background(
         if config["allowed_mask"] is not None
         else None
     )
-    blend = make_blend_mask(
-        core,
-        allowed_mask=allowed,
-        expand_px=config["expand_px"],
-        feather_px=config["feather_px"],
-    )
+    composition_mode = config.get("composition_mode", "protected")
+    if composition_mode == "full_candidate":
+        # 整张重建必须是已确认的制作选择，不能绕过明确的局部保护范围。
+        if allowed is not None and allowed.getextrema() != (255, 255):
+            raise CollageError(
+                "BACKGROUND_MODE_CONFLICT",
+                "整张重建与局部 allowed_mask 冲突；请使用局部保护或允许整张编辑",
+            )
+        blend = Image.new("L", size, 255)
+    else:
+        blend = make_blend_mask(
+            core,
+            allowed_mask=allowed,
+            expand_px=config["expand_px"],
+            feather_px=config["feather_px"],
+        )
+    LOGGER.info("背景合成方式 | mode=%s", composition_mode)
     atomic_save_image(core, work_dir / "remove_mask.png")
     atomic_save_image(blend, work_dir / "blend_mask.png")
     key_data: dict[str, Any] = {
@@ -152,6 +163,8 @@ def _build_background(
         "expand_px": config["expand_px"],
         "feather_px": config["feather_px"],
     }
+    if composition_mode != "protected":
+        key_data["composition_mode"] = composition_mode
     if config["candidate_path"] is not None:
         candidate_path = resolve_input_path(spec_path, config["candidate_path"])
         key_data["imported_sha256"] = sha256_file(candidate_path)
@@ -192,6 +205,7 @@ def _build_background(
             details={"expected": size, "actual": candidate.size},
         )
     background = protected_background_compose(reference, candidate, blend)
+    transform_record = {**transform_record, "composition_mode": composition_mode}
     atomic_save_image(candidate, work_dir / "background_candidate.png")
     atomic_write_json(work_dir / "background_transform.json", transform_record)
     atomic_save_image(background, work_dir / "background.png")

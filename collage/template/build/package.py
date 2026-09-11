@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from ...core.errors import CollageError
-from ...core.io import atomic_save_image, resolve_input_path
+from ...core.io import atomic_save_image, resolve_input_path, sha256_file
 from ...imaging.operations import load_mask, rect_to_box
 from .common import _copy_atomic
 
@@ -71,6 +71,14 @@ def _package_slots(
                 "max_lines": source["max_lines"],
                 "line_spacing": source["line_spacing"],
             }
+        if source["type"] == "image" and spec["version"] in {
+            "collage-build/2",
+            "collage-build/3",
+        }:
+            # mask 影响可见窗口，必须和固定素材一样绑定哈希，防止无声改变模板。
+            slot["clip_mask_sha256"] = (
+                sha256_file(output_dir / clip_path) if clip_path else None
+            )
         slots.append(slot)
     return slots
 

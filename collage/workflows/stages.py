@@ -16,6 +16,7 @@ from ..providers import (
 )
 from ..rendering import render_from_files
 from ..schemas import validate_draft, validate_reviewed_spec
+from ..schemas.background import background_slot_id
 from ..studio.review_server import serve_review_ui
 from ..template.analysis import analyze_reference
 from ..template.build import approve_template, build_template
@@ -58,9 +59,9 @@ class WorkflowStages:
                 project.analysis,
                 manual_draft_path=manual_path if manual_path.is_file() else None,
                 provider=provider,
-                product_policy=read_json(policy_path)
-                if policy_path.is_file()
-                else None,
+                product_policy=(
+                    read_json(policy_path) if policy_path.is_file() else None
+                ),
             )
         transition(
             self.store,
@@ -108,6 +109,7 @@ class WorkflowStages:
             project.analysis / "draft.json",
             reviewed_path,
             reviewer=workflow["options"]["reviewer"],
+            vision_provider_spec=workflow["options"]["vision_provider"],
             initial_mask_path=optional_input("initial_mask"),
             allowed_mask_path=optional_input("allowed_mask"),
             background_candidate_path=optional_input("background_candidate"),
@@ -241,7 +243,10 @@ class WorkflowStages:
         workflow: dict[str, Any],
         reviewed: dict[str, Any],
     ) -> ImageProvider | None:
-        provider_required = reviewed["background"]["candidate_path"] is None or any(
+        provider_required = (
+            background_slot_id(reviewed) is None
+            and reviewed["background"]["candidate_path"] is None
+        ) or any(
             overlay["action"] == "reference_generate"
             and overlay["prepared_asset"] is None
             for overlay in reviewed["overlays"]

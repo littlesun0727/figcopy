@@ -6,6 +6,8 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..core.errors import SpecValidationError, ValidationIssue
+from .provenance import validate_provenance, validate_sha256
+from .background import validate_slot_background
 from .common import (
     FIT_MODES,
     IMAGE_MODES,
@@ -54,12 +56,16 @@ def _validate_shape(value: Any, path: str, issues: list[ValidationIssue]) -> Non
     _integer(shape.get("gap"), f"{path}.gap", issues, minimum=0, maximum=8192)
 
 
-def _template_slot(slot_value: Any, path: str, issues: list[ValidationIssue]) -> None:
+def _template_slot(
+    slot_value: Any, path: str, issues: list[ValidationIssue], *, version2: bool = False
+) -> None:
     slot = _object(slot_value, path, issues)
     if slot is None:
         return
     common = {"id", "type", "label", "required", "upload_hint", "rect", "rotation_deg"}
     image_fields = {"mode", "fit", "anchor", "clip_mask", "edge_fade_px"}
+    if version2:
+        image_fields.add("clip_mask_sha256")
     text_fields = {
         "default_text",
         "font_path",
@@ -74,9 +80,7 @@ def _template_slot(slot_value: Any, path: str, issues: list[ValidationIssue]) ->
     required = common | (
         image_fields
         if slot_type == "image"
-        else text_fields
-        if slot_type == "text"
-        else set()
+        else text_fields if slot_type == "text" else set()
     )
     _keys(slot, required=required, optional=set(), path=path, issues=issues)
     _identifier(slot.get("id"), f"{path}.id", issues)
@@ -98,6 +102,12 @@ def _template_slot(slot_value: Any, path: str, issues: list[ValidationIssue]) ->
         _pair(slot.get("anchor"), f"{path}.anchor", issues, minimum=0, maximum=1)
         if slot.get("clip_mask") is not None:
             _string(slot.get("clip_mask"), f"{path}.clip_mask", issues)
+            if version2:
+                validate_sha256(
+                    slot.get("clip_mask_sha256"), f"{path}.clip_mask_sha256", issues
+                )
+        elif version2 and slot.get("clip_mask_sha256") is not None:
+            _issue(issues, f"{path}.clip_mask_sha256", "无 clip mask 时哈希必须为 null")
         _integer(
             slot.get("edge_fade_px"),
             f"{path}.edge_fade_px",
@@ -146,6 +156,8 @@ def validate_template_spec(value: Any, *, require_ready: bool = True) -> dict[st
     spec = _object(value, "$", issues)
     if spec is None:
         raise SpecValidationError(issues)
+    slot_background = spec.get("version") == "collage-template/3"
+    version2 = spec.get("version") in {"collage-template/2", "collage-template/3"}
     _keys(
         spec,
         required={
@@ -157,17 +169,37 @@ def validate_template_spec(value: Any, *, require_ready: bool = True) -> dict[st
             "layers",
             "build",
             "review",
+            *({"provenance"} if version2 else set()),
+            *({"background"} if slot_background else set()),
         },
         optional=set(),
         path="$",
         issues=issues,
     )
-    if spec.get("version") != "collage-template/1":
-        _issue(issues, "$.version", "必须是 collage-template/1")
+    if spec.get("version") not in {
+        "collage-template/1",
+        "collage-template/2",
+        "collage-template/3",
+    }:
+        _issue(issues, "$.version", "不支持的模板格式版本")
     allowed_status = {"ready"} if require_ready else {"needs_review", "ready"}
+    if version2:
+        validate_provenance(spec.get("provenance"), "$.provenance", issues)
+        if not require_ready:
+            allowed_status.add("needs_validation")
+        provenance = spec.get("provenance")
+        if isinstance(provenance, Mapping) and provenance.get("kind") != "human":
+            # A1 的来源证据只证明如何制作，不是自动发布的质量验收。
+            if spec.get("status") != "needs_validation":
+                _issue(
+                    issues,
+                    "$.status",
+                    "自动/fixture 制作仍需完整质量验收",
+                    "AUTO_ACCEPTANCE_UNAVAILABLE",
+                )
     _enum(spec.get("status"), allowed_status, "$.status", issues)
     manifest_claims_ready = spec.get("status") == "ready"
-    _canvas(spec.get("canvas"), "$.canvas", issues)
+    canvas = _canvas(spec.get("canvas"), "$.canvas", issues)
 
     assets = _list(spec.get("assets"), "$.assets", issues)
     if assets is not None:
@@ -191,7 +223,7 @@ def validate_template_spec(value: Any, *, require_ready: bool = True) -> dict[st
     slots = _list(spec.get("slots"), "$.slots", issues)
     if slots is not None:
         for index, slot in enumerate(slots):
-            _template_slot(slot, f"$.slots[{index}]", issues)
+            _template_slot(slot, f"$.slots[{index}]", issues, version2=version2)
     asset_ids = _unique_ids(assets, "$.assets", issues)
     slot_ids = _unique_ids(slots, "$.slots", issues)
     for collision in sorted(asset_ids & slot_ids):
@@ -249,7 +281,28 @@ def validate_template_spec(value: Any, *, require_ready: bool = True) -> dict[st
                     references.append(("slot", layer["slot_id"]))
             else:
                 _enum(layer_type, TEMPLATE_LAYER_TYPES, f"{path}.type", issues)
-        if not layers:
+        if slot_background:
+            background_slot = validate_slot_background(
+                spec.get("background"), spec.get("slots"), canvas, issues, template=True
+            )
+            if not layers or layers[0] != {"type": "slot", "slot_id": background_slot}:
+                _issue(
+                    issues,
+                    "$.layers[0]",
+                    "第一层必须引用指定的背景照片槽",
+                    "INVALID_LAYER_ORDER",
+                )
+            if any(
+                isinstance(asset, Mapping) and asset.get("role") == "background"
+                for asset in assets or []
+            ):
+                _issue(
+                    issues,
+                    "$.assets",
+                    "照片槽提供背景时不能包含固定背景素材",
+                    "INVALID_BACKGROUND_COUNT",
+                )
+        elif not layers:
             _issue(issues, "$.layers", "至少需要一个背景层")
         elif isinstance(layers[0], Mapping):
             first_id = layers[0].get("asset_id")

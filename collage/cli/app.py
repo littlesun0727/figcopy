@@ -14,6 +14,8 @@ from ..core.errors import CollageError
 from ..core.io import read_json
 from ..core.logging import configure_logging
 from ..devtools.demo import create_demo
+from ..devtools.window_demo import create_window_demo
+from ..devtools.benchmark import record_baseline
 from ..projects import DataPaths, ProjectStore
 from ..providers import (
     CutoutProvider,
@@ -30,7 +32,9 @@ from ..template.analysis import analyze_reference
 from ..template.build import approve_template, build_template
 from ..template.guide import create_upload_guide
 from ..template.review import confirm_draft
+from ..template.review.recovery import recover_saved_correction
 from ..template.validation import validate_package
+from ..template.probes import probe_template
 from ..workflows import (
     DEFAULT_CUTOUT_PROVIDER,
     DEFAULT_IMAGE_PROVIDER,
@@ -165,7 +169,9 @@ def _parser() -> argparse.ArgumentParser:
     )
     review.add_argument("--draft", type=_path, required=True)
     review.add_argument("--out", type=_path, required=True)
-    review.add_argument("--remove-mask", type=_path, required=True)
+    review.add_argument(
+        "--remove-mask", type=_path, help="固定背景必填；照片背景无需清版蒙版"
+    )
     review.add_argument("--allowed-mask", type=_path)
     review.add_argument("--background-candidate", type=_path)
     review.add_argument("--slot-overrides", type=_path)
@@ -176,9 +182,23 @@ def _parser() -> argparse.ArgumentParser:
     review.add_argument(
         "--feather-px", type=int, default=0, help="人工确认的背景混合边带宽度"
     )
+    review.add_argument(
+        "--background-composition",
+        choices=("protected", "full_candidate"),
+        default="protected",
+        help="局部保护或使用整张清版候选",
+    )
     review.add_argument("--reviewer", required=True)
     review.add_argument("--notes", default="")
     review.add_argument("--force", action="store_true")
+
+    recover = subparsers.add_parser(
+        "recover-review", help="从已保存响应恢复改稿，不调用模型"
+    )
+    recover.add_argument("--draft", type=_path, required=True)
+    recover.add_argument("--request-id", required=True)
+    recover.add_argument("--background-slot", help="明确将该全屏照片槽作为背景")
+    recover.add_argument("--reviewed", type=_path, help="已有人工确认稿的保护路径")
 
     review_ui = subparsers.add_parser(
         "review-ui", help="启动仅监听本机的一页式人工确认界面"
@@ -195,9 +215,15 @@ def _parser() -> argparse.ArgumentParser:
     review_ui.add_argument("--overlay-overrides", type=_path)
     review_ui.add_argument("--expand-px", type=int, default=0)
     review_ui.add_argument("--feather-px", type=int, default=0)
+    review_ui.add_argument(
+        "--background-composition",
+        choices=("protected", "full_candidate"),
+        default="protected",
+        help="局部保护或使用整张清版候选",
+    )
     review_ui.add_argument("--port", type=int, default=8765)
 
-    build = subparsers.add_parser("build", help="构建 needs_review 模板包")
+    build = subparsers.add_parser("build", help="从人工或 v2 执行规格构建待验收模板包")
     build.add_argument("--spec", type=_path, required=True)
     build.add_argument("--out", type=_path, required=True)
     build.add_argument("--work", type=_path)
@@ -221,6 +247,13 @@ def _parser() -> argparse.ArgumentParser:
     validate = subparsers.add_parser("validate", help="校验模板包")
     validate.add_argument("--template", type=_path, required=True)
     validate.add_argument("--allow-unreviewed", action="store_true")
+
+    probe = subparsers.add_parser("probe", help="本地编号探针与窗口可见范围检查")
+    probe.add_argument("--template", type=_path, required=True)
+    probe.add_argument("--out", type=_path, required=True)
+    probe.add_argument(
+        "--expectations", type=_path, help="仅用于离线评测的窗口 mask 规格"
+    )
 
     approve = subparsers.add_parser("approve", help="记录人工视觉验收并发布模板")
     approve.add_argument("--template", type=_path, required=True)
@@ -250,6 +283,19 @@ def _parser() -> argparse.ArgumentParser:
     guide.add_argument("--out", type=_path, required=True, help="HTML 指南路径")
     guide.add_argument("--bindings-out", type=_path, required=True)
     guide.add_argument("--allow-unreviewed", action="store_true")
+
+    baseline = subparsers.add_parser(
+        "benchmark-baseline", help="登记样板指纹和本地能力，不调用模型"
+    )
+    baseline.add_argument("--samples", type=_path, required=True)
+    baseline.add_argument("--catalog", type=_path, required=True)
+    baseline.add_argument("--out", type=_path, required=True)
+    baseline.add_argument("--repository", type=_path, default=Path.cwd())
+
+    window_demo = subparsers.add_parser(
+        "window-demo", help="生成 A1 四窗口离线评测及探针报告"
+    )
+    window_demo.add_argument("--out", type=_path, required=True)
 
     demo = subparsers.add_parser("demo", help="生成不依赖 AI 的完整 M1 演示")
     destination = demo.add_mutually_exclusive_group()
@@ -328,6 +374,13 @@ def _run(args: argparse.Namespace) -> Any:
             product_policy=policy,
             force=args.force,
         )
+    if args.command == "recover-review":
+        return recover_saved_correction(
+            args.draft,
+            args.request_id,
+            background_slot=args.background_slot,
+            reviewed_path=args.reviewed,
+        )
     if args.command == "review":
         return confirm_draft(
             args.draft,
@@ -340,6 +393,7 @@ def _run(args: argparse.Namespace) -> Any:
             overlay_overrides_path=args.overlay_overrides,
             background_expand_px=args.expand_px,
             background_feather_px=args.feather_px,
+            background_composition_mode=args.background_composition,
             notes=args.notes,
             force=args.force,
         )
@@ -355,6 +409,7 @@ def _run(args: argparse.Namespace) -> Any:
             overlay_overrides_path=args.overlay_overrides,
             background_expand_px=args.expand_px,
             background_feather_px=args.feather_px,
+            background_composition_mode=args.background_composition,
             port=args.port,
         )
         return args.out
@@ -381,6 +436,16 @@ def _run(args: argparse.Namespace) -> Any:
         )
     if args.command == "validate":
         return validate_package(args.template, require_ready=not args.allow_unreviewed)
+    if args.command == "probe":
+        report_path = probe_template(
+            args.template, args.out, expectations_path=args.expectations
+        )
+        report = read_json(report_path)
+        if report["status"] == "failed":
+            raise CollageError(
+                "PROBE_CHECK_FAILED", "窗口检查失败；详情见输出目录 quality.json"
+            )
+        return report_path
     if args.command == "approve":
         return approve_template(
             args.template,
@@ -406,6 +471,17 @@ def _run(args: argparse.Namespace) -> Any:
             args.bindings_out,
             require_ready=not args.allow_unreviewed,
         )
+    if args.command == "benchmark-baseline":
+        return record_baseline(
+            args.samples, args.catalog, args.out, repository=args.repository
+        )
+    if args.command == "window-demo":
+        report_path = create_window_demo(args.out)
+        if read_json(report_path)["status"] != "passed":
+            raise CollageError(
+                "PROBE_CHECK_FAILED", "窗口 fixture 未通过，详情见探针报告"
+            )
+        return report_path
     if args.command == "demo":
         if args.out is not None:
             output_dir = args.out

@@ -187,16 +187,42 @@ def create_workbench_server(
         def do_GET(self) -> None:
             try:
                 self._guard_request_host()
+                if urlsplit(self.path).path.rstrip("/") == "/api/provider-settings":
+                    self._json(
+                        HTTPStatus.OK,
+                        app.provider_status(probe_audit=True),
+                    )
+                    return
                 parsed = urlsplit(self.path)
                 path = parsed.path.rstrip("/") or "/"
                 if path == "/" or (
-                    path.startswith("/projects/") and not path.endswith("/review")
+                    path.startswith("/projects/")
+                    and not path.endswith(("/review", "/layers"))
                 ):
                     page = WORKBENCH_HTML.replace("__FIGCOPY_CSRF_TOKEN__", csrf_token)
                     self._send(
                         HTTPStatus.OK,
                         "text/html; charset=utf-8",
                         page.encode("utf-8"),
+                    )
+                    return
+                if path.startswith("/projects/") and path.endswith("/layers"):
+                    project_id = unquote(
+                        path.removeprefix("/projects/")[: -len("/layers")]
+                    )
+                    app.layout(project_id)
+                    page = _read_text_resource("templates", "layers.html").replace(
+                        "__FIGCOPY_CSRF_TOKEN__", csrf_token
+                    )
+                    self._send(
+                        HTTPStatus.OK, "text/html; charset=utf-8", page.encode("utf-8")
+                    )
+                    return
+                if path == "/static/layers.js":
+                    self._send(
+                        HTTPStatus.OK,
+                        "text/javascript; charset=utf-8",
+                        _read_text_resource("static", "layers.js").encode("utf-8"),
                     )
                     return
                 if path == "/static/workbench.css":
@@ -265,8 +291,26 @@ def create_workbench_server(
                     self._not_found()
                     return
                 project_id, rest = routed
+                if rest == ["review", "recoveries"]:
+                    self._json(
+                        HTTPStatus.OK, {"recoveries": app.review_recoveries(project_id)}
+                    )
+                    return
+                if rest == ["review", "correction-status"]:
+                    self._json(HTTPStatus.OK, {"task": app.latest_job(project_id)})
+                    return
                 if not rest:
                     self._json(HTTPStatus.OK, app.project_status(project_id))
+                    return
+                if rest == ["layout"]:
+                    self._json(HTTPStatus.OK, app.layout(project_id))
+                    return
+                if len(rest) == 3 and rest[:2] == ["layout", "layers"]:
+                    self._send(
+                        HTTPStatus.OK,
+                        "image/png",
+                        app.layout_layer(project_id, rest[2]),
+                    )
                     return
                 if rest == ["slots"]:
                     self._json(
@@ -288,7 +332,9 @@ def create_workbench_server(
                     return
                 if len(rest) == 2 and rest[0] == "review":
                     session = app.review_session(project_id)
-                    if rest[1] == "draft":
+                    if rest[1] == "session":
+                        self._json(HTTPStatus.OK, session.browser_state())
+                    elif rest[1] == "draft":
                         self._json(HTTPStatus.OK, session.draft)
                     elif rest[1] == "review-options":
                         self._json(HTTPStatus.OK, session.review_options)
@@ -322,6 +368,12 @@ def create_workbench_server(
         def do_POST(self) -> None:
             try:
                 self._guard_mutation()
+                if urlsplit(self.path).path.rstrip("/") == "/api/provider-settings":
+                    self._json(
+                        HTTPStatus.OK,
+                        app.configure_providers(self._read_json()),
+                    )
+                    return
                 path = urlsplit(self.path).path.rstrip("/") or "/"
                 if path == "/api/projects":
                     form = parse_multipart(
@@ -338,6 +390,30 @@ def create_workbench_server(
                     self._not_found()
                     return
                 project_id, rest = routed
+                if rest == ["layout", "save"]:
+                    self._json(
+                        HTTPStatus.OK, app.save_layout(project_id, self._read_json())
+                    )
+                    return
+                if rest == ["layout", "preview"]:
+                    self._send(
+                        HTTPStatus.OK,
+                        "image/png",
+                        app.preview_layout(project_id, self._read_json()),
+                    )
+                    return
+                if rest == ["review", "recover"]:
+                    self._json(
+                        HTTPStatus.ACCEPTED,
+                        {"task": app.recover_review(project_id, self._read_json())},
+                    )
+                    return
+                if rest == ["review", "revise"]:
+                    self._json(
+                        HTTPStatus.ACCEPTED,
+                        {"task": app.revise_review(project_id, self._read_json())},
+                    )
+                    return
                 if rest == ["review", "save"]:
                     result = app.save_review(project_id, self._read_json())
                     self._json(HTTPStatus.OK, result)

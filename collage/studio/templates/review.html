@@ -11,16 +11,26 @@
   <aside>
     <a id="returnLink" class="return-link" hidden>← 返回项目</a>
     <h1>确认模板</h1>
-    <p class="muted">通常只需检查蓝框/粉框位置并画出要从底图清除的区域。羽化、字体和装饰素材已自动处理。</p>
+    <p class="muted">先回答识别疑问并提交纠正，查看新结果后手动确认。每个装饰会独立制作。</p>
+    <h2>识别复核</h2>
+    <div id="savedCorrections" hidden></div>
+    <div id="questions"></div>
+    <label class="stack">其他错误或补充说明（选填）
+      <textarea id="otherFeedback" maxlength="12000" placeholder="例如：少识别了一张照片；右上角装饰需要拆开"></textarea>
+    </label>
+    <button id="revise" class="primary">提交回答，让 VLM 纠正</button>
+    <p id="revisionHint" class="muted"></p>
     <div class="row mode">
       <button id="boxMode" class="active">拖动框</button>
       <button id="drawMode">画删除区</button>
       <button id="eraseMode">擦除</button>
       <button id="resetMask">恢复自动涂层</button>
-      <label>笔刷 <input id="brush" type="range" min="2" max="160" value="36"></label>
+      <label id="brushControl">笔刷 <input id="brush" type="range" min="2" max="160" value="36"></label>
     </div>
     <div id="items"></div>
 
+    <p id="photoBackgroundHint" class="auto" hidden>背景由客户上传的全屏照片提供，无需清版；背景照片需不透明并铺满画布。</p>
+    <section id="backgroundControls">
     <h2>清除旧内容</h2>
     <p id="maskHint" class="auto">正在自动标出需要清除的区域…</p>
     <label id="emptyMaskOption" class="warning" hidden>
@@ -28,6 +38,13 @@
       这张图不需要清除旧内容
     </label>
 
+    <label class="stack">背景制作方式
+      <select id="backgroundComposition">
+        <option value="protected">局部保护：只替换删除区</option>
+        <option value="full_candidate">整张重建：使用完整清版背景</option>
+      </select>
+    </label>
+    <p class="muted">大面积替换照片、纸纹只需近似时可用整张重建，避免新底纹与原图碎片产生接缝；需保留原背景细节时用局部保护。</p>
     <details class="advanced">
       <summary>高级：清版参数</summary>
       <label class="stack">背景补全要求
@@ -38,13 +55,15 @@
         <label>融合羽化 <input id="backgroundFeather" type="number" min="0" max="4096"></label>
       </div>
     </details>
+    </section>
     <details class="advanced">
       <summary>高级：调整图层顺序</summary>
       <div id="layers"></div>
     </details>
     <p id="autoSummary" class="muted"></p>
     <h2>保存</h2>
-    <div class="row"><button id="save" class="primary">确认并保存</button></div>
+    <label class="stack"><span><input id="finalConfirmed" type="checkbox">我已检查当前识别结果，确认没有问题</span></label>
+    <div class="row"><button id="save" class="primary">确认并开始制作</button></div>
     <div id="status" class="status">正在载入…</div>
   </aside>
 </main>

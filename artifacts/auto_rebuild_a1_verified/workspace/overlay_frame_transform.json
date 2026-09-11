@@ -1,0 +1,23 @@
+{
+  "kind": "local_basic_shape",
+  "source_size": [
+    156,
+    120
+  ],
+  "target_size": [
+    156,
+    120
+  ],
+  "scale": [
+    1.0,
+    1.0
+  ],
+  "offset": [
+    0.0,
+    0.0
+  ],
+  "content_size": [
+    156,
+    120
+  ]
+}

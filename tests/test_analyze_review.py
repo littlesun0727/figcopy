@@ -189,6 +189,92 @@ def test_inline_ui_decisions_are_applied_to_reviewed_spec(tmp_path: Path) -> Non
     assert reviewed["overlays"][0]["requires_exact_content"] is False
 
 
+def test_basic_shape_without_shape_override_falls_back_to_reference_generation(
+    tmp_path: Path,
+) -> None:
+    reference = tmp_path / "reference.png"
+    manual = tmp_path / "manual.json"
+    mask = tmp_path / "mask.png"
+    payload = _draft_payload()
+    payload["overlays"] = [
+        {
+            "id": "frame",
+            "label": "虚线框组合",
+            "source_rect": [0, 0, 8, 8],
+            "target_rect": [0, 0, 8, 8],
+            "action": "basic_shape",
+            "generation_brief": "多个白色虚线框",
+            "requires_exact_content": False,
+            "review_notes": "",
+        }
+    ]
+    payload["layer_order"].append({"type": "overlay", "id": "frame"})
+    atomic_save_image(Image.new("RGB", (12, 10), "orange"), reference)
+    atomic_save_image(Image.new("L", (12, 10), 255), mask)
+    atomic_write_json(manual, payload)
+    draft_path = analyze_reference(
+        reference, tmp_path / "work", manual_draft_path=manual
+    )
+
+    reviewed_path = confirm_draft(
+        draft_path,
+        tmp_path / "work" / "reviewed.json",
+        remove_mask_path=mask,
+        reviewer="tester",
+    )
+
+    overlay = read_json(reviewed_path)["overlays"][0]
+    assert overlay["action"] == "reference_generate"
+    assert overlay["shape"] is None
+
+
+def test_basic_shape_with_shape_override_stays_local(tmp_path: Path) -> None:
+    reference = tmp_path / "reference.png"
+    manual = tmp_path / "manual.json"
+    mask = tmp_path / "mask.png"
+    payload = _draft_payload()
+    payload["overlays"] = [
+        {
+            "id": "frame",
+            "label": "虚线框",
+            "source_rect": [0, 0, 8, 8],
+            "target_rect": [0, 0, 8, 8],
+            "action": "basic_shape",
+            "generation_brief": "白色虚线框",
+            "requires_exact_content": False,
+            "review_notes": "",
+        }
+    ]
+    payload["layer_order"].append({"type": "overlay", "id": "frame"})
+    atomic_save_image(Image.new("RGB", (12, 10), "orange"), reference)
+    atomic_save_image(Image.new("L", (12, 10), 255), mask)
+    atomic_write_json(manual, payload)
+    draft_path = analyze_reference(
+        reference, tmp_path / "work", manual_draft_path=manual
+    )
+    shape = {
+        "kind": "dashed_rectangle",
+        "fill": None,
+        "outline": "#FFFFFF",
+        "width": 1,
+        "radius": 0,
+        "dash": 2,
+        "gap": 1,
+    }
+
+    reviewed_path = confirm_draft(
+        draft_path,
+        tmp_path / "work" / "reviewed.json",
+        remove_mask_path=mask,
+        reviewer="tester",
+        overlay_overrides_data={"frame": {"shape": shape}},
+    )
+
+    overlay = read_json(reviewed_path)["overlays"][0]
+    assert overlay["action"] == "basic_shape"
+    assert overlay["shape"] == shape
+
+
 def test_unknown_and_questions_block_confirmation(tmp_path: Path) -> None:
     reference = tmp_path / "reference.png"
     manual = tmp_path / "manual.json"

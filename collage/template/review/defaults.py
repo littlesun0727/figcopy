@@ -74,6 +74,7 @@ def build_review_options(
     *,
     background_expand_px: int,
     background_feather_px: int,
+    background_composition_mode: str = "protected",
 ) -> dict[str, Any]:
     """生成确认页初值，同时保留命令行传入的高级覆盖配置。"""
 
@@ -116,8 +117,10 @@ def build_review_options(
         file_override = file_overlay_overrides.get(source["id"], {})
         fields = {
             **default_overlay_review_fields(),
-            # 简化确认页默认允许近似制作；高级覆盖文件仍可显式要求精确素材。
-            "requires_exact_content": False,
+            "requires_exact_content": source["requires_exact_content"],
+            "text_content": source.get("text_content"),
+            "text_confirmed": False,
+            "shape": source.get("shape"),
         }
         fields.update(file_override)
         overlays[source["id"]] = fields
@@ -131,6 +134,7 @@ def build_review_options(
         "background": {
             "expand_px": background_expand_px,
             "feather_px": background_feather_px,
+            "composition_mode": background_composition_mode,
         },
     }
 
@@ -199,6 +203,12 @@ def automatic_review_notes(
         and overlay_overrides.get(source["id"], {}).get("requires_exact_content")
         is False
     ]
+    incomplete_basic_shapes = [
+        source["id"]
+        for source in draft["overlays"]
+        if source.get("action") == "basic_shape"
+        and overlay_overrides.get(source["id"], {}).get("shape") is None
+    ]
     if inferred_text:
         lines.append("- 已从 Draft 槽位名称回填默认文字：" + ", ".join(inferred_text))
     if fallback_fonts:
@@ -208,6 +218,11 @@ def automatic_review_notes(
     if approximate_overlays:
         lines.append(
             "- 缺少精确透明素材，已改为近似制作：" + ", ".join(approximate_overlays)
+        )
+    if incomplete_basic_shapes:
+        lines.append(
+            "- basic_shape 缺少可执行参数，已改为参考图近似制作："
+            + ", ".join(incomplete_basic_shapes)
         )
     if questions_deferred and draft.get("questions"):
         lines.append(
@@ -253,8 +268,16 @@ def validate_review_decisions(
             "requires_exact_content": source["requires_exact_content"],
         }
         fields.update(overlay_overrides.get(source["id"], {}))
-        if fields.get("requires_exact_content") is True and not fields.get(
-            "prepared_asset"
+        if (source.get("text_content") or fields.get("text_content")) and (
+            not fields.get("text_content") or fields.get("text_confirmed") is not True
+        ):
+            blockers.append(f"{source['id']} 的完整文字需要逐字确认")
+        if (
+            fields.get("requires_exact_content") is True
+            and not fields.get("prepared_asset")
+            and not (
+                fields.get("text_content") and fields.get("text_confirmed") is True
+            )
         ):
             blockers.append(f"{source['id']} 的精确内容需要 prepared asset")
 

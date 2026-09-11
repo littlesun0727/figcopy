@@ -1,0 +1,246 @@
+{
+  "version": "collage-template/2",
+  "status": "needs_validation",
+  "canvas": {
+    "width": 480,
+    "height": 360,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "assets": [
+    {
+      "id": "bg",
+      "path": "assets/background.png",
+      "role": "background",
+      "requires_alpha": false,
+      "sha256": "cba2bab9fa82593fd95037a20a6519f1274ec070e070d8b8885d75f03faba9b0"
+    },
+    {
+      "id": "tape",
+      "path": "assets/overlay_tape.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "58c22d2017540d9fecd1b9bdc04fd855d9444dcb1706e7e7eca716fc5eed46cf"
+    },
+    {
+      "id": "frame",
+      "path": "assets/overlay_frame.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "7f1e2887c5a76afff6197fbcd8ecb674fb4ff8d0604292781a28bba2738cff11"
+    }
+  ],
+  "slots": [
+    {
+      "id": "main_photo",
+      "type": "image",
+      "label": "main_photo",
+      "required": true,
+      "upload_hint": "程序探针，仅供离线评测",
+      "rect": [
+        0,
+        0,
+        480,
+        360
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": "masks/main_photo_clip.png",
+      "edge_fade_px": 0,
+      "clip_mask_sha256": "4db0b4b64c5ce3bb291cdbb744c1ae8c2900d43cae63c448f550a1eabb8bf282"
+    },
+    {
+      "id": "photo_left",
+      "type": "image",
+      "label": "photo_left",
+      "required": true,
+      "upload_hint": "程序探针，仅供离线评测",
+      "rect": [
+        32,
+        48,
+        140,
+        104
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": "masks/photo_left_clip.png",
+      "edge_fade_px": 0,
+      "clip_mask_sha256": "ff04537c6c870c757d3e8c0f57e585a935732f1ff0bcab956d53d2cece6eecea"
+    },
+    {
+      "id": "photo_right",
+      "type": "image",
+      "label": "photo_right",
+      "required": true,
+      "upload_hint": "程序探针，仅供离线评测",
+      "rect": [
+        294,
+        38,
+        144,
+        108
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": "masks/photo_right_clip.png",
+      "edge_fade_px": 0,
+      "clip_mask_sha256": "c7ca07fc90a72339dc54002c01103566b27e9a2b2da568636df4cc555c2eac41"
+    },
+    {
+      "id": "photo_bottom",
+      "type": "image",
+      "label": "photo_bottom",
+      "required": true,
+      "upload_hint": "程序探针，仅供离线评测",
+      "rect": [
+        250,
+        222,
+        160,
+        104
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": "masks/photo_bottom_clip.png",
+      "edge_fade_px": 0,
+      "clip_mask_sha256": "317e6116588ae35eea98a9c64cf7d535a6e12234872c4b6ab30322ca30ed93b0"
+    }
+  ],
+  "layers": [
+    {
+      "type": "asset",
+      "asset_id": "bg",
+      "rect": [
+        0,
+        0,
+        480,
+        360
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "slot",
+      "slot_id": "main_photo"
+    },
+    {
+      "type": "slot",
+      "slot_id": "photo_left"
+    },
+    {
+      "type": "slot",
+      "slot_id": "photo_right"
+    },
+    {
+      "type": "slot",
+      "slot_id": "photo_bottom"
+    },
+    {
+      "type": "asset",
+      "asset_id": "frame",
+      "rect": [
+        24,
+        40,
+        156,
+        120
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "tape",
+      "rect": [
+        0,
+        0,
+        480,
+        360
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "build": {
+    "source_sha256": "89b99cbd3f06f47cc46145846f0477926e6144860b0011df30561ca4659415d6",
+    "created_at": "2026-09-11T08:01:20+00:00",
+    "tool_version": "0.1.0",
+    "fixture_used": true,
+    "providers": [
+      {
+        "node": "background",
+        "name": "imported-background",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:tape",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:frame",
+        "name": "local-basic-shape",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      }
+    ]
+  },
+  "review": {
+    "visual_approved": false,
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": "",
+    "evidence_sha256": []
+  },
+  "provenance": {
+    "kind": "fixture",
+    "policy_version": "auto-rebuild-policy/1",
+    "evidence_sha256": [
+      "e90ab3cfa9871d7e83991b9102ee3120e89147a649a5177a3260675a387664fe"
+    ],
+    "unresolved": []
+  }
+}

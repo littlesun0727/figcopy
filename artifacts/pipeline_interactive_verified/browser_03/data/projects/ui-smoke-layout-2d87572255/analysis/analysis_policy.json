@@ -1,0 +1,15 @@
+{
+  "goal": "fixed_layout_customer_content_replacement",
+  "image_modes": [
+    "photo",
+    "photo_feather",
+    "cutout",
+    "unknown"
+  ],
+  "overlay_actions": [
+    "basic_shape",
+    "reference_generate"
+  ],
+  "allow_approximate_fixed_overlays": true,
+  "exact_content_requires_original_asset": true
+}

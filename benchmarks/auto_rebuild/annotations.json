@@ -1,0 +1,731 @@
+{
+  "version": "auto-rebuild-evaluation-inventory/1",
+  "purpose": "offline_evaluation_only",
+  "source": "assistant_visual_inspection_of_user_authorized_thumbnails",
+  "coordinate_space": "normalized_reference_fraction",
+  "geometry_precision": "coarse_inventory_not_calibrated",
+  "exact_masks_complete": false,
+  "production_input_allowed": false,
+  "samples": [
+    {
+      "id": "S01",
+      "windows": [
+        {
+          "id": "portrait_upper_left",
+          "region": [
+            0,
+            0,
+            0.64,
+            0.46
+          ],
+          "mode": "photo_feather"
+        },
+        {
+          "id": "portrait_upper_right",
+          "region": [
+            0.49,
+            0.19,
+            0.51,
+            0.36
+          ],
+          "mode": "photo_feather"
+        },
+        {
+          "id": "portrait_lower_left",
+          "region": [
+            0,
+            0.43,
+            0.4,
+            0.4
+          ],
+          "mode": "photo_feather"
+        },
+        {
+          "id": "portrait_lower_front",
+          "region": [
+            0.16,
+            0.46,
+            0.84,
+            0.54
+          ],
+          "mode": "unresolved"
+        }
+      ],
+      "layer_constraints": [
+        "lower_front portrait is in front of lower_left portrait",
+        "coffee/ticket/text/cats/stars remain independent fixed foreground"
+      ],
+      "fixed_text": [
+        "together!",
+        "hello",
+        "I am an artist"
+      ],
+      "text_policy": "preserve readable text; other ticket lettering requires full-size verification",
+      "allowed_approximations": [
+        "noncritical paper texture",
+        "cat and star illustration details"
+      ],
+      "unresolved": [
+        "lower_front portrait boundary: cutout versus locally feathered photo",
+        "precise translucent overlaps and soft masks"
+      ]
+    },
+    {
+      "id": "S02",
+      "windows": [
+        {
+          "id": "main_street",
+          "region": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "small_upper_left",
+          "region": [
+            0.053,
+            0.116,
+            0.259,
+            0.154
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "tall_upper_right",
+          "region": [
+            0.451,
+            0.053,
+            0.476,
+            0.464
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "lower_left",
+          "region": [
+            0.078,
+            0.49,
+            0.439,
+            0.429
+          ],
+          "mode": "photo"
+        }
+      ],
+      "layer_constraints": [
+        "main_street below all three inserted photos",
+        "lower_left photo overlaps bottom-left edge of tall_upper_right",
+        "dashed frames and doodles above photos"
+      ],
+      "fixed_text": [
+        "small upper-left handwriting"
+      ],
+      "text_policy": "preserve original lettering as isolated foreground only after residue check; unreadable text is not regenerated",
+      "allowed_approximations": [
+        "dash spacing after geometric calibration",
+        "minor doodle stroke details"
+      ],
+      "unresolved": [
+        "exact rotated edges of lower_left photo",
+        "clean extraction of fine handwriting without street pixels"
+      ]
+    },
+    {
+      "id": "S03",
+      "windows": [
+        {
+          "id": "drinks",
+          "region": [
+            0.173,
+            0.261,
+            0.299,
+            0.295
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "portrait_upper_right",
+          "region": [
+            0.493,
+            0.214,
+            0.343,
+            0.28
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "plush_lower_right",
+          "region": [
+            0.514,
+            0.568,
+            0.347,
+            0.174
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "plush_lower_left",
+          "region": [
+            0.187,
+            0.641,
+            0.357,
+            0.229
+          ],
+          "mode": "photo"
+        }
+      ],
+      "layer_constraints": [
+        "paper/clipboard behind windows",
+        "lower-left plush photo overlaps lower-right photo",
+        "tape, torn edges and labels above windows"
+      ],
+      "fixed_text": [
+        "clamp!",
+        "#TO DO LIST:",
+        "HAVE A NICE DAY"
+      ],
+      "text_policy": "retain Chinese handwriting and labels without inventing unrecognized characters",
+      "allowed_approximations": [
+        "paper grain",
+        "minor tape wear"
+      ],
+      "unresolved": [
+        "torn drink-photo boundary and mixed-color tape edges",
+        "full-resolution text transcription"
+      ]
+    },
+    {
+      "id": "S04",
+      "windows": [
+        {
+          "id": "upper_left",
+          "region": [
+            0.088,
+            0.056,
+            0.357,
+            0.28
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "upper_right",
+          "region": [
+            0.548,
+            0.099,
+            0.36,
+            0.305
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "lower_left",
+          "region": [
+            0.078,
+            0.51,
+            0.374,
+            0.364
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "lower_right",
+          "region": [
+            0.571,
+            0.55,
+            0.354,
+            0.341
+          ],
+          "mode": "photo"
+        }
+      ],
+      "layer_constraints": [
+        "four rectangular photo windows inside fixed decorated frames",
+        "central star and labels above adjacent frame edges"
+      ],
+      "fixed_text": [
+        "dates and Japanese lettering on frames"
+      ],
+      "text_policy": "verify exact frame lettering at full resolution; do not turn frame text into generated gibberish",
+      "allowed_approximations": [
+        "small paw/star illustrations",
+        "noncritical background dots"
+      ],
+      "unresolved": [
+        "precise frame windows and meaningful fine text"
+      ]
+    },
+    {
+      "id": "S05",
+      "windows": [
+        {
+          "id": "left_page_top",
+          "region": [
+            0.065,
+            0.065,
+            0.344,
+            0.14
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "left_page_middle_left",
+          "region": [
+            0.082,
+            0.201,
+            0.17,
+            0.171
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "left_page_middle_right",
+          "region": [
+            0.262,
+            0.201,
+            0.187,
+            0.179
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "left_page_bottom",
+          "region": [
+            0.085,
+            0.377,
+            0.364,
+            0.179
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "right_page_top",
+          "region": [
+            0.592,
+            0.089,
+            0.214,
+            0.12
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "right_page_middle",
+          "region": [
+            0.595,
+            0.222,
+            0.316,
+            0.145
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "right_page_bottom",
+          "region": [
+            0.578,
+            0.405,
+            0.327,
+            0.126
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "loose_left_print",
+          "region": [
+            0.238,
+            0.575,
+            0.252,
+            0.164
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "loose_right_print",
+          "region": [
+            0.483,
+            0.546,
+            0.279,
+            0.157
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "bottom_left_nested_photo",
+          "region": [
+            0.058,
+            0.649,
+            0.313,
+            0.32
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "bottom_right_portrait",
+          "region": [
+            0.415,
+            0.655,
+            0.534,
+            0.307
+          ],
+          "mode": "photo"
+        }
+      ],
+      "layer_constraints": [
+        "two tilted loose prints overlap lower page and lower photos",
+        "paper notes, tape and labels remain foreground"
+      ],
+      "replacement_units": "bottom_left is a photograph of several prints and is one outer image input; do not create a slot for every nested print",
+      "fixed_text": [
+        "page labels and handwritten notes"
+      ],
+      "allowed_approximations": [
+        "minor paper wear"
+      ],
+      "unresolved": [
+        "precise rotations/quad corners of loose prints",
+        "whether all eleven candidate windows are independent business replacement units"
+      ]
+    },
+    {
+      "id": "S06",
+      "windows": [
+        {
+          "id": "upper_left_pool",
+          "region": [
+            0.163,
+            0.195,
+            0.255,
+            0.194
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "upper_right_food",
+          "region": [
+            0.517,
+            0.189,
+            0.309,
+            0.181
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "small_center_print",
+          "region": [
+            0.333,
+            0.356,
+            0.163,
+            0.133
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "lower_left_landscape",
+          "region": [
+            0.194,
+            0.574,
+            0.255,
+            0.182
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "lower_right_clothing",
+          "region": [
+            0.544,
+            0.557,
+            0.299,
+            0.143
+          ],
+          "mode": "photo"
+        }
+      ],
+      "layer_constraints": [
+        "board is fixed",
+        "clips, twine and labels overlay photo edges",
+        "external street surrounds board"
+      ],
+      "fixed_text": [
+        "Happy Children's Day and printed notes"
+      ],
+      "replacement_units": "small_center_print is recorded as a candidate independent print; external street role is unresolved",
+      "allowed_approximations": [
+        "minor cardboard texture"
+      ],
+      "unresolved": [
+        "external scene fixed versus replacement slot",
+        "center print replacement policy and exact windows"
+      ]
+    },
+    {
+      "id": "S07",
+      "windows": [
+        {
+          "id": "upper_left_hand_photo",
+          "region": [
+            0.153,
+            0.195,
+            0.282,
+            0.164
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "upper_right_cafe",
+          "region": [
+            0.537,
+            0.185,
+            0.248,
+            0.174
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "small_center_flowers",
+          "region": [
+            0.34,
+            0.359,
+            0.146,
+            0.123
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "lower_left_breakfast",
+          "region": [
+            0.194,
+            0.576,
+            0.245,
+            0.176
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "lower_right_cat",
+          "region": [
+            0.524,
+            0.553,
+            0.32,
+            0.153
+          ],
+          "mode": "photo"
+        }
+      ],
+      "layer_constraints": [
+        "board and two panels preserve ordering",
+        "clips, labels and twine remain in front of images",
+        "shop scene surrounds board"
+      ],
+      "fixed_text": [
+        "album printed notes and labels"
+      ],
+      "replacement_units": "apply same rule as S06; a print visible within upper_left_hand_photo is part of that outer photo",
+      "allowed_approximations": [
+        "minor cardboard texture"
+      ],
+      "unresolved": [
+        "external scene fixed versus replacement slot",
+        "geometry differs from S06; do not reuse its coordinates"
+      ]
+    },
+    {
+      "id": "S08",
+      "windows": [
+        {
+          "id": "upper_photo",
+          "region": [
+            0.33,
+            0.115,
+            0.429,
+            0.23
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "middle_photo",
+          "region": [
+            0.245,
+            0.42,
+            0.347,
+            0.194
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "lower_photo",
+          "region": [
+            0.245,
+            0.717,
+            0.265,
+            0.207
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "seated_cutout",
+          "region": [
+            0.456,
+            0.486,
+            0.514,
+            0.514
+          ],
+          "mode": "cutout"
+        }
+      ],
+      "layer_constraints": [
+        "three binder rings occlude paper at left",
+        "large seated cutout crosses page lower/right boundaries and covers part of lower photo",
+        "cutout white border follows new subject alpha"
+      ],
+      "fixed_text": [
+        "Find sweetness in plain days",
+        "So Happy",
+        "TODAY",
+        "Life"
+      ],
+      "text_policy": "verify remaining lettering at full resolution",
+      "allowed_approximations": [
+        "minor sticker details",
+        "white outline texture"
+      ],
+      "unresolved": [
+        "precise cutout safety region and border extension"
+      ]
+    },
+    {
+      "id": "S09",
+      "windows": [
+        {
+          "id": "upper_right_portrait",
+          "region": [
+            0.534,
+            0.06,
+            0.347,
+            0.214
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "small_right_group",
+          "region": [
+            0.571,
+            0.307,
+            0.255,
+            0.133
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "slanted_upper_left",
+          "region": [
+            0.109,
+            0.244,
+            0.299,
+            0.145
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "held_left_print",
+          "region": [
+            0.18,
+            0.343,
+            0.303,
+            0.264
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "held_front_print",
+          "region": [
+            0.32,
+            0.369,
+            0.364,
+            0.315
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "lower_cutout",
+          "region": [
+            0.422,
+            0.599,
+            0.578,
+            0.401
+          ],
+          "mode": "cutout"
+        }
+      ],
+      "layer_constraints": [
+        "hand and fingers in front of held photos",
+        "front tilted print overlaps left held print",
+        "bottom person has new-subject white edge"
+      ],
+      "replacement_units": "photos held by the bottom person remain inside that cutout input; heart montage is a separate unresolved unit",
+      "fixed_text": [
+        "stamp and handwritten fragments"
+      ],
+      "allowed_approximations": [
+        "wood/paper texture details"
+      ],
+      "unresolved": [
+        "heart photo montage replacement policy",
+        "four-corner geometry and hand isolation",
+        "small occluded photo windows"
+      ]
+    },
+    {
+      "id": "S10",
+      "windows": [
+        {
+          "id": "main_beach_scene",
+          "region": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "right_photo",
+          "region": [
+            0.534,
+            0.48,
+            0.405,
+            0.414
+          ],
+          "mode": "photo"
+        },
+        {
+          "id": "front_left_cutout",
+          "region": [
+            0.024,
+            0.441,
+            0.561,
+            0.51
+          ],
+          "mode": "cutout"
+        }
+      ],
+      "layer_constraints": [
+        "front cutout and its torn white edge overlap lower photo/scene",
+        "weather card and meaningful text are fixed foreground",
+        "foreground shadow extends beyond body alpha"
+      ],
+      "fixed_text": [
+        "SUMMER TIME"
+      ],
+      "text_policy": "Paragraph requires full-resolution transcription; preserve original glyphs until checked.",
+      "allowed_approximations": [
+        "torn border fine texture",
+        "minor starfish/weather symbols"
+      ],
+      "unresolved": [
+        "top standing figure belongs to main photograph or separate cutout",
+        "exact paragraph transcription and outline mask"
+      ]
+    }
+  ],
+  "note": "All bounding boxes are coarse evaluation inventory from thumbnails, not exact masks, thresholds, runtime decisions or production input. Unresolved roles and text remain unverified."
+}

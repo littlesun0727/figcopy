@@ -1,0 +1,23 @@
+{
+  "version": "collage-review-feedback/1",
+  "status": "complete",
+  "base_revision": "5affd1eb3f101cc1cd9447592e35130a1a69e5aacee9e427299ea125ac4488ca",
+  "submitted_at": "2026-09-11T11:05:30.667892+00:00",
+  "question_resolutions": [
+    {
+      "question": "这两件装饰需要分开移动吗？",
+      "answer": "两件需要分开"
+    }
+  ],
+  "other_feedback": "保留两件独立装饰",
+  "revision": "9898e945d37dd5ab34e6c644805b2c68a599679fb124654abea9f2bc4099229c",
+  "audit": {
+    "name": "ui-smoke-fixture",
+    "requested_model": "fixture",
+    "actual_model": "fixture",
+    "request_id": "ui-fixture",
+    "fixture": true,
+    "cache_hit": false,
+    "elapsed_ms": 0
+  }
+}

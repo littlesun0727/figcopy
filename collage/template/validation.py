@@ -57,18 +57,19 @@ def validate_package(
 
     root = template_dir.resolve()
     manifest_path = root / "template.json"
-    LOGGER.info("校验模板包 | path=%s require_ready=%s", root, require_ready)
+    LOGGER.debug("校验模板包 | require_ready=%s", require_ready)
     spec = validate_template_spec(read_json(manifest_path), require_ready=require_ready)
     issues: list[ValidationIssue] = []
     _scan_sensitive(spec, "$", issues)
     canvas_size = (spec["canvas"]["width"], spec["canvas"]["height"])
     assets_by_id = {asset["id"]: asset for asset in spec["assets"]}
     background_count = sum(asset["role"] == "background" for asset in spec["assets"])
-    if background_count != 1:
+    expected_backgrounds = 0 if spec["version"] == "collage-template/3" else 1
+    if background_count != expected_backgrounds:
         issues.append(
             ValidationIssue(
                 "$.assets",
-                "模板包必须且只能有一个 background asset",
+                f"当前模板必须包含 {expected_backgrounds} 个 background asset",
                 "INVALID_BACKGROUND_COUNT",
             )
         )
@@ -113,6 +114,14 @@ def validate_package(
     for index, slot in enumerate(spec["slots"]):
         width = rect_to_box(slot["rect"])[2] - rect_to_box(slot["rect"])[0]
         height = rect_to_box(slot["rect"])[3] - rect_to_box(slot["rect"])[1]
+        if width < 1 or height < 1:
+            issues.append(
+                ValidationIssue(
+                    f"$.slots[{index}].rect",
+                    "槽位取整后必须至少为 1×1 像素",
+                    "EMPTY_SLOT_RECT",
+                )
+            )
         if slot["type"] == "image" and slot["clip_mask"] is not None:
             mask_path = _check_relative_path(
                 root, slot["clip_mask"], f"$.slots[{index}].clip_mask", issues
@@ -120,6 +129,25 @@ def validate_package(
             if mask_path is not None:
                 try:
                     mask = decode_image(mask_path, mode="L")
+                    if mask.getbbox() is None:
+                        issues.append(
+                            ValidationIssue(
+                                f"$.slots[{index}].clip_mask",
+                                "照片窗口不能完全透明",
+                                "EMPTY_SLOT_MASK",
+                            )
+                        )
+                    if (
+                        spec["version"] in {"collage-template/2", "collage-template/3"}
+                        and sha256_file(mask_path) != slot["clip_mask_sha256"]
+                    ):
+                        issues.append(
+                            ValidationIssue(
+                                f"$.slots[{index}].clip_mask_sha256",
+                                "窗口 mask 哈希与清单不一致",
+                                "MASK_HASH_MISMATCH",
+                            )
+                        )
                     if mask.size != (width, height):
                         issues.append(
                             ValidationIssue(
@@ -198,7 +226,7 @@ def validate_package(
 
     if issues:
         raise SpecValidationError(issues, "模板包文件校验失败")
-    LOGGER.info(
+    LOGGER.debug(
         "模板包校验通过 | assets=%s slots=%s layers=%s",
         len(spec["assets"]),
         len(spec["slots"]),

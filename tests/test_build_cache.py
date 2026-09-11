@@ -109,6 +109,19 @@ class ChromaOnlyOverlayProvider:
             ),
         )
 
+    def inspect_overlay(self, reference_crop, candidate, **kwargs):
+        return (
+            {
+                "complete": True,
+                "matches_reference": True,
+                "unwanted_content": False,
+                "uncertain": False,
+                "observed_text": "",
+                "issues": [],
+            },
+            ProviderAudit("fixture-inspection", "fixture", "fixture", None, True, 0),
+        )
+
 
 def test_expensive_background_call_is_cached_and_brief_invalidates(
     tmp_path: Path,

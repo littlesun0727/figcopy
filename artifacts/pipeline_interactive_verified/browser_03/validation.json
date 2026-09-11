@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "fixture": true,
+  "real_model_calls": 0,
+  "questions_shown": true,
+  "other_default_empty": true,
+  "correction_and_manual_confirmation": true,
+  "pointer_drag": true,
+  "scale_rotate_reorder": true,
+  "local_exact_preview": true,
+  "new_version_saved": true,
+  "original_manifest_unchanged": true,
+  "asset_hashes_unchanged": true,
+  "browser_exceptions": []
+}

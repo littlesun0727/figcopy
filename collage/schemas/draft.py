@@ -6,6 +6,8 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..core.errors import SpecValidationError, ValidationIssue
+from .background import validate_slot_background
+from .template import _validate_shape
 from .common import (
     DRAFT_IMAGE_MODES,
     LAYER_TYPES,
@@ -97,10 +99,14 @@ def _draft_overlay(
             "requires_exact_content",
             "review_notes",
         },
-        optional=set(),
+        optional={"text_content", "shape"},
         path=path,
         issues=issues,
     )
+    if "text_content" in overlay:
+        _string(overlay["text_content"], f"{path}.text_content", issues, nullable=True)
+    if overlay.get("shape") is not None:
+        _validate_shape(overlay["shape"], f"{path}.shape", issues)
     _identifier(overlay.get("id"), f"{path}.id", issues)
     _string(overlay.get("label"), f"{path}.label", issues)
     if _rect(overlay.get("source_rect"), f"{path}.source_rect", issues, source=True):
@@ -129,6 +135,7 @@ def _draft_layers(
     issues: list[ValidationIssue],
     slot_ids: set[str],
     overlay_ids: set[str],
+    background_slot: str | None = None,
 ) -> None:
     layers = _list(value, path, issues)
     if layers is None:
@@ -159,13 +166,25 @@ def _draft_layers(
                 references.append((layer_type, layer["id"]))
         else:
             _enum(layer_type, LAYER_TYPES, f"{layer_path}.type", issues)
-    if (
+    if background_slot is not None:
+        if not layers or layers[0] != {"type": "slot", "id": background_slot}:
+            _issue(
+                issues, path, "第一层必须引用指定的背景照片槽", "INVALID_LAYER_ORDER"
+            )
+        if background_count:
+            _issue(
+                issues,
+                path,
+                "照片槽提供背景时不能再引用固定背景层",
+                "INVALID_LAYER_ORDER",
+            )
+    elif (
         not layers
         or not isinstance(layers[0], Mapping)
         or layers[0].get("type") != "background"
     ):
         _issue(issues, path, "第一层必须是 background", "INVALID_LAYER_ORDER")
-    if background_count != 1:
+    if background_slot is None and background_count != 1:
         _issue(issues, path, "background 必须且只能出现一次", "INVALID_LAYER_ORDER")
     expected = {
         *(("slot", name) for name in slot_ids),
@@ -232,8 +251,18 @@ def validate_draft(value: Any, *, require_metadata: bool = True) -> dict[str, An
     for collision in sorted(slot_ids & overlay_ids):
         _issue(issues, "$", f"slot 与 overlay 的 ID 冲突：{collision}", "DUPLICATE_ID")
 
+    slot_background = draft.get("version") == "collage-draft/2" or (
+        not require_metadata
+        and isinstance(draft.get("background"), Mapping)
+        and draft["background"].get("mode") == "slot"
+    )
+    background_slot = None
+    if slot_background:
+        background_slot = validate_slot_background(
+            draft.get("background"), slots, canvas, issues, draft=True
+        )
     background = _object(draft.get("background"), "$.background", issues)
-    if background is not None:
+    if background is not None and not slot_background:
         _keys(
             background,
             required={"background_brief", "review_notes"},
@@ -254,7 +283,12 @@ def validate_draft(value: Any, *, require_metadata: bool = True) -> dict[str, An
             allow_empty=True,
         )
     _draft_layers(
-        draft.get("layer_order"), "$.layer_order", issues, slot_ids, overlay_ids
+        draft.get("layer_order"),
+        "$.layer_order",
+        issues,
+        slot_ids,
+        overlay_ids,
+        background_slot,
     )
 
     questions = _list(draft.get("questions"), "$.questions", issues)
@@ -263,8 +297,8 @@ def validate_draft(value: Any, *, require_metadata: bool = True) -> dict[str, An
             _string(question, f"$.questions[{index}]", issues)
 
     if require_metadata:
-        if draft.get("version") != "collage-draft/1":
-            _issue(issues, "$.version", "必须是 collage-draft/1")
+        if draft.get("version") not in {"collage-draft/1", "collage-draft/2"}:
+            _issue(issues, "$.version", "必须是 collage-draft/1 或 collage-draft/2")
         if draft.get("status") != "draft":
             _issue(issues, "$.status", "草稿状态必须是 draft")
         source = _object(draft.get("source"), "$.source", issues)

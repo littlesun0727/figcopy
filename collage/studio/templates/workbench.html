@@ -15,6 +15,9 @@
     </a>
     <div class="header-actions">
       <span id="connectionState" class="connection"><i></i> 本机运行</span>
+      <button id='providerSettings' class='button provider-button' type='button'>
+        <i id='providerDot' class='provider-dot'></i><span id='providerLabel'>Provider 设置</span>
+      </button>
       <button id="newProject" class="button primary" type="button">新建项目</button>
     </div>
   </header>
@@ -113,6 +116,62 @@
       <div class="dialog-actions">
         <button class="button quiet" value="cancel" formmethod="dialog">取消</button>
         <button id="createSubmit" class="button primary" type="submit">创建并开始分析</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id='providerDialog' class='create-dialog provider-dialog'>
+    <form id='providerForm' method='dialog'>
+      <div class='dialog-heading'>
+        <div><p class='eyebrow'>RUNTIME SETTINGS</p><h2>Provider 设置</h2></div>
+        <button class='icon-button' value='cancel' formmethod='dialog' aria-label='关闭'>×</button>
+      </div>
+      <p class='settings-intro'>配置分析、图片编辑和抠图能力。API Key 只保存在当前工作台进程内存中，不会写入项目、日志或浏览器存储。</p>
+      <div id='providerCards' class='provider-cards' aria-live='polite'></div>
+      <div id='auditStatus' class='audit-status'>正在检测本机审计代理…</div>
+
+      <section class='settings-section'>
+        <div class='settings-heading'><h3>Yibu 云端能力</h3><span>VLM + 图片编辑</span></div>
+        <label>Yibu API Key
+          <input id='yibuApiKey' name='yibu_api_key' type='password' autocomplete='off' spellcheck='false' maxlength='4096' placeholder='输入后仅驻留本进程内存'>
+          <small id='credentialHint'>留空会沿用当前配置</small>
+        </label>
+        <label>或已有 shared.py 路径
+          <input id='sharedPath' name='shared_path' autocomplete='off' spellcheck='false' placeholder='例如 D:\codes\creative-video-editor\shared.py'>
+        </label>
+        <div class='form-grid two'>
+          <label>本机审计代理<input id='auditBaseUrl' name='audit_base_url' type='url' value='http://127.0.0.1:17860'></label>
+          <label>请求超时（秒）<input id='timeoutSeconds' name='timeout_seconds' type='number' min='1' step='1' placeholder='900'></label>
+          <label>VLM 模型<input id='vlmModel' name='vlm_model' placeholder='kimi-k3'></label>
+          <label>VLM 最大输出<input id='vlmMaxTokens' name='vlm_max_tokens' type='number' min='1' step='1' placeholder='16384'></label>
+          <label>推理强度
+            <select id='vlmReasoning' name='vlm_reasoning_effort'>
+              <option value=''>模型默认</option><option value='low'>low</option><option value='high'>high</option><option value='max'>max</option>
+            </select>
+          </label>
+          <label>图片编辑模型<input id='imageModel' name='image_model' placeholder='doubao-seedream-5-0-260128'></label>
+          <label>图片尺寸
+            <select id='imageSize' name='image_size'><option value='1K'>1K（仅 Gemini）</option><option value='2K' selected>2K（Seedream 推荐）</option><option value='4K'>4K</option></select>
+          </label>
+        </div>
+        <label class='check danger-check'><input id='clearCredentials' name='clear_credentials' type='checkbox'> 清除当前工作台进程中的 Key 与 shared.py 配置</label>
+      </section>
+
+      <section class='settings-section'>
+        <div class='settings-heading'><h3>本地抠图</h3><span>BiRefNet，不上传客户图片</span></div>
+        <div class='form-grid two'>
+          <label>推理设备
+            <select id='birefnetDevice' name='birefnet_device'><option value='auto'>auto</option><option value='cpu'>cpu</option><option value='cuda'>cuda</option><option value='cuda:0'>cuda:0</option></select>
+          </label>
+          <label>本地模型目录 <small>可选；留空沿用卡片中显示的当前模型</small><input id='birefnetModelPath' name='birefnet_model_path' autocomplete='off' spellcheck='false'></label>
+        </div>
+      </section>
+
+      <label id='retryAfterSettingsLabel' class='check retry-after-settings' hidden><input id='retryAfterSettings' type='checkbox' checked> 保存后立即重试当前项目</label>
+      <p id='providerError' class='form-error' hidden></p>
+      <div class='dialog-actions'>
+        <button class='button quiet' value='cancel' formmethod='dialog'>取消</button>
+        <button id='providerSubmit' class='button primary' type='submit'>保存当前会话设置</button>
       </div>
     </form>
   </dialog>

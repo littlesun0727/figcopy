@@ -1,0 +1,227 @@
+{
+  "version": "auto-rebuild-catalog/1",
+  "purpose": "offline_evaluation_only",
+  "policy_version": "auto-rebuild-policy/1",
+  "samples": [
+    {
+      "id": "S01",
+      "filename": "20260908-192922.jpg",
+      "bytes": 845271,
+      "sha256": "21ca6c64e4294a37cb555796a86ebf48289cf047001f3b863ef002747ecb9054",
+      "structure": "多张人像照片与贴纸混合，部分局部柔边",
+      "hard_requirements": "逐槽区分照片与抠图；保留必要环境；局部 mask、主体比例、文字归属",
+      "first_phase": "A3",
+      "evaluation": {
+        "status": "coarse_inventory_complete",
+        "basis": "improvement_plan_section_3",
+        "exact_geometry_verified": false,
+        "required_dimensions": [
+          "windows",
+          "processing_modes",
+          "layer_order",
+          "fixed_and_variable_text",
+          "allowed_approximations"
+        ],
+        "inventory": "annotations.json"
+      }
+    },
+    {
+      "id": "S02",
+      "filename": "20260908-192946.jpg",
+      "bytes": 445767,
+      "sha256": "e7c2f75ad7481a4306d4ca515f3d3dbb71573431abb9017fa1d3125c4cfdc16e",
+      "structure": "满版街景主照片＋三个小照片窗口＋白色涂鸦",
+      "hard_requirements": "主背景也是图片槽；虚线框和文字前景不能夹带旧照片",
+      "first_phase": "A2",
+      "evaluation": {
+        "status": "coarse_inventory_complete",
+        "basis": "improvement_plan_section_3",
+        "exact_geometry_verified": false,
+        "required_dimensions": [
+          "windows",
+          "processing_modes",
+          "layer_order",
+          "fixed_and_variable_text",
+          "allowed_approximations"
+        ],
+        "inventory": "annotations.json"
+      }
+    },
+    {
+      "id": "S03",
+      "filename": "拼贴1.jpg",
+      "bytes": 192488,
+      "sha256": "d7c9e8165b06d309be33194ed86377e9d518e2b575a254c5b91ef4b8844b5e4f",
+      "structure": "纸张、夹板、多个照片窗口、粗糙框边与胶带",
+      "hard_requirements": "窗口提取、固定底板、前景遮挡、局部不规则边缘",
+      "first_phase": "A2",
+      "evaluation": {
+        "status": "coarse_inventory_complete",
+        "basis": "improvement_plan_section_3",
+        "exact_geometry_verified": false,
+        "required_dimensions": [
+          "windows",
+          "processing_modes",
+          "layer_order",
+          "fixed_and_variable_text",
+          "allowed_approximations"
+        ],
+        "inventory": "annotations.json"
+      }
+    },
+    {
+      "id": "S04",
+      "filename": "拼贴2.jpg",
+      "bytes": 208645,
+      "sha256": "ca6f054b861abe1fd57f04bd3f23014d9f05e409b1edc4b71174f8df71870d2c",
+      "structure": "装饰底板与多张拍立得式相框",
+      "hard_requirements": "保留框边和标签；换照片而不是重画整套相框",
+      "first_phase": "A2",
+      "evaluation": {
+        "status": "coarse_inventory_complete",
+        "basis": "improvement_plan_section_3",
+        "exact_geometry_verified": false,
+        "required_dimensions": [
+          "windows",
+          "processing_modes",
+          "layer_order",
+          "fixed_and_variable_text",
+          "allowed_approximations"
+        ],
+        "inventory": "annotations.json"
+      }
+    },
+    {
+      "id": "S05",
+      "filename": "拼贴3.jpg",
+      "bytes": 246392,
+      "sha256": "072917824d05fbbb5132e42e22c84c5817bcf2f6ea5b1b0f3dcf17d81f7ca586",
+      "structure": "密集照片、旋转打印照片、嵌套照片和多层纸张",
+      "hard_requirements": "替换单位策略、旋转、层序、小窗口可读性",
+      "first_phase": "A4",
+      "evaluation": {
+        "status": "coarse_inventory_complete",
+        "basis": "improvement_plan_section_3",
+        "exact_geometry_verified": false,
+        "required_dimensions": [
+          "windows",
+          "processing_modes",
+          "layer_order",
+          "fixed_and_variable_text",
+          "allowed_approximations"
+        ],
+        "inventory": "annotations.json"
+      }
+    },
+    {
+      "id": "S06",
+      "filename": "拼贴4.jpg",
+      "bytes": 204044,
+      "sha256": "e69f1ba7d8bf40820fd8aef92fdba06cdbf715006462571527c8d919af097b7f",
+      "structure": "牛皮纸相册、夹子、绳线和内部照片",
+      "hard_requirements": "纸板与阴影保留；内部照片窗口；外部场景是否换图的规则",
+      "first_phase": "A2",
+      "evaluation": {
+        "status": "coarse_inventory_complete",
+        "basis": "improvement_plan_section_3",
+        "exact_geometry_verified": false,
+        "required_dimensions": [
+          "windows",
+          "processing_modes",
+          "layer_order",
+          "fixed_and_variable_text",
+          "allowed_approximations"
+        ],
+        "inventory": "annotations.json"
+      }
+    },
+    {
+      "id": "S07",
+      "filename": "拼贴5.jpg",
+      "bytes": 226291,
+      "sha256": "4f1eea5f27b4b9ca1509f938eeaba99e240d3c07adcc094b0460daebec2ed53e",
+      "structure": "与拼贴4很接近的相册结构，换了照片和外部场景",
+      "hard_requirements": "验证同类结构自动适配，不能假设两张几何完全相同",
+      "first_phase": "A2",
+      "evaluation": {
+        "status": "coarse_inventory_complete",
+        "basis": "improvement_plan_section_3",
+        "exact_geometry_verified": false,
+        "required_dimensions": [
+          "windows",
+          "processing_modes",
+          "layer_order",
+          "fixed_and_variable_text",
+          "allowed_approximations"
+        ],
+        "inventory": "annotations.json"
+      }
+    },
+    {
+      "id": "S08",
+      "filename": "拼贴6.jpg",
+      "bytes": 179037,
+      "sha256": "c6f4f416f7e1c2769dafe481abba96a30818e029b6a776699cf45daffbbd0603",
+      "structure": "活页纸、普通照片、突出页面的人物剪贴",
+      "hard_requirements": "新人物 alpha、动态白边、阴影、跨页面边界与遮挡",
+      "first_phase": "A3",
+      "evaluation": {
+        "status": "coarse_inventory_complete",
+        "basis": "improvement_plan_section_3",
+        "exact_geometry_verified": false,
+        "required_dimensions": [
+          "windows",
+          "processing_modes",
+          "layer_order",
+          "fixed_and_variable_text",
+          "allowed_approximations"
+        ],
+        "inventory": "annotations.json"
+      }
+    },
+    {
+      "id": "S09",
+      "filename": "拼贴7.jpg",
+      "bytes": 328868,
+      "sha256": "f6b59f7bd816c5176a4bed45a42f2163da4cc24bfa464bf09a6e2883104d5308",
+      "structure": "倾斜照片、手持照片、人物剪贴、复杂嵌套",
+      "hard_requirements": "四角透视、手部遮挡、替换单位、动态剪贴边；最高风险之一",
+      "first_phase": "A4",
+      "evaluation": {
+        "status": "coarse_inventory_complete",
+        "basis": "improvement_plan_section_3",
+        "exact_geometry_verified": false,
+        "required_dimensions": [
+          "windows",
+          "processing_modes",
+          "layer_order",
+          "fixed_and_variable_text",
+          "allowed_approximations"
+        ],
+        "inventory": "annotations.json"
+      }
+    },
+    {
+      "id": "S10",
+      "filename": "海边人像拼图.jpg",
+      "bytes": 163596,
+      "sha256": "36acb360b79646651809b83eb1038fca61cc810a2ae40afec7c3299ebfe41e5f",
+      "structure": "海边背景、矩形照片、带撕纸白边的人物",
+      "hard_requirements": "背景槽、普通照片与抠图混合、动态撕纸边、局部遮挡",
+      "first_phase": "A3",
+      "evaluation": {
+        "status": "coarse_inventory_complete",
+        "basis": "improvement_plan_section_3",
+        "exact_geometry_verified": false,
+        "required_dimensions": [
+          "windows",
+          "processing_modes",
+          "layer_order",
+          "fixed_and_variable_text",
+          "allowed_approximations"
+        ],
+        "inventory": "annotations.json"
+      }
+    }
+  ]
+}

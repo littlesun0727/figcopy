@@ -12,6 +12,7 @@ from typing import Any
 from ...core.errors import CollageError
 from ...core.io import atomic_write_json, read_json, resolve_input_path, sha256_file
 from ...imaging.operations import load_mask
+from ...schemas.background import background_slot_id
 from ...schemas import (
     draft_has_release_blockers,
     validate_draft,
@@ -90,9 +91,11 @@ def default_slot_review_fields(source: dict[str, Any]) -> dict[str, Any]:
             "fit": "contain" if source["mode"] == "cutout" else "cover",
             "anchor": [0.5, 0.5],
             "clip_mask": None,
-            "edge_fade_px": suggested_edge_fade_px(source["target_rect"])
-            if source["mode"] == "photo_feather"
-            else 0,
+            "edge_fade_px": (
+                suggested_edge_fade_px(source["target_rect"])
+                if source["mode"] == "photo_feather"
+                else 0
+            ),
         }
     return {
         "required": True,
@@ -122,6 +125,25 @@ def default_overlay_review_fields() -> dict[str, Any]:
     }
 
 
+def _reviewed_overlay(
+    source: dict[str, Any], override: dict[str, Any]
+) -> dict[str, Any]:
+    """Build one reviewed overlay, degrading incomplete local shapes safely."""
+
+    overlay = {**default_overlay_review_fields(), **source}
+    overlay.update(override)
+    if overlay.get("action") == "basic_shape" and overlay.get("shape") is None:
+        # DraftSpec intentionally does not contain the executable shape fields.
+        # Unless an advanced override supplies them, provider generation is the
+        # only path that can preserve the reference decoration faithfully.
+        LOGGER.warning(
+            "basic_shape 缺少 shape 参数，改用参考图近似制作 | overlay=%s",
+            source["id"],
+        )
+        overlay["action"] = "reference_generate"
+    return overlay
+
+
 def _merge_override_maps(
     path: Path | None,
     inline: dict[str, dict[str, Any]] | None,
@@ -142,7 +164,7 @@ def confirm_draft(
     draft_path: Path,
     output_path: Path,
     *,
-    remove_mask_path: Path,
+    remove_mask_path: Path | None = None,
     reviewer: str,
     allowed_mask_path: Path | None = None,
     background_candidate_path: Path | None = None,
@@ -152,6 +174,7 @@ def confirm_draft(
     overlay_overrides_data: dict[str, dict[str, Any]] | None = None,
     background_expand_px: int = 0,
     background_feather_px: int = 0,
+    background_composition_mode: str = "protected",
     notes: str = "",
     force: bool = False,
 ) -> Path:
@@ -173,9 +196,13 @@ def confirm_draft(
     if sha256_file(source_path) != draft["source"]["sha256"]:
         raise CollageError("SOURCE_HASH_MISMATCH", "规范化参考图与 Draft 哈希不一致")
     canvas_size = (draft["canvas"]["width"], draft["canvas"]["height"])
-    load_mask(remove_mask_path, canvas_size, name="remove_mask")
-    if allowed_mask_path is not None:
-        load_mask(allowed_mask_path, canvas_size, name="allowed_mask")
+    photo_background = background_slot_id(draft)
+    if photo_background is None:
+        if remove_mask_path is None:
+            raise CollageError("REMOVE_MASK_REQUIRED", "固定背景制作需要删除蒙版")
+        load_mask(remove_mask_path, canvas_size, name="remove_mask")
+        if allowed_mask_path is not None:
+            load_mask(allowed_mask_path, canvas_size, name="allowed_mask")
     slot_overrides = _merge_override_maps(
         slot_overrides_path, slot_overrides_data, source="确认页面 slot 覆盖"
     )
@@ -213,13 +240,13 @@ def confirm_draft(
 
     overlays: list[dict[str, Any]] = []
     for source in draft["overlays"]:
-        overlay = {**source, **default_overlay_review_fields()}
-        overlay.update(overlay_overrides.get(source["id"], {}))
-        overlays.append(overlay)
+        overlays.append(
+            _reviewed_overlay(source, overlay_overrides.get(source["id"], {}))
+        )
 
     reviewed = {
-        "version": "collage-reviewed/1",
-        "status": "reviewed",
+        "version": "collage-build/3" if photo_background else "collage-reviewed/1",
+        "status": "planned" if photo_background else "reviewed",
         "reference": {
             "path": _relative(source_path, output_path),
             "sha256": draft["source"]["sha256"],
@@ -227,18 +254,27 @@ def confirm_draft(
         "canvas": draft["canvas"],
         "slots": slots,
         "overlays": overlays,
-        "background": {
-            **draft["background"],
-            "remove_mask": _relative(remove_mask_path, output_path),
-            "allowed_mask": _relative(allowed_mask_path, output_path)
-            if allowed_mask_path
-            else None,
-            "candidate_path": _relative(background_candidate_path, output_path)
-            if background_candidate_path
-            else None,
-            "expand_px": background_expand_px,
-            "feather_px": background_feather_px,
-        },
+        "background": (
+            dict(draft["background"])
+            if photo_background
+            else {
+                **draft["background"],
+                "remove_mask": _relative(remove_mask_path, output_path),
+                "allowed_mask": (
+                    _relative(allowed_mask_path, output_path)
+                    if allowed_mask_path
+                    else None
+                ),
+                "candidate_path": (
+                    _relative(background_candidate_path, output_path)
+                    if background_candidate_path
+                    else None
+                ),
+                "expand_px": background_expand_px,
+                "feather_px": background_feather_px,
+                "composition_mode": background_composition_mode,
+            }
+        ),
         "layer_order": draft["layer_order"],
         "review": {
             "reviewer": reviewer,
@@ -246,8 +282,18 @@ def confirm_draft(
             "notes": notes,
             "questions_resolved": True,
         },
-        "audit": {"source_draft_sha256": sha256_file(draft_path)},
+        "audit": {
+            "source_draft_sha256": sha256_file(draft_path),
+            "analysis_provider": draft["provider"],
+        },
     }
+    if photo_background:
+        reviewed["provenance"] = {
+            "kind": "human",
+            "policy_version": "customer-photo-background/1",
+            "evidence_sha256": [sha256_file(draft_path)],
+            "unresolved": [],
+        }
     validate_reviewed_spec(reviewed)
     atomic_write_json(output_path, reviewed)
     LOGGER.info(

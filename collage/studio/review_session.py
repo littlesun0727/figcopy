@@ -6,7 +6,6 @@ import base64
 import copy
 import io
 import logging
-import threading
 from pathlib import Path
 from typing import Any
 
@@ -19,8 +18,11 @@ from ..core.io import (
     read_json,
     resolve_input_path,
 )
+from ..core.locking import project_edit_lock
+from ..template.review.feedback import review_revision
 from ..imaging.operations import load_mask
 from ..schemas import validate_draft
+from ..schemas.background import background_slot_id
 from ..template.review import (
     automatic_remove_mask,
     automatic_review_notes,
@@ -69,6 +71,7 @@ class ReviewSession:
         overlay_overrides_path: Path | None = None,
         background_expand_px: int = 0,
         background_feather_px: int = 0,
+        background_composition_mode: str = "protected",
     ) -> None:
         self.draft_path = draft_path.resolve()
         self.output_path = output_path.resolve()
@@ -79,7 +82,7 @@ class ReviewSession:
         self.overlay_overrides_path = overlay_overrides_path
         self.background_expand_px = background_expand_px
         self.background_feather_px = background_feather_px
-        self._save_lock = threading.Lock()
+        self.background_composition_mode = background_composition_mode
 
         self.draft = validate_draft(read_json(self.draft_path))
         self.reference_path = resolve_input_path(
@@ -89,7 +92,10 @@ class ReviewSession:
             self.draft["canvas"]["width"],
             self.draft["canvas"]["height"],
         )
-        if initial_mask_path is not None:
+        if background_slot_id(self.draft):
+            initial_mask = Image.new("L", self.canvas_size, 0)
+            initial_mask_source = "not_required"
+        elif initial_mask_path is not None:
             initial_mask = load_mask(
                 initial_mask_path, self.canvas_size, name="初始 remove_mask"
             )
@@ -108,8 +114,10 @@ class ReviewSession:
             overlay_overrides_path,
             background_expand_px=background_expand_px,
             background_feather_px=background_feather_px,
+            background_composition_mode=background_composition_mode,
         )
         self.review_options["initial_mask_source"] = initial_mask_source
+        self.review_options["revision"] = review_revision(self.draft)
         feather_count = sum(
             1
             for slot in self.draft["slots"]
@@ -123,12 +131,43 @@ class ReviewSession:
             len(self.draft["questions"]),
         )
 
+    def browser_state(self) -> dict[str, Any]:
+        """Return one coherent review revision including its generated mask."""
+        return {
+            "draft": self.draft,
+            "review_options": self.review_options,
+            "mask_data_url": "data:image/png;base64,"
+            + base64.b64encode(self.mask_png).decode("ascii"),
+        }
+
     def save(self, payload: Any) -> dict[str, Any]:
         """Validate browser edits and create the canonical ReviewedSpec."""
 
         if not isinstance(payload, dict) or not isinstance(payload.get("draft"), dict):
             raise CollageError("INVALID_REQUEST", "保存请求格式错误")
-        with self._save_lock:
+        with project_edit_lock(self.draft_path.parent):
+            if self.output_path.exists():
+                raise CollageError("REVIEW_ALREADY_SAVED", "该识别结果已经确认")
+            revision = review_revision(validate_draft(read_json(self.draft_path)))
+            if payload.get("revision") != revision or revision != review_revision(
+                self.draft
+            ):
+                raise CollageError(
+                    "REVIEW_REVISION_CONFLICT", "识别结果已更新，请重新载入后复核"
+                )
+            if payload.get("final_confirmed") is not True:
+                raise CollageError(
+                    "HUMAN_REVIEW_REQUIRED", "请手动确认当前识别结果没有问题"
+                )
+            if self.draft["questions"] or payload.get("defer_questions") is True:
+                raise CollageError(
+                    "REVIEW_CORRECTION_REQUIRED",
+                    "请先回答疑问并提交给 VLM 纠正，再确认新结果",
+                )
+            if payload.get("other_feedback") or payload.get("question_resolutions"):
+                raise CollageError(
+                    "REVIEW_CORRECTION_REQUIRED", "填写的反馈尚未提交纠正"
+                )
             edited = copy.deepcopy(payload["draft"])
             # The browser may edit semantics but never program-owned provenance.
             for field in (
@@ -191,32 +230,61 @@ class ReviewSession:
                     )
                     is False
                 ),
-                len(self.draft["questions"])
-                if payload.get("defer_questions") is True
-                else 0,
+                (
+                    len(self.draft["questions"])
+                    if payload.get("defer_questions") is True
+                    else 0
+                ),
             )
-            mask = _decode_mask(payload.get("mask_png", ""), self.canvas_size)
-            if mask.getbbox() is None:
-                if payload.get("empty_mask_approved") is not True:
-                    raise CollageError(
-                        "EMPTY_REMOVE_MASK",
-                        "删除蒙版为空；请画出需要清版的旧内容，或明确确认无需删除",
+            mask = None
+            selected_expand_px = 0
+            selected_feather_px = 0
+            selected_composition_mode = "protected"
+            if background_slot_id(edited) is None:
+                mask = _decode_mask(payload.get("mask_png", ""), self.canvas_size)
+                if mask.getbbox() is None:
+                    if payload.get("empty_mask_approved") is not True:
+                        raise CollageError(
+                            "EMPTY_REMOVE_MASK",
+                            "删除蒙版为空；请画出需要清版的旧内容，或明确确认无需删除",
+                        )
+                    LOGGER.warning("模板作者明确接受空删除蒙版")
+                else:
+                    LOGGER.info("删除蒙版已确认 | bbox=%s", mask.getbbox())
+                selected_expand_px = background_parameter(
+                    payload, "background_expand_px", self.background_expand_px
+                )
+                selected_feather_px = background_parameter(
+                    payload, "background_feather_px", self.background_feather_px
+                )
+                selected_composition_mode = payload.get(
+                    "background_composition_mode", self.background_composition_mode
+                )
+                if selected_composition_mode not in ("protected", "full_candidate"):
+                    raise CollageError("INVALID_REQUEST", "不支持的背景合成方式")
+                if (
+                    selected_composition_mode == "full_candidate"
+                    and self.allowed_mask_path
+                ):
+                    allowed = load_mask(
+                        self.allowed_mask_path, self.canvas_size, name="allowed_mask"
                     )
-                LOGGER.warning("模板作者明确接受空删除蒙版")
-            else:
-                LOGGER.info("删除蒙版已确认 | bbox=%s", mask.getbbox())
-            selected_expand_px = background_parameter(
-                payload, "background_expand_px", self.background_expand_px
-            )
-            selected_feather_px = background_parameter(
-                payload, "background_feather_px", self.background_feather_px
-            )
+                    if allowed.getextrema() != (255, 255):
+                        raise CollageError(
+                            "BACKGROUND_MODE_CONFLICT",
+                            "整张重建与局部 allowed_mask 冲突",
+                        )
             # Keep the edited Draft beside the original so its source-relative
             # reference path remains valid when project review output lives elsewhere.
             ui_draft_path = self.draft_path.parent / "ui_confirmed_draft.json"
-            ui_mask_path = self.output_path.parent / "remove_mask.png"
+            ui_mask_path = (
+                self.output_path.parent / "remove_mask.png"
+                if mask is not None
+                else None
+            )
             atomic_write_json(ui_draft_path, edited)
-            atomic_save_image(mask, ui_mask_path)
+            if mask is not None:
+                atomic_save_image(mask, ui_mask_path)
             confirm_draft(
                 ui_draft_path,
                 self.output_path,
@@ -230,6 +298,16 @@ class ReviewSession:
                 overlay_overrides_data=overlay_overrides,
                 background_expand_px=selected_expand_px,
                 background_feather_px=selected_feather_px,
+                background_composition_mode=selected_composition_mode,
                 notes=notes,
+            )
+            atomic_write_json(
+                self.output_path.parent / "confirmation.json",
+                {
+                    "revision": revision,
+                    "final_confirmed": True,
+                    "reviewer": self.reviewer,
+                    "confirmed_draft": "ui_confirmed_draft.json",
+                },
             )
             return {"ok": True, "path": str(self.output_path)}

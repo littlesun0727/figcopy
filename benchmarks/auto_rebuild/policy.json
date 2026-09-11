@@ -1,0 +1,88 @@
+{
+  "version": "auto-rebuild-policy/1",
+  "scope": "first_automatic_template_rebuild",
+  "replacement_units": {
+    "main_photos": "preserve count, role and layer order; no silent merge or removal",
+    "nested_photos": "outer photograph is one input unless a distinct designed inner replacement window is supported by evidence; unresolved units block automatic construction",
+    "external_scene": "full canvas scene used as the main photo is a slot; scene around an album is not silently changed; ambiguous scene role blocks automatic construction"
+  },
+  "fixed_elements": {
+    "actions": [
+      "preserve",
+      "basic_shape",
+      "reference_generate"
+    ],
+    "preserve": "requires an isolated asset; retaining flattened old photo pixels is not preservation",
+    "basic_shape": "requires complete executable shape parameters",
+    "reference_generate": "only individually allowed approximate decorations; never customer photos, meaningful text or critical protected content"
+  },
+  "coordinates": {
+    "space": "EXIF-normalized working canvas pixels",
+    "rect": "xywh",
+    "rotation": "clockwise about slot center",
+    "slot_clip_mask": "slot-local, before rotation",
+    "remove_mask": "canvas-local, white removes",
+    "subject_alpha": "new customer input only",
+    "foreground": "asset layers in explicit order"
+  },
+  "quality": {
+    "probe_scope": "window visibility only; no production approval",
+    "real_geometry_thresholds": null,
+    "threshold_status": "calibration_pending",
+    "approximate_pass": "all hard requirements pass and approximation list is nonempty"
+  },
+  "models": {
+    "vision": "kimi-k3",
+    "reasoning_effort": "high",
+    "image": "doubao-seedream-5-0-260128",
+    "preserve_explicit_overrides": true
+  },
+  "real_trial": {
+    "status": "authorized_s02_trial",
+    "upload_scope": {
+      "sample_ids": [
+        "S02"
+      ],
+      "providers": [
+        "existing Kimi high",
+        "existing Seedream",
+        "qwen3.8-max via existing Yibu audit provider"
+      ],
+      "customer_photos": "local_processing_only"
+    },
+    "total_budget": {
+      "mode": "unlimited",
+      "currency": "CNY",
+      "source": "explicit_user_instruction_2026-09-11"
+    },
+    "customer_material_groups": [
+      {
+        "pool_id": "user_portraits_20260911",
+        "available_images": 5,
+        "combinations": 3,
+        "same_aspect_ratio": true,
+        "three_independent_material_sets": false
+      }
+    ],
+    "execution_limits": {
+      "max_calls": 18,
+      "max_seconds": 3600,
+      "service_retries_per_failed_node": 1,
+      "quality_repairs_per_node": 1
+    },
+    "model_override": {
+      "vision": "qwen3.8-max",
+      "reasoning_effort": null,
+      "scope": "S02 comparison trial only",
+      "source": "explicit_user_instruction_2026-09-11",
+      "global_defaults_changed": false
+    },
+    "diagnostic_continuation": {
+      "instruction_source": "explicit_user_instruction_2026-09-11",
+      "continue_known_structure": true,
+      "preserve_unresolved": true,
+      "automatic_acceptance_credit": false,
+      "scope": "current S02 Qwen trial"
+    }
+  }
+}

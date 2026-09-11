@@ -1,0 +1,43 @@
+{
+  "status": "needs_review",
+  "nodes": {
+    "overlay_crops": {
+      "status": "complete",
+      "count": 0
+    },
+    "background": {
+      "status": "skipped",
+      "code": "BACKGROUND_PROVIDED_BY_SLOT",
+      "slot_id": "cover_photo",
+      "outputs": [],
+      "audit": null
+    },
+    "overlay:frame": {
+      "status": "complete",
+      "source_rect": [
+        5,
+        5,
+        15,
+        10
+      ],
+      "audit": {
+        "node": "overlay:frame",
+        "name": "local-basic-shape",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        0,
+        0,
+        15,
+        10
+      ],
+      "output": "assets/overlay_frame.png"
+    }
+  },
+  "last_error": null
+}

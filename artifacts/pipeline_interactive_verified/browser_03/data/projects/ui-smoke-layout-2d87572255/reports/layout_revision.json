@@ -1,0 +1,63 @@
+{
+  "source_project": "ui-smoke",
+  "source_revision": "2c193bf13497354f0c04f06a4ddf2ebf156d41db7507686e10361ab0f521875b",
+  "revision": "bf0d837a22493ffdf91a9deeef499d1222f3ff6ad7faa1b4de68fbca4f0da63b",
+  "fixed_assets_regenerated": false,
+  "network_calls": 0,
+  "items": [
+    {
+      "id": "asset:bg",
+      "label": "bg",
+      "rect": [
+        0,
+        0,
+        600,
+        760
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": false,
+      "background": true
+    },
+    {
+      "id": "asset:frame",
+      "label": "frame",
+      "rect": [
+        280,
+        300,
+        200,
+        180
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "background": false
+    },
+    {
+      "id": "asset:circle",
+      "label": "circle",
+      "rect": [
+        125,
+        150,
+        190,
+        190
+      ],
+      "rotation_deg": 25,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "background": false
+    }
+  ]
+}

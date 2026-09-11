@@ -1,0 +1,129 @@
+{
+  "version": "collage-template/1",
+  "status": "needs_review",
+  "canvas": {
+    "width": 600,
+    "height": 760,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "assets": [
+    {
+      "id": "bg",
+      "path": "assets/background.png",
+      "role": "background",
+      "requires_alpha": false,
+      "sha256": "7c3e177ef50361dbd716185206998a3f532946a13f16d2059af6094fff86c464"
+    },
+    {
+      "id": "circle",
+      "path": "assets/overlay_circle.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "559c69579714082892c6a47d30514b48cab2318b5e0678d07c9f39eefb163196"
+    },
+    {
+      "id": "frame",
+      "path": "assets/overlay_frame.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "a2010c26073c050ef51d8e06600114aff89ae403b59660d041d20c9e5c7d98a0"
+    }
+  ],
+  "slots": [],
+  "layers": [
+    {
+      "type": "asset",
+      "asset_id": "bg",
+      "rect": [
+        0,
+        0,
+        600,
+        760
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "frame",
+      "rect": [
+        280,
+        300,
+        200,
+        180
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "circle",
+      "rect": [
+        125,
+        150,
+        190,
+        190
+      ],
+      "rotation_deg": 25,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "build": {
+    "source_sha256": "40ae70abc46da0f9264c25d2a93b0fd1b64a2297a8302735169de84cf451d255",
+    "created_at": "2026-09-11T11:05:32+00:00",
+    "tool_version": "0.1.0",
+    "fixture_used": false,
+    "providers": [
+      {
+        "node": "background",
+        "name": "imported-background",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:circle",
+        "name": "local-basic-shape",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:frame",
+        "name": "local-basic-shape",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      }
+    ]
+  },
+  "review": {
+    "visual_approved": false,
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": "",
+    "evidence_sha256": []
+  }
+}
