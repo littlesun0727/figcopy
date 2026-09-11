@@ -79,9 +79,7 @@ def test_alpha_and_adaptive_chroma_key() -> None:
     assert alpha_is_meaningful(transparent)
 
 
-def test_textured_chroma_background_is_removed_without_erasing_isolated_detail() -> (
-    None
-):
+def test_textured_chroma_background_including_enclosed_key_is_removed() -> None:
     key = (0, 255, 0)
     image = Image.new("RGB", (24, 18), (0, 72, 0))
     for y in range(image.height):
@@ -98,7 +96,8 @@ def test_textured_chroma_background_is_removed_without_erasing_isolated_detail()
     assert cleaned.getpixel((0, 0))[3] == 0
     assert cleaned.getpixel((23, 17))[3] == 0
     assert cleaned.getpixel((6, 5))[3] == 255
-    assert cleaned.getpixel((12, 9))[3] == 255
+    # A matching screen pixel is keyed even when a foreground outline encloses it.
+    assert cleaned.getpixel((12, 9))[3] == 0
     assert chroma_alpha_is_clean(cleaned)
 
 

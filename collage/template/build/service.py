@@ -178,7 +178,9 @@ def build_template(
             "version": (
                 "collage-template/3"
                 if photo_background
-                else "collage-template/2" if version2 else "collage-template/1"
+                else "collage-template/2"
+                if version2
+                else "collage-template/1"
             ),
             "status": pending_status,
             "canvas": spec["canvas"],
@@ -218,6 +220,8 @@ def build_template(
     except CollageError as exc:
         blocked_codes = {
             "IMAGE_PROVIDER_UNAVAILABLE",
+            "CHROMA_DEPENDENCY_MISSING",
+            "CHROMA_FILTER_UNAVAILABLE",
             "IMAGE_PROVIDER_CAPABILITY_MISSING",
             "EXACT_CONTENT_REQUIRED",
         }

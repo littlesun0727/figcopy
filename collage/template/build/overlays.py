@@ -20,11 +20,11 @@ from ...core.io import (
 )
 from ...core.state import NodeCache
 from ...imaging.geometry import pad_for_model
+from ...imaging.chroma import CHROMA_PROCESSING_VERSION, require_chroma_backend
 from ...imaging.operations import (
     alpha_is_meaningful,
     choose_chroma_key,
     chroma_alpha_is_clean,
-    clean_chroma_edges,
     parse_color,
     rect_to_box,
     remove_chroma_background,
@@ -115,10 +115,20 @@ def _provider_overlay(
             "图片 provider 不支持参考图片输入，无法制作 overlay",
             details={"provider": capabilities.name},
         )
+    requested_mode = overlay["background_mode"]
+    effective_mode = (
+        requested_mode
+        if requested_mode == "chroma_key" or capabilities.supports_transparency
+        else "chroma_key"
+    )
+    processing_version = (
+        CHROMA_PROCESSING_VERSION if effective_mode == "chroma_key" else None
+    )
     cached = cache.get("overlay", cache_key)
     if (
         cached is not None
         and cached.metadata.get("validated_version") == OVERLAY_PROMPT_VERSION
+        and cached.metadata.get("processing_version") == processing_version
         and cached.metadata.get("image_fingerprint") == asset_fingerprint(cached.image)
     ):
         metadata = cached.metadata
@@ -130,14 +140,9 @@ def _provider_overlay(
             key,
             metadata["transform"],
         )
-    requested_mode = overlay["background_mode"]
-    effective_mode = (
-        requested_mode
-        if requested_mode == "chroma_key" or capabilities.supports_transparency
-        else "chroma_key"
-    )
     key = None
     if effective_mode == "chroma_key":
+        require_chroma_backend()
         key = (
             tuple(overlay["chroma_key"])
             if overlay["chroma_key"]
@@ -185,13 +190,22 @@ def _provider_overlay(
             )
         if record_path.exists():
             record = read_json(record_path)
-            if record.get("status") == "rejected":
+            # Keep uncertain requests blocked even if a new local keyer fails a technical gate.
+            if record.get("inspection_status") == "pending":
+                raise CollageError(
+                    "OVERLAY_INSPECTION_UNCERTAIN",
+                    "素材视觉检查已发送但未落盘，停止自动重复请求",
+                )
+            if (
+                record.get("status") == "rejected"
+                and record.get("processing_version") == processing_version
+            ):
                 issues = record["issues"]
                 semantic = record.get("semantic", {})
                 continue
             # A completed output may be reused; a transport timeout cannot safely be replayed.
             if (
-                record.get("status") not in {"generated", "accepted"}
+                record.get("status") not in {"generated", "accepted", "rejected"}
                 or not raw_path.exists()
             ):
                 raise CollageError(
@@ -240,20 +254,10 @@ def _provider_overlay(
         issues = list(technical["issues"])
         if effective_mode == "chroma_key" and not chroma_alpha_is_clean(mapped):
             issues.append("OPAQUE_OVERLAY")
-        before_mass = sum(
-            i * count for i, count in enumerate(mapped.getchannel("A").histogram())
-        )
-        # Thin strokes matter. Never silently accept an aggressive alpha cleanup.
-        cleaned = clean_chroma_edges(mapped) if key is not None else mapped
-        after_mass = sum(
-            i * count for i, count in enumerate(cleaned.getchannel("A").histogram())
-        )
-        retained = after_mass / before_mass if before_mass else 0
-        if retained < 0.9:
-            # Preserve the un-eroded cutout and let semantic inspection reject any residue.
-            # Losing an entire fine line is worse than retaining a candidate for inspection.
-            cleaned = mapped
-            retained = 1.0
+        # PyAV supplies the soft matte and corrected colors. Erosion would change
+        # the user-reviewed output and can remove an entire one-pixel stroke.
+        cleaned = mapped
+        retained = 1.0
         # Inspect the actual file pixels at their final resolution, before trimming.
         if cleaned.size != crop.size:
             cleaned, output_transform = pad_for_model(cleaned, crop.size)
@@ -265,13 +269,18 @@ def _provider_overlay(
             issues.append("EMPTY_OVERLAY")
         atomic_save_image(cleaned, attempt_root / f"{attempt}_candidate.png")
         semantic = {}
+        candidate_fingerprint = asset_fingerprint(cleaned)
         if not issues:
-            if record.get("inspection_status") == "pending":
-                raise CollageError(
-                    "OVERLAY_INSPECTION_UNCERTAIN",
-                    "素材视觉检查已发送但未落盘，停止自动重复请求",
+            # A different local keyer must not inherit a verdict for old candidate pixels.
+            # Keep the generation cache key unchanged so raw outputs and the two-call cap survive.
+            if (
+                record.get("semantic")
+                and record.get("processing_version") == processing_version
+                and (
+                    processing_version is None
+                    or record.get("inspection_fingerprint") == candidate_fingerprint
                 )
-            if record.get("semantic"):
+            ):
                 semantic = record["semantic"]
             else:
                 record["inspection_status"] = "pending"
@@ -285,6 +294,8 @@ def _provider_overlay(
             alpha_mass_retained=retained,
             semantic=semantic,
             inspection_status="complete",
+            processing_version=processing_version,
+            inspection_fingerprint=candidate_fingerprint,
         )
         atomic_write_json(record_path, record)
         if issues:
@@ -301,6 +312,7 @@ def _provider_overlay(
             "technical": technical,
             "semantic": semantic,
             "alpha_mass_retained": retained,
+            "processing_version": processing_version,
         }
         cache.put(
             "overlay",
@@ -313,6 +325,7 @@ def _provider_overlay(
                 "transform": transform_record,
                 "normalized": True,
                 "validated_version": OVERLAY_PROMPT_VERSION,
+                "processing_version": processing_version,
                 "image_fingerprint": asset_fingerprint(mapped),
             },
         )

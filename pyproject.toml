@@ -9,7 +9,7 @@ version = "0.1.0"
 description = "Deterministic collage template builder and local PNG renderer"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["Pillow>=11,<13"]
+dependencies = ["Pillow>=11,<13", "av>=18.1,<19"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10"]

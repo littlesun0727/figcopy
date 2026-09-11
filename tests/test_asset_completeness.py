@@ -128,3 +128,103 @@ def test_corrupted_cached_png_cannot_reuse_unrelated_quality_evidence(tmp_path):
     restored, *_ = _run(tmp_path, provider)
     assert restored.tobytes() == original.tobytes()
     assert provider.calls == 1 and provider.inspections == 1
+
+
+class ChromaProvider(Provider):
+    """Exercise actual local keying with fixture artwork and mocked semantic verdicts."""
+
+    capabilities = ImageCapabilities(
+        "mock-chroma", "fixture-image", True, False, False, "white_edit"
+    )
+
+    def __init__(self, *, complete=None):
+        super().__init__(complete=complete, texts=[""] * 8)
+
+    def make_overlay(self, image, **kwargs):
+        self.calls += 1
+        self.briefs.append(kwargs["brief"])
+        raw = Image.new("RGB", image.size, kwargs["chroma_key"])
+        draw = ImageDraw.Draw(raw)
+        draw.rectangle((25, 25, 75, 65), fill="white")
+        draw.line((10, 80, 90, 80), fill="white", width=1)
+        return GeneratedImage(raw, self.audit(), raw_image=raw)
+
+
+def test_chroma_build_preserves_single_pixel_stroke(tmp_path):
+    provider = ChromaProvider()
+    result, *_ = _run(tmp_path, provider)
+    assert result.getpixel((50, 80)) == (255, 255, 255, 255)
+    assert provider.calls == 1 and provider.inspections == 1
+
+
+def test_processing_upgrade_reuses_raw_but_rechecks_semantics(tmp_path, monkeypatch):
+    from collage.core.io import read_json
+    from collage.template.build import overlays as overlay_build
+
+    provider = ChromaProvider()
+    _run(tmp_path, provider)
+    monkeypatch.setattr(overlay_build, "CHROMA_PROCESSING_VERSION", "pyav-test-next")
+    _run(tmp_path, provider)
+    assert provider.calls == 1 and provider.inspections == 2
+    record = read_json(tmp_path / "overlay_attempts/test-key/0.json")
+    assert record["processing_version"] == "pyav-test-next"
+    assert record["inspection_fingerprint"]
+    _run(tmp_path, provider)
+    assert provider.calls == 1 and provider.inspections == 2
+
+
+def test_processing_upgrade_rechecks_rejected_raw_without_resetting_generation_cap(
+    tmp_path, monkeypatch
+):
+    from collage.template.build import overlays as overlay_build
+
+    provider = ChromaProvider(complete=[False, False, True])
+    with pytest.raises(CollageError) as caught:
+        _run(tmp_path, provider)
+    assert caught.value.code == "OVERLAY_COMPLETENESS_FAILED"
+    assert provider.calls == 2 and provider.inspections == 2
+
+    monkeypatch.setattr(overlay_build, "CHROMA_PROCESSING_VERSION", "pyav-test-next")
+    _run(tmp_path, provider)
+    assert provider.calls == 2 and provider.inspections == 3
+
+
+@pytest.mark.parametrize("technical_failure", [False, True])
+def test_processing_upgrade_keeps_unknown_inspection_blocked(
+    tmp_path, monkeypatch, technical_failure
+):
+    from collage.core.io import atomic_write_json, read_json
+    from collage.template.build import overlays as overlay_build
+
+    provider = ChromaProvider()
+    _run(tmp_path, provider)
+    record_path = tmp_path / "overlay_attempts/test-key/0.json"
+    record = read_json(record_path)
+    record["inspection_status"] = "pending"
+    atomic_write_json(record_path, record)
+    monkeypatch.setattr(overlay_build, "CHROMA_PROCESSING_VERSION", "pyav-test-next")
+
+    if technical_failure:
+        monkeypatch.setattr(
+            overlay_build,
+            "alpha_completeness",
+            lambda image: {"issues": ["OVERLAY_EDGE_CLIPPED"]},
+        )
+    with pytest.raises(CollageError) as caught:
+        _run(tmp_path, provider)
+    assert caught.value.code == "OVERLAY_INSPECTION_UNCERTAIN"
+    assert provider.calls == 1 and provider.inspections == 1
+
+
+def test_chroma_backend_is_checked_before_generation(tmp_path, monkeypatch):
+    from collage.template.build import overlays as overlay_build
+
+    def missing():
+        raise CollageError("CHROMA_DEPENDENCY_MISSING", "missing local PyAV")
+
+    provider = ChromaProvider()
+    monkeypatch.setattr(overlay_build, "require_chroma_backend", missing)
+    with pytest.raises(CollageError) as caught:
+        _run(tmp_path, provider)
+    assert caught.value.code == "CHROMA_DEPENDENCY_MISSING"
+    assert provider.calls == 0 and provider.inspections == 0

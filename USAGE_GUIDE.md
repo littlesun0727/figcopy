@@ -51,7 +51,7 @@ figcopy resume --project my-collage --approve --approval-notes "已完成视觉�
 
 ## 2. 环境准备
 
-项目要求 Python 3.11+ 和 Pillow 11/12。在项目目录执行：
+项目要求 Python 3.11+、Pillow 11/12 和 PyAV 18.1。在项目目录执行：
 
 ```powershell
 cd D:\codes\figcopy
@@ -480,6 +480,9 @@ python -m collage --verbose render `
 |---|---|
 | `VISION_PROVIDER_UNAVAILABLE` | 未提供 VLM；改用 `--manual-draft` 或配置真实 provider |
 | `IMAGE_PROVIDER_UNAVAILABLE` | 缺清版/装饰素材；导入候选 PNG 或配置图片 provider |
+| `CHROMA_DEPENDENCY_MISSING` | 无法加载本地 PyAV；运行 `python -m pip install -e "."` 更新核心依赖，并重启工作台 |
+| `CHROMA_FILTER_UNAVAILABLE` | PyAV 缺少去底滤镜；安装项目声明的官方 PyAV 二进制包 |
+| `CHROMA_PROCESSING_FAILED` | 本地色键处理失败；检查单件原始输出与日志，不会自动回退旧算法 |
 | `CUTOUT_PROVIDER_UNAVAILABLE` | `cutout` 槽收到普通不透明图片；提供透明 PNG、alpha 或抠图 provider |
 | `BIREFNET_DEPENDENCY_MISSING` | 未安装或无法加载本地模型依赖；运行 `python -m pip install -e ".[birefnet]"` |
 | `BIREFNET_MODEL_LOAD_FAILED` | 首次下载失败、缓存不完整或模型目录不正确；查看 `--verbose` 日志并检查模型配置 |
@@ -529,3 +532,11 @@ python -m collage --verbose render `
 - 结构复核的问答记录在项目 analysis/feedback 下，最终确认绑定当前 Draft 哈希；生成失败的单件记录在 workspace/overlay_attempts 下。请依据业务 code 检查，未知网络结果不会自动重复计费。
 
 本轮验证入口见 [实现记录](artifacts/pipeline_interactive_verified/README.md)。
+
+### 固定装饰的 PyAV 色键处理
+
+生成装饰和导入色键素材均使用同一 PyAV 路径。保留现有 `chroma_key`、`chroma_tolerance` 字段；默认容差 40 对应 `similarity=0.12`，默认软边对应 `blend=0.16`。程序从外围 8% 区域采样与指定色键色相相近的可见像素；背景变化较大时会相应扩大去底半径。
+
+绿色、蓝色背景附加对应的颜色污染清理；紫红、青、黄等其他色键执行去底而不套用绿色去污染。去底依据颜色，因此被线条围住的同色色键区域也会变透明；请使用与主体颜色分离的色键。细线不再自动内缩，输入已有的透明度会保留。
+
+升级本地处理器不会清空已发生的生成请求或重新开始两次生成额度。旧原图可以重新去底并接受新的完整性检查；已发送但结果未知的检查仍会停止自动重放。PyAV 处理后的部分边缘可能呈灰色，仍需按实际合成效果验收。

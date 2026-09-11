@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import math
-from collections import deque
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -12,6 +11,7 @@ from PIL import Image, ImageChops, ImageColor, ImageFilter, ImageOps
 
 from ..core.errors import CollageError
 from ..core.io import atomic_save_image, decode_image
+from .chroma import remove_background
 
 LOGGER = logging.getLogger(__name__)
 
@@ -222,78 +222,16 @@ def remove_chroma_background(
     hue_tolerance: int = 24,
     minimum_saturation: int = 32,
 ) -> Image.Image:
-    """去除模型生成的非均匀色键背景，同时保护不与边界连通的主体同色细节。"""
+    """通过 PyAV 去除色键背景与绿/蓝污染，保持旧调用接口及输入 alpha。"""
 
-    rgba = remove_chroma_key(
+    return remove_background(
         image,
         key_rgb,
         tolerance=tolerance,
         softness=softness,
+        hue_tolerance=hue_tolerance,
+        minimum_saturation=minimum_saturation,
     )
-    width, height = rgba.size
-    if width == 0 or height == 0:
-        return rgba
-
-    rgb = image.convert("RGB")
-    hsv = rgb.convert("HSV")
-    rgb_pixels = rgb.tobytes()
-    hsv_pixels = hsv.tobytes()
-    key_hue = Image.new("RGB", (1, 1), key_rgb).convert("HSV").getpixel((0, 0))[0]
-    soft_distance = max(0, tolerance) + max(1, softness)
-    soft_distance_squared = soft_distance * soft_distance
-    candidates = bytearray(width * height)
-    for index in range(width * height):
-        offset = index * 3
-        red, green, blue = rgb_pixels[offset : offset + 3]
-        hue, saturation = hsv_pixels[offset : offset + 2]
-        distance_squared = (
-            (red - key_rgb[0]) ** 2
-            + (green - key_rgb[1]) ** 2
-            + (blue - key_rgb[2]) ** 2
-        )
-        hue_distance = min(abs(hue - key_hue), 256 - abs(hue - key_hue))
-        if distance_squared <= soft_distance_squared or (
-            saturation >= minimum_saturation and hue_distance <= hue_tolerance
-        ):
-            candidates[index] = 1
-
-    # 仅移除与画面边界连通的候选色。这样模型把纯色键做成明暗纹理时仍能
-    # 清干净，同时主体内部偶然出现的同色小细节不会被整块挖掉。
-    connected = bytearray(width * height)
-    queue: deque[int] = deque()
-
-    def seed(index: int) -> None:
-        if candidates[index] and not connected[index]:
-            connected[index] = 1
-            queue.append(index)
-
-    for x in range(width):
-        seed(x)
-        seed((height - 1) * width + x)
-    for y in range(1, height - 1):
-        seed(y * width)
-        seed(y * width + width - 1)
-
-    while queue:
-        index = queue.popleft()
-        x = index % width
-        if x > 0:
-            seed(index - 1)
-        if x + 1 < width:
-            seed(index + 1)
-        if index >= width:
-            seed(index - width)
-        if index + width < width * height:
-            seed(index + width)
-
-    alpha_values = bytearray(rgba.getchannel("A").tobytes())
-    for index, is_background in enumerate(connected):
-        if is_background:
-            alpha_values[index] = 0
-    alpha = Image.new("L", rgba.size)
-    alpha.putdata(alpha_values)
-    rgba.putalpha(alpha)
-    return rgba
 
 
 def chroma_alpha_is_clean(
