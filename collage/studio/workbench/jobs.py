@@ -25,6 +25,7 @@ class JobRegistry:
         self._lock = threading.Lock()
         self._jobs: dict[str, dict[str, Any]] = {}
         self._latest_by_project: dict[str, str] = {}
+        self._inline_projects: set[str] = set()
 
     def submit(
         self,
@@ -37,11 +38,15 @@ class JobRegistry:
         with self._lock:
             previous_id = self._latest_by_project.get(project_id)
             previous = self._jobs.get(previous_id or "")
-            if previous is not None and previous["state"] in {"queued", "running"}:
+            if project_id in self._inline_projects or (
+                previous is not None and previous["state"] in {"queued", "running"}
+            ):
                 raise CollageError(
                     "PROJECT_BUSY",
                     "该项目已有任务正在执行，请等待完成后再操作",
-                    details={"job_id": previous["id"]},
+                    details={"job_id": previous["id"]}
+                    if previous
+                    else {"project_id": project_id},
                 )
             now = _utc_now()
             job_id = uuid.uuid4().hex
@@ -78,11 +83,26 @@ class JobRegistry:
         """Return project identifiers that currently have queued or running work."""
 
         with self._lock:
-            return {
+            return self._inline_projects | {
                 record["project_id"]
                 for record in self._jobs.values()
                 if record["state"] in {"queued", "running"}
             }
+
+    def run_exclusive(self, project_id: str, operation: Callable[[], Any]) -> Any:
+        """Reserve a project for a short local mutation without starting a model job."""
+        with self._lock:
+            latest = self._jobs.get(self._latest_by_project.get(project_id, ""))
+            if project_id in self._inline_projects or (
+                latest and latest["state"] in {"queued", "running"}
+            ):
+                raise CollageError("PROJECT_BUSY", "项目有任务运行，请完成后再另存")
+            self._inline_projects.add(project_id)
+        try:
+            return operation()
+        finally:
+            with self._lock:
+                self._inline_projects.discard(project_id)
 
     def _run(self, job_id: str, operation: Callable[[], Any]) -> None:
         self._update(job_id, state="running")

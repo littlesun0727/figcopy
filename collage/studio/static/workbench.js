@@ -441,6 +441,22 @@ function renderProject(status) {
   $('#stageBadge').textContent = STAGE_LABELS[status.stage] || status.stage;
   renderSteps(status);
   renderArtifacts(status);
+  const backgroundRevision = $('#backgroundRevision');
+  backgroundRevision.hidden = !status.artifacts?.reviewed?.exists;
+  $('#backgroundRevisionHint').hidden = backgroundRevision.hidden;
+  backgroundRevision.disabled = activeJob(status.task);
+  backgroundRevision.onclick = async () => {
+    backgroundRevision.disabled = true;
+    try {
+      const url = `/api/projects/${encodeURIComponent(status.project_id)}/background-revision`;
+      const source = await api(url);
+      const result = await api(url, {method: 'POST', body: {revision: source.revision}});
+      window.location.assign(result.url);
+    } catch (error) {
+      toast(describeError(error));
+      backgroundRevision.disabled = false;
+    }
+  };
 
   const task = status.task;
   $('#taskBanner').hidden = !activeJob(task);

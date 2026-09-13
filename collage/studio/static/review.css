@@ -11,6 +11,7 @@ h2{font-size:15px;margin:20px 0 8px}
 .row{display:flex;gap:8px;align-items:center;margin:7px 0;flex-wrap:wrap}
 .row>*{min-width:0}
 .stack{display:block;margin:8px 0}
+[hidden]{display:none!important}
 .stack>input[type=text],.stack>textarea{display:block;width:100%;margin-top:4px}
 input,select,button,textarea{font:inherit}
 input[type=number]{width:76px}

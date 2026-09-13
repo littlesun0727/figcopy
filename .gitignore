@@ -6,7 +6,10 @@ __pycache__/
 *.egg-info/
 .tmp_demo/
 /.tmp_preview/
-/artifacts/
+/artifacts/*
+!/artifacts/background_source_verified/
+/artifacts/background_source_verified/*
+!/artifacts/background_source_verified/README.md
 /templates/
 /work/
 *.render.json

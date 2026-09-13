@@ -13,9 +13,9 @@ from ...core.errors import CollageError
 from ...core.io import atomic_write_json, read_json, resolve_input_path
 from ...projects import DataPaths, ProjectPaths, ProjectStore
 from ...providers import VisionProvider, load_provider
-from ...template.review.feedback import revise_draft, validate_feedback, review_revision
-from ...template.review.recovery import available_recoveries, recover_saved_correction
 from ...schemas import validate_bindings
+from ...template.review.feedback import review_revision, revise_draft, validate_feedback
+from ...template.review.recovery import available_recoveries, recover_saved_correction
 from ...template.validation import validate_package
 from ...workflows import WorkflowService
 from ...workflows.model import (
@@ -319,6 +319,20 @@ class WorkbenchApplication:
         from .layout import layout_document
 
         return layout_document(self.store.open(project_id))
+
+    def background_revision(self, project_id: str) -> dict[str, Any]:
+        """Return a token for explicitly forking the current confirmed project."""
+        from .background_revision import revision_document
+
+        return revision_document(self.store.open(project_id))
+
+    def fork_background(self, project_id: str, payload: Any) -> dict[str, Any]:
+        """Fork a local review while excluding simultaneous generation jobs."""
+        from .background_revision import fork_background_review
+
+        return self.jobs.run_exclusive(
+            project_id, lambda: fork_background_review(self.store, project_id, payload)
+        )
 
     def layout_layer(self, project_id: str, identifier: str) -> bytes:
         from .layout import layer_image

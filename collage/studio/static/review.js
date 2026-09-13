@@ -22,7 +22,67 @@ let initialMaskData = null;
 let overlayTextReviewOpened = false;
 let overlayDetailsOpen = false;
 let initialOverlayText = {};
+let backgroundSelection = null;
+let fixedBackground = null;
 const photoBackgroundId = () => draft?.background?.mode === 'slot' ? draft.background.slot_id : null;
+
+function eligibleBackgroundSlots() {
+  return draft.slots.filter(item => {
+    const fields = reviewOptions.slots[item.id];
+    return item.type === 'image' && item.mode === 'photo'
+      && JSON.stringify(item.target_rect) === JSON.stringify([0, 0, draft.canvas.width, draft.canvas.height])
+      && fields.required === true && fields.fit === 'cover' && fields.rotation_deg === 0
+      && !fields.clip_mask && fields.edge_fade_px === 0;
+  });
+}
+
+function renderBackgroundSource() {
+  const id = photoBackgroundId();
+  const candidates = eligibleBackgroundSlots();
+  $('#backgroundSource').value = id ? 'slot' : 'fixed';
+  $('#backgroundSlotControl').hidden = !id;
+  $('#backgroundSlot').innerHTML = candidates.map(item =>
+    `<option value="${escapeHtml(item.id)}">${escapeHtml(item.label)} · ${escapeHtml(item.id)}</option>`).join('');
+  if (id) $('#backgroundSlot').value = id;
+  $('#backgroundSourceHint').textContent = id
+    ? '客户背景照片必须不透明并铺满画布；跳过固定背景制作，装饰仍独立处理。'
+    : candidates.length ? '当前仍使用固定底板。发现可用的满版照片槽；仅当客户会替换整个背景时才切换。'
+      : '保留固定底板；清版与保护区域按下方设置处理。暂无符合满版约束的普通照片槽。';
+  $('#backgroundControls').hidden = Boolean(id);
+  $('#photoBackgroundHint').hidden = !id;
+  for (const name of ['drawMode', 'eraseMode', 'resetMask', 'brushControl']) $('#' + name).hidden = Boolean(id);
+  if (id) setMode('box');
+  updateMaskState();
+}
+
+function selectBackground(mode, slotId = null) {
+  const candidate = eligibleBackgroundSlots().find(item => item.id === slotId) || eligibleBackgroundSlots()[0];
+  if (mode === 'slot' && !candidate) {
+    renderBackgroundSource();
+    $('#status').textContent = '不能使用照片背景：需先有必填、满版、无旋转、无开洞或羽化的普通照片槽。';
+    return;
+  }
+  $('#finalConfirmed').checked = false;
+  if (!photoBackgroundId()) fixedBackground = structuredClone(draft.background);
+  if (mode === 'slot') {
+    draft.background = {mode: 'slot', slot_id: candidate.id, review_notes: '用户选择客户满版照片作为背景'};
+    draft.layer_order = [{type: 'slot', id: candidate.id}, ...draft.layer_order.filter(layer =>
+      layer.type !== 'background' && !(layer.type === 'slot' && layer.id === candidate.id))];
+    backgroundSelection = {mode: 'slot', slot_id: candidate.id};
+  } else {
+    draft.background = structuredClone(fixedBackground || {background_brief: '', review_notes: '请复核固定底板制作说明与删除区域'});
+    draft.layer_order = [{type: 'background'}, ...draft.layer_order.filter(layer => layer.type !== 'background')];
+    $('#backgroundBrief').value = draft.background.background_brief;
+    backgroundSelection = {mode: 'fixed'};
+  }
+  // The server derives the schema version and validates this order independently.
+  draft.version = mode === 'slot' ? 'collage-draft/2' : 'collage-draft/1';
+  renderItems(); renderLayers(); renderBackgroundSource(); render();
+  $('#status').textContent = '背景来源已修改，请检查并重新勾选整体确认；尚未调用模型。';
+}
+
+$('#backgroundSource').onchange = event => selectBackground(event.target.value);
+$('#backgroundSlot').onchange = event => selectBackground('slot', event.target.value);
 
 function setMode(next) {
   mode = next;
@@ -64,7 +124,7 @@ function render() {
   ctx.drawImage(image, 0, 0);
   ctx.save();
   ctx.globalAlpha = 0.34;
-  ctx.drawImage(mask, 0, 0);
+  if (!photoBackgroundId()) ctx.drawImage(mask, 0, 0);
   ctx.restore();
   ctx.font = `${Math.max(12, view.width / 80)}px sans-serif`;
   for (const entry of allItems()) {
@@ -445,6 +505,9 @@ function acceptsDefaultText(item, settings) {
 
 function preflightErrors() {
   const errors = [];
+  if (backgroundSelection?.mode === 'fixed' && !$('#backgroundBrief').value.trim()) {
+    errors.push('切回固定底板时请填写清版说明并复核删除区域');
+  }
   for (const item of draft.slots) {
     const settings = reviewOptions.slots[item.id];
     if (item.mode === 'unknown') {
@@ -498,13 +561,8 @@ async function load() {
     .map(([id, fields]) => [id, fields.text_content]));
   draft = snapshot.draft;
   reviewOptions = snapshot.review_options;
-  const photoBackground = Boolean(photoBackgroundId());
-  $('#backgroundControls').hidden = photoBackground;
-  $('#photoBackgroundHint').hidden = !photoBackground;
-  for (const id of ['drawMode', 'eraseMode', 'resetMask', 'brushControl']) {
-    $('#' + id).hidden = photoBackground;
-  }
-  if (photoBackground) setMode('box');
+  backgroundSelection = null;
+  fixedBackground = photoBackgroundId() ? null : structuredClone(draft.background);
 
   image = new Image();
   image.src = endpoint('/reference');
@@ -513,7 +571,7 @@ async function load() {
   view.height = mask.height = draft.canvas.height;
 
   const initial = new Image();
-  initial.src = snapshot.mask_data_url;
+  initial.src = snapshot.fixed_mask_data_url || snapshot.mask_data_url;
   await initial.decode();
   const temporary = document.createElement('canvas');
   temporary.width = mask.width;
@@ -551,6 +609,7 @@ async function load() {
   renderItems();
   renderLayers();
   renderQuestions();
+  renderBackgroundSource();
   await loadRecoveries();
   $('#autoSummary').textContent = '没有反馈时可直接勾选整体确认；未展开的装饰文字沿用识别结果。';
   render();
@@ -585,6 +644,7 @@ $('#save').onclick = async () => {
       background_composition_mode: $('#backgroundComposition').value,
       background_expand_px: Number($('#backgroundExpand').value),
       background_feather_px: Number($('#backgroundFeather').value),
+      background_selection: backgroundSelection,
     }),
   });
   const result = await response.json();
@@ -671,6 +731,7 @@ function busy(value) {
 }
 
 async function awaitCorrection(task) {
+  const previousSelection = backgroundSelection;
   while (task && ['queued', 'running'].includes(task.state)) {
     $('#status').textContent = task.kind === 'recover_review' ? '正在恢复已保存的结果，无需调用模型…' : 'VLM 正在根据回答纠正识别，请稍候…';
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -685,6 +746,10 @@ async function awaitCorrection(task) {
   try { sessionStorage.removeItem(feedbackKey()); } catch (_) {}
   await load();
   $('#status').textContent = '已生成纠正后的结果。请再次检查，确认无误后手动勾选确认。';
+  if (previousSelection && (previousSelection.mode !== (photoBackgroundId() ? 'slot' : 'fixed')
+    || (previousSelection.mode === 'slot' && previousSelection.slot_id !== photoBackgroundId()))) {
+    $('#status').textContent += '\n注意：模型返回的背景来源与刚才的显式选择不同，请检查“背景来源”后再决定。';
+  }
 }
 
 $('#revise').onclick = async () => {
@@ -704,6 +769,7 @@ $('#revise').onclick = async () => {
       method: 'POST',
       headers: {'content-type': 'application/json', ...(csrfToken ? {'X-Figcopy-Token': csrfToken} : {})},
       body: JSON.stringify({revision: reviewOptions.revision, draft: edited,
+        background_selection: backgroundSelection,
         question_resolutions: answers, other_feedback: other}),
     });
     const result = await response.json();

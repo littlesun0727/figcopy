@@ -219,6 +219,13 @@ class WorkflowService:
         validate_workflow(workflow)
 
         if workflow["stage"] in {"blocked", "failed"}:
+            if (workflow.get("last_error") or {}).get(
+                "code"
+            ) == "BACKGROUND_REVISION_INCOMPLETE":
+                raise CollageError(
+                    "BACKGROUND_REVISION_INCOMPLETE",
+                    "此修订复制未完成，请从源项目重新另存；原项目未修改",
+                )
             resume_stage = workflow.get("resume_stage") or infer_resume_stage(project)
             transition(self.store, project, workflow, resume_stage)
         if approve and workflow["stage"] not in {"awaiting_approval", "complete"}:

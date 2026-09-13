@@ -305,6 +305,9 @@ def create_workbench_server(
                 if rest == ["layout"]:
                     self._json(HTTPStatus.OK, app.layout(project_id))
                     return
+                if rest == ["background-revision"]:
+                    self._json(HTTPStatus.OK, app.background_revision(project_id))
+                    return
                 if len(rest) == 3 and rest[:2] == ["layout", "layers"]:
                     self._send(
                         HTTPStatus.OK,
@@ -393,6 +396,12 @@ def create_workbench_server(
                 if rest == ["layout", "save"]:
                     self._json(
                         HTTPStatus.OK, app.save_layout(project_id, self._read_json())
+                    )
+                    return
+                if rest == ["background-revision"]:
+                    self._json(
+                        HTTPStatus.OK,
+                        app.fork_background(project_id, self._read_json()),
                     )
                     return
                 if rest == ["layout", "preview"]:

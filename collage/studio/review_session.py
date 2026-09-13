@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import base64
-import copy
 import io
 import logging
 from pathlib import Path
@@ -11,7 +10,7 @@ from typing import Any
 
 from PIL import Image
 
-from ..core.errors import CollageError
+from ..core.errors import CollageError, SpecValidationError
 from ..core.io import (
     atomic_save_image,
     atomic_write_json,
@@ -19,10 +18,9 @@ from ..core.io import (
     resolve_input_path,
 )
 from ..core.locking import project_edit_lock
-from ..template.review.feedback import review_revision
 from ..imaging.operations import load_mask
 from ..schemas import validate_draft
-from ..schemas.background import background_slot_id
+from ..schemas.background import background_slot_id, validate_slot_background
 from ..template.review import (
     automatic_remove_mask,
     automatic_review_notes,
@@ -32,6 +30,9 @@ from ..template.review import (
     validate_override_map,
     validate_review_decisions,
 )
+from ..template.review.background_source import background_decision, edited_review_draft
+from ..template.review.feedback import review_revision
+from ..template.review.service import default_slot_review_fields
 
 LOGGER = logging.getLogger(__name__)
 
@@ -71,9 +72,24 @@ class ReviewSession:
         background_expand_px: int = 0,
         background_feather_px: int = 0,
         background_composition_mode: str = "protected",
+        initial_review_options: dict[str, Any] | None = None,
     ) -> None:
         self.draft_path = draft_path.resolve()
         self.output_path = output_path.resolve()
+        restored_path = self.output_path.parent / "revision_options.json"
+        if initial_review_options is None and restored_path.is_file():
+            initial_review_options = read_json(restored_path)
+        if initial_review_options:
+            background_options = initial_review_options.get("background", {})
+            background_expand_px = background_options.get(
+                "expand_px", background_expand_px
+            )
+            background_feather_px = background_options.get(
+                "feather_px", background_feather_px
+            )
+            background_composition_mode = background_options.get(
+                "composition_mode", background_composition_mode
+            )
         self.reviewer = reviewer
         self.allowed_mask_path = allowed_mask_path
         self.background_candidate_path = background_candidate_path
@@ -117,6 +133,43 @@ class ReviewSession:
         )
         self.review_options["initial_mask_source"] = initial_mask_source
         self.review_options["revision"] = review_revision(self.draft)
+        if initial_review_options:
+            for kind in ("slots", "overlays"):
+                for item in self.draft[kind]:
+                    restored = initial_review_options.get(kind, {}).get(item["id"], {})
+                    # A later model correction may replace semantic fields. Do not
+                    # reapply an old text/shape or its confirmation to new content.
+                    fields = {
+                        k: v
+                        for k, v in restored.items()
+                        if k not in item
+                        and k not in {"shape", "text_content", "default_text"}
+                    }
+                    if kind == "overlays" and any(
+                        restored.get(key) != item.get(key)
+                        for key in (
+                            "source_rect",
+                            "action",
+                            "generation_brief",
+                            "text_content",
+                        )
+                    ):
+                        fields.pop("prepared_asset", None)
+                    if kind == "overlays" and restored.get("text_content") != item.get(
+                        "text_content"
+                    ):
+                        fields["text_confirmed"] = False
+                    self.review_options[kind][item["id"]].update(fields)
+        self.fixed_mask_png = self.mask_png
+        if background_slot_id(self.draft):
+            fallback = (
+                load_mask(initial_mask_path, self.canvas_size, name="初始 remove_mask")
+                if initial_mask_path
+                else automatic_remove_mask(self.draft)
+            )
+            buffer = io.BytesIO()
+            fallback.save(buffer, format="PNG")
+            self.fixed_mask_png = buffer.getvalue()
         feather_count = sum(
             1
             for slot in self.draft["slots"]
@@ -137,6 +190,8 @@ class ReviewSession:
             "review_options": self.review_options,
             "mask_data_url": "data:image/png;base64,"
             + base64.b64encode(self.mask_png).decode("ascii"),
+            "fixed_mask_data_url": "data:image/png;base64,"
+            + base64.b64encode(self.fixed_mask_png).decode("ascii"),
         }
 
     def save(self, payload: Any) -> dict[str, Any]:
@@ -177,22 +232,8 @@ class ReviewSession:
             text_review_opened = payload.get("overlay_text_review_opened", True)
             if type(text_review_opened) is not bool:
                 raise CollageError("INVALID_REQUEST", "文字复核展开状态必须是布尔值")
-            edited = copy.deepcopy(payload["draft"])
-            # The browser may edit semantics but never program-owned provenance.
-            for field in (
-                "version",
-                "status",
-                "source",
-                "canvas",
-                "prompt_version",
-                "provider",
-                "created_at",
-            ):
-                edited[field] = self.draft[field]
-            # Accepting the current result is a human decision, not a VLM correction.
-            # Keep the original questions in draft.json and in confirmation evidence.
-            edited["questions"] = list(self.draft["questions"])
-            validate_draft(edited)
+            edited = edited_review_draft(self.draft, payload)
+            background_evidence = background_decision(self.draft, edited, payload)
             slot_overrides = validate_override_map(
                 payload.get("slot_overrides", {}), source="确认页面 slot 覆盖"
             )
@@ -200,6 +241,36 @@ class ReviewSession:
                 payload.get("overlay_overrides", {}),
                 source="确认页面 overlay 覆盖",
             )
+            # Restored project options are authoritative defaults even for older
+            # clients that submit only a partial override map.
+            for kind, overrides in (
+                ("slots", slot_overrides),
+                ("overlays", overlay_overrides),
+            ):
+                for item in edited[kind]:
+                    defaults = dict(self.review_options[kind].get(item["id"], {}))
+                    defaults.update({key: item[key] for key in defaults if key in item})
+                    overrides[item["id"]] = {
+                        **defaults,
+                        **overrides.get(item["id"], {}),
+                    }
+            if background_slot_id(edited):
+                issues = []
+                validate_slot_background(
+                    edited["background"],
+                    [
+                        {
+                            **item,
+                            **default_slot_review_fields(item),
+                            **slot_overrides.get(item["id"], {}),
+                        }
+                        for item in edited["slots"]
+                    ],
+                    self.canvas_size,
+                    issues,
+                )
+                if issues:
+                    raise SpecValidationError(issues)
             accepted_default_text = self._accept_default_text(
                 edited, overlay_overrides, opened=text_review_opened
             )
@@ -318,6 +389,7 @@ class ReviewSession:
                     "confirmed_draft": "ui_confirmed_draft.json",
                     "questions_accepted_as_is": self.draft["questions"],
                     "default_text_accepted": accepted_default_text,
+                    "background_decision": background_evidence,
                 },
             )
             return {"ok": True, "path": str(self.output_path)}

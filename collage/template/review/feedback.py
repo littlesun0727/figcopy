@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 import json
 import logging
 from datetime import UTC, datetime
@@ -22,10 +21,10 @@ from ...providers import VisionProvider
 from ...schemas import validate_draft
 from ...schemas.background import background_slot_id
 from ..analysis import ANALYSIS_PROMPT, DEFAULT_PRODUCT_POLICY, _draw_draft_preview
+from .background_source import CORE_FIELDS, background_decision, edited_review_draft
 
 LOGGER = logging.getLogger(__name__)
-FEEDBACK_PROMPT_VERSION = "collage-review-feedback/2"
-CORE_FIELDS = ("slots", "overlays", "background", "layer_order", "questions")
+FEEDBACK_PROMPT_VERSION = "collage-review-feedback/3"
 
 
 def review_revision(draft: dict[str, Any]) -> str:
@@ -68,19 +67,13 @@ def validate_feedback(draft: dict[str, Any], payload: Any) -> dict[str, Any]:
     ]
     if not answers and not other.strip():
         raise CollageError("REVIEW_FEEDBACK_EMPTY", "请填写待确认问题或其他错误说明")
-    edited = copy.deepcopy(payload.get("draft", draft))
-    if not isinstance(edited, dict):
-        raise CollageError("INVALID_REQUEST", "当前编辑稿必须是 JSON object")
-    for field in set(draft) - set(CORE_FIELDS):
-        edited[field] = draft[field]
-    # Questions belong to the loaded revision, not to the browser's editable copy.
-    edited["questions"] = draft["questions"]
-    validate_draft(edited)
+    edited = edited_review_draft(draft, payload)
     return {
         "question_resolutions": answers,
         "other_feedback": other.strip(),
         "draft": edited,
         "revision": payload["revision"],
+        "background_decision": background_decision(draft, edited, payload),
     }
 
 
@@ -188,6 +181,7 @@ def revise_draft(
             "submitted_at": datetime.now(UTC).isoformat(),
             "question_resolutions": feedback["question_resolutions"],
             "other_feedback": feedback["other_feedback"],
+            "background_decision": feedback["background_decision"],
         }
         atomic_write_json(request_path, request)
         LOGGER.info(

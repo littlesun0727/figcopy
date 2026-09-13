@@ -22,31 +22,35 @@ _DRAFT_REQUIRED_FIELDS = frozenset(
     {"slots", "overlays", "background", "layer_order", "questions"}
 )
 
-_DRAFT_CONTRACT = """只输出以下结构的 JSON，不要 Markdown：
-{
-  "slots": [{
-    "id": "slot_id", "label": "槽位名称", "type": "image或text",
-    "mode": "photo、photo_feather、cutout、unknown或null",
-    "source_rect": [x,y,width,height], "target_rect": [x,y,width,height],
-    "upload_hint": "上传提示", "review_notes": "复核说明"
-  }],
-  "overlays": [{
-    "id": "overlay_id", "label": "装饰名称",
-    "source_rect": [x,y,width,height], "target_rect": [x,y,width,height],
-    "action": "从 product_policy.overlay_actions 中选择",
-    "generation_brief": "制作说明", "requires_exact_content": false,
-    "review_notes": "复核说明"
-  }],
-  "background": {"background_brief": "清版说明", "review_notes": "复核说明"},
-  "layer_order": [{"type": "background"}, {"type": "slot", "id": "slot_id"}],
-  "questions": []
-}
-背景有两种来源，必须按产品需求选择：
-1. 固定背景沿用上面的 background 对象，layer_order 第一项为 {"type":"background"}，且只能出现一次。
-2. 如果客户上传的一张普通照片铺满整个画布作为背景，将 background 改为
-   {"mode":"slot","slot_id":"实际的全屏图片槽ID","review_notes":"背景由客户照片提供，无需制作固定背景"}。
-   对应槽位必须为 image/photo，target_rect 为 [0,0,画布宽,画布高]；
-   layer_order 第一项直接引用这个 slot，不能再包含 {"type":"background"}。
-   不清版旧街景、不生成固定背景、不恢复旧照片作为默认图。
+_DRAFT_CONTRACT = """只输出一个完整 JSON，不要 Markdown。必须有 slots、overlays、background、layer_order、questions。
+先判断客户要替换什么，再明确背景来源；以下两种来源地位相同，不默认强制清版。
+示例坐标仅说明格式（100×80 画布），实际必须按传入 canvas 和参考图识别，不照抄尺寸或槽数。
+
+方案 A：客户只替换纸张/相册底板/固定场景中的照片，底板仍保留。
+{"slots":[{"id":"photo","label":"内部照片","type":"image","mode":"photo",
+"source_rect":[10,10,60,50],"target_rect":[10,10,60,50],"upload_hint":"上传内部照片","review_notes":"底板保留"}],
+"overlays":[],"background":{"background_brief":"清除需要替换的旧内容，保留固定底板","review_notes":"固定背景"},
+"layer_order":[{"type":"background"},{"type":"slot","id":"photo"}],"questions":[]}
+固定背景必须且只能出现一次 type:background，并位于最底层。
+
+方案 B：客户上传的一张普通照片将替换整个背景，其他元素独立叠加。
+{"slots":[{"id":"base_photo","label":"背景照片","type":"image","mode":"photo",
+"source_rect":[0,0,100,80],"target_rect":[0,0,100,80],"upload_hint":"上传不透明满版背景照片","review_notes":"背景可替换"},
+{"id":"inset","label":"插图照片","type":"image","mode":"photo",
+"source_rect":[10,10,30,20],"target_rect":[10,10,30,20],"upload_hint":"上传插图照片","review_notes":"独立照片"}],
+"overlays":[],"background":{"mode":"slot","slot_id":"base_photo","review_notes":"由客户照片提供，无需制作固定背景"},
+"layer_order":[{"type":"slot","id":"base_photo"},{"type":"slot","id":"inset"}],"questions":[]}
+照片背景对应唯一 image/photo 槽，target_rect 必须为 [0,0,画布宽,画布高]；
+最底层直接引用该槽，不能再包含 type:background。不清版旧场景，不恢复旧照片作默认图。
+背景槽不能是抠图、羽化或局部窗口；但它上方可以有独立抠图、羽化或普通照片。
+画面里有风景/人物，或发现满版槽，单独都不能证明客户要替换整个底板。
+仅在 review_notes 写“无需清版”不够，必须用方案 B 的结构表达。
+替换意图不明确时保留固定背景与 questions，等待客户复核；不要猜测省略底板。
+
+slots 每项采用示例中的完整字段；type 可为 image 或 text，文字的 mode 为 null；
+图片 mode 可为 photo、photo_feather、cutout、unknown。坐标格式均为 [x,y,width,height]。
+每件固定装饰独立放入 overlays，字段为 id、label、source_rect、target_rect、
+action（从 product_policy.overlay_actions 选择）、generation_brief、requires_exact_content（布尔）、review_notes；
+可带 text_content 和合法 shape。示例没有装饰不意味着实际应该省略装饰。
 所有 slot 和 overlay 都必须在 layer_order 中各引用一次，顺序从底到顶。
 不要输出 version、status、source、canvas、provider、created_at 或 prompt_version，应用程序会补齐。"""

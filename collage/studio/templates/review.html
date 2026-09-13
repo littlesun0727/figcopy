@@ -13,6 +13,19 @@
     <h1>确认模板</h1>
     <p class="muted">接受当前识别结果时，无需填写反馈，勾选整体确认即可制作。有修改意见时先提交 VLM 纠正。每个装饰会独立制作。</p>
     <h2>识别复核</h2>
+    <section>
+      <h2>背景来源</h2>
+      <label class="stack">画布最底层由什么提供？
+        <select id="backgroundSource">
+          <option value="fixed">固定底板：保留或清版</option>
+          <option value="slot">客户照片铺满背景</option>
+        </select>
+      </label>
+      <label id="backgroundSlotControl" class="stack" hidden>背景照片槽
+        <select id="backgroundSlot"></select>
+      </label>
+      <p id="backgroundSourceHint" class="auto"></p>
+    </section>
     <div id="savedCorrections" hidden></div>
     <div id="questions"></div>
     <label class="stack">其他错误或补充说明（选填）
