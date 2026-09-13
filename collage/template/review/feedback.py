@@ -22,7 +22,6 @@ from ...providers import VisionProvider
 from ...schemas import validate_draft
 from ...schemas.background import background_slot_id
 from ..analysis import ANALYSIS_PROMPT, DEFAULT_PRODUCT_POLICY, _draw_draft_preview
-from .defaults import question_resolution_notes
 
 LOGGER = logging.getLogger(__name__)
 FEEDBACK_PROMPT_VERSION = "collage-review-feedback/2"
@@ -35,7 +34,7 @@ def review_revision(draft: dict[str, Any]) -> str:
 
 
 def validate_feedback(draft: dict[str, Any], payload: Any) -> dict[str, Any]:
-    """Require every question's answer; the additional feedback defaults to empty."""
+    """Accept optional answers, requiring actual feedback and the current revision."""
     if not isinstance(payload, dict):
         raise CollageError("INVALID_REQUEST", "纠正请求必须是 JSON object")
     if payload.get("revision") != review_revision(draft):
@@ -45,12 +44,28 @@ def validate_feedback(draft: dict[str, Any], payload: Any) -> dict[str, Any]:
     answers = payload.get("question_resolutions", [])
     if not isinstance(answers, list) or (not draft["questions"] and answers):
         raise CollageError("INVALID_REQUEST", "问答与当前识别结果不一致")
-    question_resolution_notes(draft["questions"], answers)
+    if answers and (
+        len(answers) != len(draft["questions"])
+        or any(
+            not isinstance(item, dict)
+            or item.get("question") != question
+            or not isinstance(item.get("answer"), str)
+            for question, item in zip(draft["questions"], answers)
+        )
+    ):
+        raise CollageError("INVALID_REQUEST", "问答与当前识别结果不一致")
     other = payload.get("other_feedback", "")
     if not isinstance(other, str) or len(other) > 12000:
         raise CollageError("INVALID_REQUEST", "其他说明必须是 12000 字以内的文字")
     if any(len(item["answer"]) > 12000 for item in answers):
         raise CollageError("INVALID_REQUEST", "每个回答不能超过 12000 字")
+    # Empty optional answers are not invented decisions; the model retains the
+    # original questions in the Draft and only receives feedback the user wrote.
+    answers = [
+        {"question": item["question"], "answer": item["answer"].strip()}
+        for item in answers
+        if item["answer"].strip()
+    ]
     if not answers and not other.strip():
         raise CollageError("REVIEW_FEEDBACK_EMPTY", "请填写待确认问题或其他错误说明")
     edited = copy.deepcopy(payload.get("draft", draft))

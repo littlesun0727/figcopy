@@ -29,7 +29,6 @@ from ..template.review import (
     background_parameter,
     build_review_options,
     confirm_draft,
-    question_resolution_notes,
     validate_override_map,
     validate_review_decisions,
 )
@@ -159,15 +158,25 @@ class ReviewSession:
                 raise CollageError(
                     "HUMAN_REVIEW_REQUIRED", "请手动确认当前识别结果没有问题"
                 )
-            if self.draft["questions"] or payload.get("defer_questions") is True:
-                raise CollageError(
-                    "REVIEW_CORRECTION_REQUIRED",
-                    "请先回答疑问并提交给 VLM 纠正，再确认新结果",
+            other = payload.get("other_feedback", "")
+            answers = payload.get("question_resolutions", [])
+            if (
+                not isinstance(other, str)
+                or not isinstance(answers, list)
+                or any(
+                    not isinstance(item, dict)
+                    or not isinstance(item.get("answer"), str)
+                    for item in answers
                 )
-            if payload.get("other_feedback") or payload.get("question_resolutions"):
+            ):
+                raise CollageError("INVALID_REQUEST", "反馈必须是文字和问答列表")
+            if other.strip() or any(item["answer"].strip() for item in answers):
                 raise CollageError(
                     "REVIEW_CORRECTION_REQUIRED", "填写的反馈尚未提交纠正"
                 )
+            text_review_opened = payload.get("overlay_text_review_opened", True)
+            if type(text_review_opened) is not bool:
+                raise CollageError("INVALID_REQUEST", "文字复核展开状态必须是布尔值")
             edited = copy.deepcopy(payload["draft"])
             # The browser may edit semantics but never program-owned provenance.
             for field in (
@@ -180,6 +189,9 @@ class ReviewSession:
                 "created_at",
             ):
                 edited[field] = self.draft[field]
+            # Accepting the current result is a human decision, not a VLM correction.
+            # Keep the original questions in draft.json and in confirmation evidence.
+            edited["questions"] = list(self.draft["questions"])
             validate_draft(edited)
             slot_overrides = validate_override_map(
                 payload.get("slot_overrides", {}), source="确认页面 slot 覆盖"
@@ -188,22 +200,22 @@ class ReviewSession:
                 payload.get("overlay_overrides", {}),
                 source="确认页面 overlay 覆盖",
             )
+            accepted_default_text = self._accept_default_text(
+                edited, overlay_overrides, opened=text_review_opened
+            )
             validate_review_decisions(edited, slot_overrides, overlay_overrides)
-            if payload.get("defer_questions") is True:
-                question_notes = ""
-            else:
-                question_notes = question_resolution_notes(
-                    self.draft["questions"], payload.get("question_resolutions", [])
-                )
             automatic_notes = automatic_review_notes(
                 self.draft,
                 slot_overrides,
                 overlay_overrides,
-                questions_deferred=payload.get("defer_questions") is True,
+                questions_deferred=bool(self.draft["questions"]),
             )
-            notes = "\n\n".join(
-                part for part in (question_notes, automatic_notes) if part
-            )
+            notes = automatic_notes
+            if accepted_default_text:
+                notes += "\n- 整体确认时接受默认识别文字，未逐字核对：" + ", ".join(
+                    accepted_default_text
+                )
+            edited["questions"] = []
             LOGGER.info(
                 "确认页自动策略已应用 | inferred_text=%s fallback_fonts=%s "
                 "approximate_overlays=%s deferred_questions=%s",
@@ -230,11 +242,7 @@ class ReviewSession:
                     )
                     is False
                 ),
-                (
-                    len(self.draft["questions"])
-                    if payload.get("defer_questions") is True
-                    else 0
-                ),
+                len(self.draft["questions"]),
             )
             mask = None
             selected_expand_px = 0
@@ -308,6 +316,39 @@ class ReviewSession:
                     "final_confirmed": True,
                     "reviewer": self.reviewer,
                     "confirmed_draft": "ui_confirmed_draft.json",
+                    "questions_accepted_as_is": self.draft["questions"],
+                    "default_text_accepted": accepted_default_text,
                 },
             )
             return {"ok": True, "path": str(self.output_path)}
+
+    def _accept_default_text(
+        self,
+        edited: dict[str, Any],
+        overrides: dict[str, dict[str, Any]],
+        *,
+        opened: bool,
+    ) -> list[str]:
+        """Accept unchanged hidden text through the explicit overall confirmation."""
+        accepted: list[str] = []
+        if opened:
+            return accepted
+        originals = {item["id"]: item for item in self.draft["overlays"]}
+        for item in edited["overlays"]:
+            original = originals.get(item["id"])
+            if original is None:
+                continue
+            defaults = self.review_options["overlays"][item["id"]]
+            fields = {**defaults, **overrides.get(item["id"], {})}
+            if (
+                defaults.get("text_content")
+                and fields.get("text_content") == defaults["text_content"]
+                and item.get("text_content") == original.get("text_content")
+                and fields.get("text_confirmed") is not True
+            ):
+                # text_confirmed means accepted for generation; the evidence below
+                # distinguishes accepting defaults from an explicit character check.
+                fields["text_confirmed"] = True
+                overrides[item["id"]] = fields
+                accepted.append(item["id"])
+        return accepted

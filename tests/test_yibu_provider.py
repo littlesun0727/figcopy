@@ -40,9 +40,9 @@ def _png_base64(size: tuple[int, int] = (32, 24)) -> str:
 class _AuditStubHandler(BaseHTTPRequestHandler):
     """模拟审计代理，只记录测试请求且不访问网络。"""
 
-    def _send_json(self, payload: dict[str, Any]) -> None:
+    def _send_json(self, payload: dict[str, Any], status: int = 200) -> None:
         body = json.dumps(payload).encode("utf-8")
-        self.send_response(200)
+        self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("X-Request-ID", "stub-header-id")
@@ -67,6 +67,11 @@ class _AuditStubHandler(BaseHTTPRequestHandler):
                 "payload": payload,
             }
         )
+        failure = self.server.failure  # type: ignore[attr-defined]
+        if failure is not None:
+            status, response = failure
+            self._send_json(response, status)
+            return
         if self.path == "/v1/chat/completions":
             chat_response = self.server.chat_response  # type: ignore[attr-defined]
             if chat_response is not None:
@@ -147,6 +152,7 @@ def _audit_stub() -> Iterator[tuple[ThreadingHTTPServer, str]]:
     server.records = []  # type: ignore[attr-defined]
     server.image_base64 = _png_base64()  # type: ignore[attr-defined]
     server.chat_response = None  # type: ignore[attr-defined]
+    server.failure = None  # type: ignore[attr-defined]
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
@@ -407,6 +413,57 @@ def test_image_provider_uses_seedream_generation_endpoint_with_one_reference() -
     assert result.audit.actual_model == DEFAULT_IMAGE_MODEL
     assert result.audit.request_id == "seedream-response-id"
     assert provider.capabilities.name == "yibu-audit-seedream-image"
+
+
+@pytest.mark.parametrize(
+    ("status", "expected_code"),
+    [
+        (401, "PROVIDER_AUTH_FAILED"),
+        (403, "PROVIDER_AUTH_FAILED"),
+        (400, "PROVIDER_REQUEST_FAILED"),
+        (429, "RATE_LIMITED"),
+        (503, "TEMPORARY_NETWORK_ERROR"),
+    ],
+)
+def test_seedream_http_failure_is_actionable_and_redacts_echoed_credentials(
+    status: int, expected_code: str, caplog: pytest.LogCaptureFixture
+) -> None:
+    image_data = "data:image/png;base64," + _png_base64()
+    with _audit_stub() as (server, base_url):
+        server.failure = (  # type: ignore[attr-defined]
+            status,
+            {
+                "error": {
+                    "message": f"Invalid token unit-test-key {image_data}",
+                    "type": "new_api_error",
+                }
+            },
+        )
+        provider = YibuImageProvider(_settings(base_url))
+        with pytest.raises(CollageError) as caught:
+            provider.edit_background(
+                Image.new("RGB", (20, 30), "gray"),
+                Image.new("L", (20, 30), 255),
+                brief="移除旧照片",
+            )
+
+    error = caught.value
+    assert error.code == expected_code
+    assert error.details["http_status"] == status
+    assert error.details["operation"] == "edit-background"
+    assert "Invalid token" in error.details["response"]
+    assert len(server.records) == 1  # type: ignore[attr-defined]
+    if status in {401, 403}:
+        assert "Provider 设置" in error.message
+        assert "YIBU_UPSTREAM_API_KEY" in error.message
+        assert ("模型访问权限" in error.message) is (status == 403)
+    else:
+        assert error.message == f"yibu 请求失败：HTTP {status}"
+    serialized = json.dumps(error.as_dict(), ensure_ascii=False) + caplog.text
+    assert "unit-test-key" not in serialized
+    assert image_data not in serialized
+    assert "<api-key>" in error.details["response"]
+    assert "<image-data>" in error.details["response"]
 
 
 def test_seedream_overlay_sends_single_image_value_and_upgrades_1k(

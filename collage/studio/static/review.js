@@ -19,6 +19,9 @@ let mode = 'box';
 let selected = null;
 let drag = null;
 let initialMaskData = null;
+let overlayTextReviewOpened = false;
+let overlayDetailsOpen = false;
+let initialOverlayText = {};
 const photoBackgroundId = () => draft?.background?.mode === 'slot' ? draft.background.slot_id : null;
 
 function setMode(next) {
@@ -194,6 +197,15 @@ function decisionControls(kind, item) {
 
 function renderItems() {
   const root = $('#items');
+  const previousDetails = $('#overlayDetails');
+  if (previousDetails) {
+    // toggle is asynchronous; read the live state before rebuilding the cards.
+    overlayDetailsOpen = previousDetails.open;
+    if (previousDetails.open && !overlayTextReviewOpened) {
+      overlayTextReviewOpened = true;
+      $('#finalConfirmed').checked = false;
+    }
+  }
   const modeLabels = {
     photo: '普通照片',
     photo_feather: '柔和融合照片',
@@ -233,12 +245,22 @@ function renderItems() {
   const slotCards = draft.slots.map(item => itemCard('slot', item)).join('');
   const overlayCards = draft.overlays.map(item => itemCard('overlay', item)).join('');
   const overlays = draft.overlays.length
-    ? `<details class="advanced">
+    ? `<details class="advanced" id="overlayDetails" ${overlayDetailsOpen ? 'open' : ''}>
         <summary>固定装饰 ${draft.overlays.length} 项（分别制作）</summary>
+        <p class="muted">未展开时沿用识别文字；展开后请核对非空文字并勾选确认。</p>
         ${overlayCards}
       </details>`
     : '';
   root.innerHTML = '<h2>可替换内容</h2>' + slotCards + overlays;
+  const overlayDetails = $('#overlayDetails');
+  if (overlayDetails) overlayDetails.ontoggle = () => {
+    if (!overlayDetails.isConnected) return;
+    overlayDetailsOpen = overlayDetails.open;
+    if (overlayDetails.open && !overlayTextReviewOpened) {
+      overlayTextReviewOpened = true;
+      $('#finalConfirmed').checked = false;
+    }
+  };
 
   root.querySelectorAll('[data-select]').forEach(element => {
     element.onclick = event => {
@@ -289,6 +311,12 @@ function renderItems() {
         }
       }
       collection[element.dataset.itemId][element.dataset.field] = value;
+      if (element.dataset.optionKind === 'overlay' && element.dataset.field === 'text_content') {
+        overlayTextReviewOpened = true;
+        collection[element.dataset.itemId].text_confirmed = false;
+        const checkbox = root.querySelector(`[data-item-id="${element.dataset.itemId}"][data-field="text_confirmed"]`);
+        if (checkbox) checkbox.checked = false;
+      }
       render();
     };
   });
@@ -410,6 +438,11 @@ function updateMaskState() {
   }
 }
 
+function acceptsDefaultText(item, settings) {
+  return !overlayTextReviewOpened && settings.text_content
+    && settings.text_content === initialOverlayText[item.id];
+}
+
 function preflightErrors() {
   const errors = [];
   for (const item of draft.slots) {
@@ -429,17 +462,20 @@ function preflightErrors() {
   for (const item of draft.overlays) {
     const settings = reviewOptions.overlays[item.id];
     if (settings.requires_exact_content === true && !settings.prepared_asset
-      && !(settings.text_content && settings.text_confirmed)) {
+      && !(settings.text_content && (settings.text_confirmed || acceptsDefaultText(item, settings)))) {
       errors.push(`${item.label} 的高级配置要求精确素材，但没有提供素材`);
     }
   }
-  if (draft.questions.length || $('#otherFeedback').value.trim() || questionAnswers().length) {
+  if ($('#otherFeedback').value.trim() || questionAnswers().some(item => item.answer)) {
     errors.push('请先提交问答或其他反馈，让 VLM 纠正当前结果');
   }
   if (!$('#finalConfirmed').checked) errors.push('请手动确认当前识别结果没有问题');
   for (const item of draft.overlays) {
     const settings = reviewOptions.overlays[item.id];
-    if (settings.text_content && !settings.text_confirmed) errors.push(item.label + ' 的完整文字尚未确认');
+    if ((item.text_content || settings.text_content)
+      && !(settings.text_content && (settings.text_confirmed || acceptsDefaultText(item, settings)))) {
+      errors.push(item.label + ' 的完整文字尚未确认');
+    }
   }
   if (!photoBackgroundId() && !maskHasPixels() && !$('#emptyMaskApproved').checked) {
     errors.push('删除蒙版为空；请画出旧内容，或明确确认无需删除');
@@ -455,6 +491,11 @@ async function load() {
   const response = await fetch(endpoint('/session'));
   if (!response.ok) throw new Error('无法读取当前审核版本');
   const snapshot = await response.json();
+  $('#items').replaceChildren();
+  overlayTextReviewOpened = false;
+  overlayDetailsOpen = false;
+  initialOverlayText = Object.fromEntries(Object.entries(snapshot.review_options.overlays)
+    .map(([id, fields]) => [id, fields.text_content]));
   draft = snapshot.draft;
   reviewOptions = snapshot.review_options;
   const photoBackground = Boolean(photoBackgroundId());
@@ -511,9 +552,9 @@ async function load() {
   renderLayers();
   renderQuestions();
   await loadRecoveries();
-  $('#autoSummary').textContent = '纠正后请重新检查位置、数量、文字和图层关系。';
+  $('#autoSummary').textContent = '没有反馈时可直接勾选整体确认；未展开的装饰文字沿用识别结果。';
   render();
-  $('#status').textContent = draft.questions.length ? '请回答下面的识别疑问。' : '请检查识别结果；有错误可在其他说明中填写。';
+  $('#status').textContent = '请检查识别结果；接受当前结果可直接确认，有错误再填写反馈。';
 }
 
 $('#save').onclick = async () => {
@@ -537,7 +578,9 @@ $('#save').onclick = async () => {
       overlay_overrides: reviewOptions.overlays,
       revision: reviewOptions.revision,
       final_confirmed: $('#finalConfirmed').checked,
+      question_resolutions: questionAnswers(),
       other_feedback: $('#otherFeedback').value.trim(),
+      overlay_text_review_opened: overlayTextReviewOpened,
       empty_mask_approved: $('#emptyMaskApproved').checked,
       background_composition_mode: $('#backgroundComposition').value,
       background_expand_px: Number($('#backgroundExpand').value),
@@ -564,7 +607,7 @@ function questionAnswers() {
 function renderQuestions() {
   $('#questions').innerHTML = draft.questions.length
     ? draft.questions.map((question, index) => `<label class="stack">${index + 1}. ${escapeHtml(question)}
-      <textarea maxlength="12000" aria-label="${escapeHtml(question)}" required></textarea></label>`).join('')
+      <textarea maxlength="12000" aria-label="${escapeHtml(question)}" placeholder="选填；留空表示接受当前识别"></textarea></label>`).join('')
     : '<p class="auto">模型没有留下疑问，请继续核对画面；发现遗漏可填写其他说明。</p>';
   $('#otherFeedback').value = '';
   $('#finalConfirmed').checked = false;
@@ -647,11 +690,8 @@ async function awaitCorrection(task) {
 $('#revise').onclick = async () => {
   const answers = questionAnswers();
   const other = $('#otherFeedback').value.trim();
-  if (answers.some(item => !item.answer)) {
-    $('#status').textContent = '请回答每个待确认问题。'; return;
-  }
-  if (!answers.length && !other) {
-    $('#status').textContent = '请填写需要纠正的错误说明。'; return;
+  if (!answers.some(item => item.answer) && !other) {
+    $('#status').textContent = '没有填写反馈；接受当前结果可直接勾选整体确认并保存。'; return;
   }
   $('#finalConfirmed').checked = false;
   busy(true);

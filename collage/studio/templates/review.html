@@ -11,7 +11,7 @@
   <aside>
     <a id="returnLink" class="return-link" hidden>← 返回项目</a>
     <h1>确认模板</h1>
-    <p class="muted">先回答识别疑问并提交纠正，查看新结果后手动确认。每个装饰会独立制作。</p>
+    <p class="muted">接受当前识别结果时，无需填写反馈，勾选整体确认即可制作。有修改意见时先提交 VLM 纠正。每个装饰会独立制作。</p>
     <h2>识别复核</h2>
     <div id="savedCorrections" hidden></div>
     <div id="questions"></div>
@@ -62,7 +62,7 @@
     </details>
     <p id="autoSummary" class="muted"></p>
     <h2>保存</h2>
-    <label class="stack"><span><input id="finalConfirmed" type="checkbox">我已检查当前识别结果，确认没有问题</span></label>
+    <label class="stack"><span><input id="finalConfirmed" type="checkbox">我已检查并接受当前识别结果，未展开的装饰文字沿用识别内容</span></label>
     <div class="row"><button id="save" class="primary">确认并开始制作</button></div>
     <div id="status" class="status">正在载入…</div>
   </aside>

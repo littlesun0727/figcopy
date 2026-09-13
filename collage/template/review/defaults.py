@@ -226,8 +226,10 @@ def automatic_review_notes(
         )
     if questions_deferred and draft.get("questions"):
         lines.append(
-            f"- {len(draft['questions'])} 个 Draft 待确认问题按当前设置处理，未要求逐题填写。"
+            f"- {len(draft['questions'])} 个 Draft 问题由用户整体确认接受当前识别，"
+            "未要求逐题填写，本次直接确认未调用 VLM 纠正。"
         )
+        lines.extend(f"  原始问题：{question}" for question in draft["questions"])
     if len(lines) == 1:
         lines.append("- 无需额外自动决策。")
     return "\n".join(lines)

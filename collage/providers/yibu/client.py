@@ -95,20 +95,32 @@ class _YibuAuditClient:
                 }
         except urllib.error.HTTPError as exc:
             try:
-                detail = _safe_error_text(exc.read(4096).decode("utf-8", "replace"))
+                detail = exc.read(4096).decode("utf-8", "replace")
             except OSError:
-                detail = _safe_error_text(exc.reason)
+                detail = str(exc.reason)
+            # 上游可能回显任意格式的凭据；不能只依赖 sk- 前缀脱敏。
+            if self.settings.api_key:
+                detail = detail.replace(self.settings.api_key, "<api-key>")
+            detail = _safe_error_text(detail)
+            message = f"yibu 请求失败：HTTP {exc.code}"
             if exc.code == 429:
                 code = "RATE_LIMITED"
             elif exc.code in {500, 502, 503, 504}:
                 code = "TEMPORARY_NETWORK_ERROR"
             elif exc.code in {401, 403}:
                 code = "PROVIDER_AUTH_FAILED"
+                permission_hint = "及模型访问权限" if exc.code == 403 else ""
+                # 日志使用固定指引，上游正文仅保留在脱敏后的 details 中。
+                message = (
+                    f"yibu 鉴权失败：HTTP {exc.code}；请在 Provider 设置或启动环境中"
+                    f"检查或更新 API Key{permission_hint}；若审计代理设置了 "
+                    "YIBU_UPSTREAM_API_KEY，该凭据会覆盖工作台 Key，需检查代理配置"
+                )
             else:
                 code = "PROVIDER_REQUEST_FAILED"
             raise CollageError(
                 code,
-                f"yibu 请求失败：HTTP {exc.code}",
+                message,
                 details={
                     "operation": operation,
                     "response": detail,
