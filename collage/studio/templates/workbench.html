@@ -61,6 +61,7 @@
         <ol id="stageSteps" class="stage-steps" aria-label="工作流进度"></ol>
         <div id="taskBanner" class="task-banner" hidden></div>
         <div id="errorBanner" class="error-banner" hidden></div>
+        <div id="projectProviders" class="panel"></div>
         <div id="overlayActions" class="panel" hidden></div>
 
         <div class="content-grid">
@@ -91,6 +92,10 @@
         <label>项目 ID<input name="project_id" required pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,63}" placeholder="autumn-collage"></label>
       </div>
       <label>审核人<input name="reviewer" required autocomplete="name" placeholder="你的名字"></label>
+      <div class="form-grid two">
+        <label>识别服务<select id="createVision"></select></label>
+        <label>图片服务<select id="createImage"></select></label>
+      </div>
       <label class="file-drop required-file">
         <input id="referenceUpload" name="reference" type="file" accept="image/*" required>
         <span class="file-icon">＋</span>
@@ -130,6 +135,11 @@
         <button class='icon-button' value='cancel' formmethod='dialog' aria-label='关闭'>×</button>
       </div>
       <p class='settings-intro'>配置分析、图片编辑和抠图能力。API Key 只保存在当前工作台进程内存中，不会写入项目、日志或浏览器存储。</p>
+      <div class="form-grid two">
+        <label>新项目默认识别服务<select id="defaultVision"></select></label>
+        <label>新项目默认图片服务<select id="defaultImage"></select></label>
+      </div>
+      <p>已有项目保留自己的服务选择；两套配置会分别保留。</p>
       <div id='providerCards' class='provider-cards' aria-live='polite'></div>
       <div id='auditStatus' class='audit-status'>正在检测本机审计代理…</div>
 
@@ -157,7 +167,29 @@
             <select id='imageSize' name='image_size'><option value='1K'>1K（仅 Gemini）</option><option value='2K' selected>2K（Seedream 推荐）</option><option value='4K'>4K</option></select>
           </label>
         </div>
-        <label class='check danger-check'><input id='clearCredentials' name='clear_credentials' type='checkbox'> 清除当前工作台进程中的 Key 与 shared.py 配置</label>
+        <label class='check danger-check'><input id='clearCredentials' name='clear_credentials' type='checkbox'> 清除当前工作台进程中的 Yibu Key 与 shared.py 配置</label>
+      </section>
+
+      <section class="settings-section">
+        <div class="settings-heading"><h3>内网识别服务</h3><span>Qwen3.8-Flash-Next</span></div>
+        <label>服务地址<input id="intranetBaseUrl" type="url" placeholder="http://服务地址 或 http://服务地址/v1"></label>
+        <label>内网 VLM API Key<input id="intranetApiKey" type="password" autocomplete="off" maxlength="4096" placeholder="留空沿用；仅保存在当前进程">
+          <small id="intranetCredentialHint"></small>
+        </label>
+        <div class="form-grid two">
+          <label>模型名<input id="intranetModel" value="Qwen/Qwen3.8-Flash-Next"></label>
+          <label>最大输出<input id="intranetMaxTokens" type="number" min="1" step="1" value="16384"></label>
+          <label>请求超时（秒）<input id="intranetTimeout" type="number" min="1" step="1" value="900"></label>
+        </div>
+        <label class="check"><input id="clearIntranetCredentials" type="checkbox"> 清除内网 VLM Key</label>
+      </section>
+      <section class="settings-section">
+        <div class="settings-heading"><h3>A100 图片服务</h3><span>Qwen-Image-Edit-2511</span></div>
+        <div class="form-grid two">
+          <label>服务地址<input id="qwenBaseUrl" type="url" placeholder="http://127.0.0.1:8037"></label>
+          <label>请求超时（秒）<input id="qwenTimeout" type="number" min="1" step="1" value="900"></label>
+        </div>
+        <p>使用已部署的常驻服务，每次生成一件素材。</p>
       </section>
 
       <section class='settings-section'>
@@ -170,7 +202,7 @@
         </div>
       </section>
 
-      <label id='retryAfterSettingsLabel' class='check retry-after-settings' hidden><input id='retryAfterSettings' type='checkbox' checked> 保存后立即重试当前项目</label>
+      <label id='retryAfterSettingsLabel' class='check retry-after-settings' hidden><input id='retryAfterSettings' type='checkbox' checked> 保存后将上述服务选择应用到当前失败项目并重试</label>
       <p id='providerError' class='form-error' hidden></p>
       <div class='dialog-actions'>
         <button class='button quiet' value='cancel' formmethod='dialog'>取消</button>

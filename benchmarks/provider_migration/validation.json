@@ -1,0 +1,131 @@
+{
+  "date": "2026-09-14",
+  "branch": "feat/intranet-model-providers",
+  "base_commit": "7238c19",
+  "scope": "Local HTTP protocol simulation with synthetic images; real browser; no real model calls.",
+  "commands": [
+    "python -m pytest -q",
+    "python -m ruff check collage tests"
+  ],
+  "regression": {
+    "tests": 358,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "duration_seconds": 100.261,
+  "new_tests": 24,
+  "browser_tests": 13,
+  "ruff": "passed",
+  "browser_recheck_after_css": {
+    "tests": 2,
+    "failures": 0,
+    "duration_seconds": 8.583,
+    "included_in_unique_count": true
+  },
+  "matrix": [
+    {
+      "vision_provider": "collage.providers.yibu:YibuVisionProvider",
+      "image_provider": "collage.providers.yibu:YibuImageProvider",
+      "stage": "awaiting_approval",
+      "render_exists": true
+    },
+    {
+      "vision_provider": "collage.providers.intranet:IntranetVisionProvider",
+      "image_provider": "collage.providers.yibu:YibuImageProvider",
+      "stage": "awaiting_approval",
+      "render_exists": true
+    },
+    {
+      "vision_provider": "collage.providers.yibu:YibuVisionProvider",
+      "image_provider": "collage.providers.qwen:QwenImageProvider",
+      "stage": "awaiting_approval",
+      "render_exists": true
+    },
+    {
+      "vision_provider": "collage.providers.intranet:IntranetVisionProvider",
+      "image_provider": "collage.providers.qwen:QwenImageProvider",
+      "stage": "awaiting_approval",
+      "render_exists": true
+    }
+  ],
+  "real_integration": {
+    "status": "blocked",
+    "reason": "User confirmed this environment cannot access company services; no real Yibu, internal VLM, or A100 requests were attempted.",
+    "a100_url_provided_by_user": "http://127.0.0.1:8037"
+  },
+  "artifacts": [
+    {
+      "path": "reference.png",
+      "size": [
+        24,
+        16
+      ],
+      "mode": "RGB",
+      "sha256": "55cffc713cab95bc33279b2c61880cd0700bb33e4d91ff6b0e0114ca062e49da"
+    },
+    {
+      "path": "result.png",
+      "size": [
+        24,
+        16
+      ],
+      "mode": "RGBA",
+      "sha256": "226fe2cace53a1d75a273bd4f26edb8294a6f32a1841b416223fc777fc81044a"
+    },
+    {
+      "path": "background_raw.png",
+      "size": [
+        1248,
+        832
+      ],
+      "mode": "RGB",
+      "sha256": "86d2454413697a4198307318723aa2f36a85b3a5b83d2d4642d17acf91e82121"
+    },
+    {
+      "path": "background.png",
+      "size": [
+        24,
+        16
+      ],
+      "mode": "RGBA",
+      "sha256": "99796541c8de546d72ac9e16c938b7349af77822c172da9a780018464a4b24e5"
+    },
+    {
+      "path": "overlay_raw.png",
+      "size": [
+        1088,
+        960
+      ],
+      "mode": "RGB",
+      "sha256": "40060ec0758b999f93f1993447a248342c4919c9cdfd256673aa78e1b9629c7b"
+    },
+    {
+      "path": "overlay_processed.png",
+      "size": [
+        1088,
+        960
+      ],
+      "mode": "RGBA",
+      "sha256": "639690a214bf2cc9ecc11e347f40bd5a72c2ed919160a833530843f884319c8c"
+    },
+    {
+      "path": "browser_create.png",
+      "size": [
+        1380,
+        960
+      ],
+      "mode": "RGB",
+      "sha256": "907d76f4b2125f8fbbbabc05992f08936afd777bb485fcf063286d93d2f727d4"
+    },
+    {
+      "path": "browser_retry.png",
+      "size": [
+        1380,
+        960
+      ],
+      "mode": "RGB",
+      "sha256": "c4ea8981405c6aa7d2caa2babbae8c59fa6485e16489ccffc8c263862d3ace9d"
+    }
+  ]
+}

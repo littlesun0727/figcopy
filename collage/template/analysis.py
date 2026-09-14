@@ -20,6 +20,7 @@ from ..core.io import (
     stable_hash,
 )
 from ..imaging.operations import normalize_image, rect_to_box
+from ..providers.selection import cache_configuration
 from ..providers import ProviderAudit, VisionProvider
 from ..schemas import validate_draft
 from ..schemas.draft_prompt import DRAFT_PROMPT
@@ -106,6 +107,7 @@ def analyze_reference(
                 "prompt_version": PROMPT_VERSION,
                 "product_policy": policy,
                 "provider": provider.name,
+                **cache_configuration(provider),
                 "requested_model": provider.requested_model,
             }
         )

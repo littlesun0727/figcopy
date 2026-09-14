@@ -13,6 +13,7 @@ from ...core.errors import CollageError
 from ...core.io import atomic_write_json, read_json, resolve_input_path, sha256_file
 from ...projects import DataPaths, ProjectPaths, ProjectStore
 from ...providers import VisionProvider, load_provider
+from ...providers.selection import provider_overrides
 from ...schemas import validate_bindings
 from ...template.review.feedback import review_revision, revise_draft, validate_feedback
 from ...template.review.recovery import available_recoveries, recover_saved_correction
@@ -161,6 +162,10 @@ class WorkbenchApplication:
             "task": self.jobs.latest(project_id),
             "updated_at": manifest.get("updated_at"),
             "history": history[-20:],
+            "providers": {
+                name: (workflow or {}).get("options", {}).get(name)
+                for name in ("vision_provider", "image_provider")
+            },
             "warnings": template.get("build", {}).get("warnings", []),
             "template_revision": sha256_file(template_path) if template else None,
             "overlays": [
@@ -171,6 +176,40 @@ class WorkbenchApplication:
             if template
             else [],
         }
+
+    def configure_project_providers(self, project_id: str, payload: Any) -> dict:
+        """Save future service choices without rerunning or modifying generated content."""
+        if not isinstance(payload, dict) or set(payload) - {
+            "vision_provider",
+            "image_provider",
+        }:
+            raise CollageError(
+                "INVALID_REQUEST", "项目服务设置只接受识别和图片 Provider"
+            )
+        values = provider_overrides(payload)
+
+        def operation():
+            project = self.store.open(project_id)
+            if (project.template / "template.json").is_file():
+                raise CollageError(
+                    "PROVIDER_REVISION_REQUIRED",
+                    "已有模板请在单件重做时选择服务，或另存背景修订后修改",
+                )
+            manifest = self.store.get_manifest(project_id)
+            workflow = validate_workflow(manifest.get("workflow"))
+            workflow["options"].update(values)
+            if "image_provider" in values:
+                workflow["options"]["fixture_provider"] = False
+            self.store.update_workflow(project_id, workflow, status=manifest["status"])
+            return {
+                "ok": True,
+                "providers": {
+                    name: workflow["options"].get(name)
+                    for name in ("vision_provider", "image_provider")
+                },
+            }
+
+        return self.jobs.run_exclusive(project_id, operation)
 
     def latest_job(self, project_id: str) -> dict[str, Any] | None:
         """Return transient progress even before a project's manifest exists."""
@@ -621,6 +660,11 @@ class WorkbenchApplication:
             self.store.get_manifest(project_id).get("workflow")
         )
 
+        selected = provider_overrides({"image_provider": payload.get("image_provider")})
+        workflow["options"].update(selected)
+        if selected:
+            workflow["options"]["fixture_provider"] = False
+
         def operation() -> dict:
             provider = self.workflow.stages._image_provider(workflow, reviewed)
             return fork_layout(
@@ -629,6 +673,7 @@ class WorkbenchApplication:
                 document,
                 overlay_id=identifier,
                 image_provider=provider,
+                image_provider_spec=selected.get("image_provider"),
             )
 
         return self.jobs.submit(project_id, "regenerate_overlay", operation)

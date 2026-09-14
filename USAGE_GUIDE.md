@@ -11,7 +11,7 @@ cd D:\codes\figcopy
 python -m collage studio --data-dir D:\datas\figcopy
 ```
 
-程序默认打开 `http://127.0.0.1:8787/`。本次开发升级使用 `collage-draft/3`、`collage-build/4`、`collage-template/4`，不兼容旧工程协议。升级后重启工作台并新建项目；在设置页输入的内存 Key 需要重新填写，旧项目文件不会自动转换或删除。
+程序默认打开 `http://127.0.0.1:8787/`。当前使用 `collage-draft/3`、`collage-build/4`、`collage-template/4`。此前照片附属关系改造不兼容更早的工程协议；本次内网 Provider 接入不再升级协议，符合当前协议的项目可以继续使用。更新代码后重启工作台；在设置页输入的内存 Key 需要重新填写，旧项目文件不会自动转换或删除。
 
 在页面内按顺序完成：
 
@@ -30,7 +30,7 @@ figcopy studio --data-dir D:\datas\figcopy
 
 默认会自动打开浏览器；`--no-open` 禁止自动打开，`--port 8899` 可更换端口。服务固定只接受本机回环访问；写操作需要页面启动令牌，并拒绝非本机 Host/Origin。单次上传总量限制为 128 MiB。
 
-启动 Yibu 审计代理后，点击页面右上角“Provider 设置”即可在密码框输入 API Key，并配置 VLM、图片编辑模型和本地 BiRefNet。Key 只保存在当前 `studio` 进程内存中，不进入项目文件、日志或浏览器存储；关闭该进程后会清除。流程若因缺少配置而阻塞，设置页可在保存后直接重试当前项目。
+点击页面右上角“Provider 设置”可配置 VLM、图片服务和本地 BiRefNet；使用 Yibu 时需先启动审计代理，并填写对应 API Key。Key 只保存在当前 `studio` 进程内存中，不进入项目文件、日志或浏览器存储；关闭该进程后会清除。流程若因缺少配置而阻塞，设置页可在保存后直接重试当前项目。
 
 没有 VLM 或图片模型时，在“新建项目 → 高级设置”上传人工 Draft JSON 与清版背景图。需要 `cutout` 的普通不透明照片时，安装 BiRefNet 可选依赖，或在高级设置中指定其他抠图 Provider。
 
@@ -44,6 +44,77 @@ figcopy resume --project my-collage --approve --approval-notes "已完成视觉�
 ```
 
 程序关闭、模型失败或依赖缺失时，工作台会显示稳定错误码与重试表单；CLI 用户可用 `status` 查看 `stage`、`last_error` 和 `next_action`，修复后执行 `resume`。后续章节的 `analyze / review-ui / build / guide / render / approve` 是高级调试入口。
+
+
+### Yibu 与内网服务切换
+
+识别服务和图片服务分别选择，可组合使用 Yibu、内网 `Qwen3.8-Flash-Next` 和 A100 `Qwen-Image-Edit-2511`。未配置新默认值时仍使用 Yibu，已有 Yibu 设置和缓存继续保留。
+
+1. 打开右上角“Provider 设置”，分别填写两套服务配置。内网 VLM 填公司提供的地址、模型名和 Key；A100 图片地址填 `http://127.0.0.1:8037`（按实际运行环境调整）。
+2. 选择“新项目默认识别服务”和“新项目默认图片服务”。全内网组合不要求 Yibu Key 或审计代理。
+3. 新建项目时检查两个服务下拉框。项目保存自己的选择，后续修改默认值不会切换已有项目。
+4. 模板制作前，可在项目页“本项目服务”修改并保存，之后识别、反馈纠正和构建使用这个选择。
+5. 失败项目可以在重试表单选择服务；设置对话框的“保存后应用到当前失败项目并重试”也会明确更新该项目的选择。
+6. 已有模板时，在“重做一件装饰”旁选择这次使用的图片服务。新修订记录新选择，原素材、原布局和原项目保留。背景另存修订先继承来源项目的选择，新复核页对应的项目仍可再修改服务。
+
+服务切换只影响后续模型请求，不自动重做整张模板。布局编辑和客户换图继续在本地处理；仍取消逐素材 VLM 复核及自动质量重生成。
+
+工作台密码框中的两个 Key 分开保存、分开清除，均不写入项目、模板和浏览器存储。工作台设置只作用于当前进程，关闭后需要重填，或通过启动环境配置。项目所选 Provider 会保留。
+
+“已配置”表示必要配置已填写，不代表模型已经成功运行。A100 的“在线”来自 `/health`；Yibu 审计代理在线也不代表上游鉴权和模型可用。模型实际结果以任务记录为准。
+
+`127.0.0.1` 指运行 Figcopy 的机器；该机器需能直接访问服务或已做好端口转发。A100 服务不需要跟随 Figcopy 的修改重新部署。
+
+#### 通过启动环境配置
+
+在运行 Figcopy 的 PowerShell 中设置非敏感参数，随后启动工作台：
+
+```powershell
+$env:COLLAGE_INTRANET_VLM_BASE_URL = "http://你的内网VLM地址/v1"
+$env:COLLAGE_INTRANET_VLM_MODEL = "Qwen/Qwen3.8-Flash-Next"
+$env:COLLAGE_QWEN_IMAGE_BASE_URL = "http://127.0.0.1:8037"
+$env:COLLAGE_VISION_PROVIDER = "collage.providers.intranet:IntranetVisionProvider"
+$env:COLLAGE_IMAGE_PROVIDER = "collage.providers.qwen:QwenImageProvider"
+python -m collage studio --data-dir D:\datas\figcopy
+```
+
+内网 VLM Key 可在工作台密码框输入，也可由你的运行环境注入 `COLLAGE_INTRANET_VLM_API_KEY`。现有 `YIBU_*` 环境变量继续有效，两套 Key 不混用。
+
+| 可选环境变量 | 默认行为 |
+|---|---|
+| `COLLAGE_INTRANET_VLM_MAX_TOKENS` | 16384 |
+| `COLLAGE_INTRANET_VLM_TIMEOUT` | 900 秒 |
+| `COLLAGE_QWEN_IMAGE_TIMEOUT` | 900 秒，包含准备和等待时间 |
+| `COLLAGE_QWEN_IMAGE_SEED` | 留空时每次新生成使用随机 seed，实际 seed 记录在制作工作区；填写整数可固定对比 |
+
+A100 服务继续使用部署时固定的 40 步、CFG 4.0。Figcopy 发送参考图、prompt、seed、输出尺寸，并读取 PNG；不向它发送聊天协议或黑白 mask。原始生成图保留在项目工作区，背景保护和装饰去底仍在本地执行。
+
+#### 在内网做实际联调
+
+先在运行 Figcopy 的环境检查：
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8037/health
+```
+
+然后在工作台新建一个测试项目，依次完成：参考图识别 → 反馈纠正（按需）→ 手动确认 → 背景及装饰制作 → 上传替换照片 → 查看结果。记录耗时及效果，再选择另一图片服务重做一件装饰，检查新修订的服务选择和旧版保留情况。
+
+CLI 也可显式选择组合，不必修改原 Yibu 配置：
+
+```powershell
+python -m collage run --project intranet-demo --reference reference.png --reviewer tester --vision-provider collage.providers.intranet:IntranetVisionProvider --image-provider collage.providers.qwen:QwenImageProvider --no-review-ui
+python -m collage status --project intranet-demo
+```
+
+失败项目切回 Yibu 图片服务时，先确保原 Yibu 配置可用，再执行：
+
+```powershell
+python -m collage resume --project intranet-demo --image-provider collage.providers.yibu:YibuImageProvider --no-review-ui
+```
+
+同一 Figcopy 进程向同一个 A100 服务串行发图。服务明确返回 `MODEL_BUSY` 时会限时等待；请求超时会显示“结果不确定”，不会立即重复发送。装饰失败仍可保留候选提示继续，必要背景失败则等待修复并重试。
+
+模拟测试覆盖与真实联调限制见 [Provider 接入验证记录](benchmarks/provider_migration/README.md)。
 
 ### 背景来源与另存修订
 

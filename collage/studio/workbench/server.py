@@ -400,6 +400,12 @@ def create_workbench_server(
                     self._not_found()
                     return
                 project_id, rest = routed
+                if rest == ["providers"]:
+                    self._json(
+                        HTTPStatus.OK,
+                        app.configure_project_providers(project_id, self._read_json()),
+                    )
+                    return
                 if rest == ["layout", "edit"]:
                     self._json(
                         HTTPStatus.OK, app.edit_layout(project_id, self._read_json())

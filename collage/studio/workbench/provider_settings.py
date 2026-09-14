@@ -24,6 +24,16 @@ from ...providers.yibu.constants import (
     KIMI_K3_REASONING_EFFORT,
 )
 from ...providers.yibu.settings import YibuSettings
+from ...providers.intranet import IntranetSettings
+from ...providers.qwen import QwenImageProvider, QwenSettings, MODEL as QWEN_MODEL
+from ...providers.selection import (
+    CHOICES,
+    INTRANET_VISION,
+    QWEN_IMAGE,
+    YIBU_VISION,
+    YIBU_IMAGE,
+    default_provider,
+)
 from ...workflows import (
     DEFAULT_CUTOUT_PROVIDER,
     DEFAULT_IMAGE_PROVIDER,
@@ -52,12 +62,29 @@ _YIBU_FIELDS = {
     "image_size",
     "timeout_seconds",
 }
-_ALLOWED_FIELDS = _YIBU_FIELDS | {
-    "birefnet_device",
-    "birefnet_model_path",
-    "clear_credentials",
+_INTRANET_FIELDS = {
+    "intranet_base_url": "COLLAGE_INTRANET_VLM_BASE_URL",
+    "intranet_model": "COLLAGE_INTRANET_VLM_MODEL",
+    "intranet_max_tokens": "COLLAGE_INTRANET_VLM_MAX_TOKENS",
+    "intranet_timeout": "COLLAGE_INTRANET_VLM_TIMEOUT",
+    "qwen_base_url": "COLLAGE_QWEN_IMAGE_BASE_URL",
+    "qwen_timeout": "COLLAGE_QWEN_IMAGE_TIMEOUT",
+    "default_vision_provider": "COLLAGE_VISION_PROVIDER",
+    "default_image_provider": "COLLAGE_IMAGE_PROVIDER",
 }
+_ALLOWED_FIELDS = (
+    _YIBU_FIELDS
+    | set(_INTRANET_FIELDS)
+    | {
+        "intranet_api_key",
+        "clear_intranet_credentials",
+        "birefnet_device",
+        "birefnet_model_path",
+        "clear_credentials",
+    }
+)
 _ENVIRONMENT_FIELDS = {
+    **_INTRANET_FIELDS,
     "audit_base_url": "YIBU_AUDIT_BASE_URL",
     "vlm_model": "YIBU_VLM_MODEL",
     "vlm_max_tokens": "YIBU_VLM_MAX_TOKENS",
@@ -161,6 +188,7 @@ class ProviderRuntimeSettings:
     def __init__(self) -> None:
         self._lock = threading.RLock()
         self._session_key_configured = False
+        self._session_intranet_key_configured = False
 
     def status(self, *, probe_audit: bool = False) -> dict[str, Any]:
         """Return public readiness information without returning credentials or paths."""
@@ -240,7 +268,7 @@ class ProviderRuntimeSettings:
                 device = os.environ.get("COLLAGE_BIREFNET_DEVICE", "auto")
                 model_cached = False
 
-            return {
+            result = {
                 "credential": {
                     "configured": credential_configured,
                     "source": credential_source,
@@ -288,6 +316,81 @@ class ProviderRuntimeSettings:
                 },
                 "secret_persistence": "memory_only",
             }
+            result["choices"] = CHOICES
+            result["selection"] = {kind: default_provider(kind) for kind in CHOICES}
+            yibu_connection = {
+                "state": "not_checked"
+                if audit["state"] == "online"
+                else audit["state"],
+                "message": "代理在线；模型及鉴权待实际请求验证"
+                if audit["state"] == "online"
+                else audit.get("message", "尚未检测"),
+            }
+            result["vision"]["connection"] = yibu_connection
+            result["image"]["connection"] = yibu_connection
+            services = {YIBU_VISION: result["vision"], YIBU_IMAGE: result["image"]}
+            for kind, provider, settings_class, name in (
+                ("vision", INTRANET_VISION, IntranetSettings, "内网 Flash-Next"),
+                ("image", QWEN_IMAGE, QwenSettings, "A100 Qwen-Image-Edit"),
+            ):
+                try:
+                    settings = settings_class.from_env(required=False)
+                    configured = bool(settings.base_url) and (
+                        kind == "image" or bool(settings.api_key)
+                    )
+                    connection = {
+                        "state": "not_checked",
+                        "message": "已配置；待实际请求验证"
+                        if configured
+                        else "尚未配置",
+                    }
+                    if kind == "image" and configured and probe_audit:
+                        try:
+                            connection = QwenImageProvider(settings).health()
+                        except CollageError as exc:
+                            connection = {"state": "offline", "message": exc.message}
+                    services[provider] = {
+                        "provider": provider,
+                        "name": name,
+                        "configured": configured,
+                        "base_url": settings.base_url,
+                        "timeout_seconds": settings.timeout_seconds,
+                        "model": settings.vlm_model if kind == "vision" else QWEN_MODEL,
+                        "connection": connection,
+                    }
+                    if kind == "vision":
+                        services[provider].update(
+                            max_tokens=settings.vlm_max_tokens,
+                            credential={
+                                "configured": bool(settings.api_key),
+                                "source": "当前工作台内存 Key"
+                                if self._session_intranet_key_configured
+                                else "启动环境中的 Key"
+                                if settings.api_key
+                                else "未配置",
+                            },
+                        )
+                except CollageError as exc:
+                    services[provider] = {
+                        "provider": provider,
+                        "name": name,
+                        "model": "",
+                        "configured": False,
+                        "connection": {"state": "invalid", "message": exc.message},
+                    }
+            result["services"] = services
+            for kind, selection in result["selection"].items():
+                result[kind] = services.get(
+                    selection,
+                    {
+                        "name": "自定义 Provider",
+                        "provider": selection,
+                        "model": "",
+                        "configured": True,
+                        "connection": {"state": "not_checked", "message": "调用时加载"},
+                    },
+                )
+            return result
 
     def configure(self, payload: Any) -> dict[str, Any]:
         """Atomically validate and apply settings, never serializing the API key."""
@@ -315,11 +418,23 @@ class ProviderRuntimeSettings:
                 "INVALID_PROVIDER_SETTINGS",
                 "清除凭据不能与新 Key 或 shared.py 同时提交",
             )
+        intranet_key = _bounded_string(payload, "intranet_api_key", maximum=4096)
+        clear_intranet = payload.get("clear_intranet_credentials", False)
+        if not isinstance(clear_intranet, bool) or (clear_intranet and intranet_key):
+            raise CollageError("INVALID_PROVIDER_SETTINGS", "内网 Key 清除设置无效")
+        for kind in CHOICES:
+            field = f"default_{kind}_provider"
+            if field in payload and (
+                not isinstance(payload[field], str)
+                or (payload[field] and payload[field] not in CHOICES[kind])
+            ):
+                raise CollageError("INVALID_PROVIDER_SETTINGS", "请选择支持的默认服务")
         values = {
             name: _bounded_string(payload, name, maximum=500)
             for name in _ENVIRONMENT_FIELDS
         }
         touched_environment_names = {
+            "COLLAGE_INTRANET_VLM_API_KEY",
             "YIBU_API_KEY",
             "YIBU_SHARED_PATH",
             "YIBU_CREDENTIALS_FILE",
@@ -331,7 +446,14 @@ class ProviderRuntimeSettings:
                 name: os.environ.get(name) for name in touched_environment_names
             }
             previous_session_flag = self._session_key_configured
+            previous_intranet_flag = self._session_intranet_key_configured
             try:
+                if clear_intranet:
+                    os.environ.pop("COLLAGE_INTRANET_VLM_API_KEY", None)
+                    self._session_intranet_key_configured = False
+                elif intranet_key:
+                    os.environ["COLLAGE_INTRANET_VLM_API_KEY"] = intranet_key
+                    self._session_intranet_key_configured = True
                 if clear_credentials:
                     os.environ.pop("YIBU_API_KEY", None)
                     os.environ.pop("YIBU_SHARED_PATH", None)
@@ -376,6 +498,10 @@ class ProviderRuntimeSettings:
                         "YIBU_CREDENTIAL_MISSING",
                         "请输入 Yibu API Key，或指定已有 shared.py",
                     )
+                if any(name.startswith("intranet_") for name in payload):
+                    IntranetSettings.from_env(required=False)
+                if any(name.startswith("qwen_") for name in payload):
+                    QwenSettings.from_env(required=False)
                 if set(payload) & {"birefnet_device", "birefnet_model_path"}:
                     BiRefNetSettings.from_env()
             except Exception:
@@ -385,5 +511,6 @@ class ProviderRuntimeSettings:
                     else:
                         os.environ[name] = value
                 self._session_key_configured = previous_session_flag
+                self._session_intranet_key_configured = previous_intranet_flag
                 raise
         return self.status(probe_audit=True)

@@ -28,6 +28,7 @@ from ...imaging.operations import (
     rect_to_box,
     remove_chroma_background,
 )
+from ...providers.selection import cache_configuration
 from ...providers import ImageProvider, ProviderAudit
 from .common import (
     _audit_from_cache,
@@ -182,7 +183,10 @@ def _provider_overlay(
         audit = _audit_from_cache(record)
         attempt = int(saved.stem)
         LOGGER.info("复用已保存素材 | id=%s attempt=%s", overlay["id"], attempt + 1)
-    elif records:
+    elif records and read_json(records[0]).get("status") not in {
+        "not_started",
+        "failed",
+    }:
         raise CollageError(
             "OVERLAY_REQUEST_UNCERTAIN",
             "该件请求已有记录但无完整输出，请检查记录或手动重做",
@@ -193,7 +197,7 @@ def _provider_overlay(
         already_processed = bool(cached.metadata.get("normalized"))
         attempt = 0
     else:
-        attempt = 0
+        attempt = max((int(path.stem) for path in records), default=-1) + 1
         brief = (
             overlay["generation_brief"]
             + "\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。"
@@ -202,19 +206,34 @@ def _provider_overlay(
         if overlay.get("text_content"):
             brief += "\n必须逐字包含且仅包含客户确认的文字：" + overlay["text_content"]
         record = {"status": "pending", "attempt": attempt, "prompt": brief}
-        record_path = attempt_root / "0.json"
+        record_path = attempt_root / f"{attempt}.json"
         atomic_write_json(record_path, record)
         LOGGER.info(
             "生成单件装饰 | id=%s provider=%s", overlay["id"], capabilities.name
         )
-        generated = provider.make_overlay(
-            provider_crop, brief=brief, background_mode=effective_mode, chroma_key=key
-        )
+        try:
+            generated = provider.make_overlay(
+                provider_crop,
+                brief=brief,
+                background_mode=effective_mode,
+                chroma_key=key,
+            )
+        except CollageError as exc:
+            # New direct transports distinguish a rejected request from an unknown result.
+            # Keep the legacy pending behavior when the provider does not report certainty.
+            request_state = exc.details.get("request_state")
+            if request_state in {"not_started", "failed", "unknown"}:
+                record.update(
+                    status="uncertain" if request_state == "unknown" else request_state,
+                    error_code=exc.code,
+                )
+                atomic_write_json(record_path, record)
+            raise
         raw = (
             generated.raw_image if generated.raw_image is not None else generated.image
         )
         audit = generated.audit
-        raw_path = attempt_root / "0_raw.png"
+        raw_path = attempt_root / f"{attempt}_raw.png"
         atomic_save_image(raw, raw_path)
         record.update(
             status="generated",
@@ -332,6 +351,7 @@ def _build_overlay(
                 "chroma_key": overlay["chroma_key"],
                 "chroma_tolerance": overlay["chroma_tolerance"],
                 "provider": capabilities.name,
+                **cache_configuration(provider),
                 "requested_model": capabilities.requested_model,
                 "supports_transparency": capabilities.supports_transparency,
                 "output_sizes": [list(size) for size in capabilities.output_sizes],

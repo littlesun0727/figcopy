@@ -376,8 +376,8 @@ function renderRetry(status) {
     <div class='action-row provider-recovery'><button id='openProviderFromRetry' class='button primary' type='button'>配置 Key 与 Provider</button></div>
     <div class="notice warning"><strong>${escapeHtml(error?.code || 'WORKFLOW_PAUSED')}</strong><br>${escapeHtml(error?.message || status.next_action)}</div>
     <form id="retryForm" class="retry-form">
-      <label>VLM Provider<input id="retryVision" placeholder="module:object（留空沿用原设置）"></label>
-      <label>图片 Provider<input id="retryImage" placeholder="module:object（留空沿用原设置）"></label>
+      <label>识别服务<select id="retryVision">${serviceOptions('vision', status.providers?.vision_provider, true)}</select></label>
+      <label>图片服务<select id="retryImage">${serviceOptions('image', status.providers?.image_provider, true)}</select></label>
       <label>抠图 Provider<input id="retryCutout" placeholder="module:object（留空沿用原设置）"></label>
       <label class="check"><input id="retryFixture" type="checkbox"> 改用离线 fixture 图片 Provider（仅测试）</label>
       <label class="check"><input id="retryCloud" type="checkbox"> 明确允许云端上传</label>
@@ -447,6 +447,7 @@ function renderOverlayActions(status) {
     ${overlays.length ? `<div class="action-row">
       <label>重做一件装饰 <select id="overlayChoice" ${busy ? 'disabled' : ''}>${overlays.map(item =>
         `<option value="${escapeHtml(item.id)}">${escapeHtml(item.label)}</option>`).join('')}</select></label>
+      <label>这次使用的图片服务<select id="regenerateImage" ${busy ? 'disabled' : ''}>${serviceOptions('image', status.providers?.image_provider, true)}</select></label>
       <button id="regenerateOverlay" class="button quiet" ${busy ? 'disabled' : ''}>生成一次并保存新版本</button>
     </div>` : ''}`;
   if (!overlays.length) return;
@@ -456,7 +457,7 @@ function renderOverlayActions(status) {
     try {
       const response = await api(`/api/projects/${encodeURIComponent(status.project_id)}/overlays/regenerate`, {
         method: 'POST',
-        body: {overlay_id: $('#overlayChoice').value, revision: status.template_revision},
+        body: {overlay_id: $('#overlayChoice').value, revision: status.template_revision, image_provider: $('#regenerateImage').value},
       });
       state.followTaskId = response.task.id;
       toast('正在重做选中的装饰，其余素材沿用');
@@ -478,6 +479,7 @@ function renderProject(status) {
   renderSteps(status);
   renderArtifacts(status);
   renderOverlayActions(status);
+  renderProjectProviders(status);
   const backgroundRevision = $('#backgroundRevision');
   backgroundRevision.hidden = !status.artifacts?.reviewed?.exists;
   $('#backgroundRevisionHint').hidden = backgroundRevision.hidden;
@@ -613,61 +615,77 @@ function makeProviderCard(config, tone, label, detail) {
   return card;
 }
 
+function serviceOptions(kind, selected, inherit = false) {
+  const choices = {...(state.providerStatus?.choices?.[kind] || {})};
+  if (selected && !choices[selected]) choices[selected] = selected;
+  const items = Object.entries(choices).map(([value, label]) =>
+    '<option value="' + escapeHtml(value) + '"' + (value === selected ? ' selected' : '') + '>' + escapeHtml(label) + '</option>');
+  if (inherit) items.unshift('<option value="">沿用项目设置</option>');
+  return items.join('');
+}
+
+function serviceDetails(config) {
+  const connection = config.connection || {};
+  if (!config.configured) return ['error', '未配置', connection.message || '请填写配置'];
+  if (['offline', 'invalid'].includes(connection.state)) return ['error', '连接异常', connection.message];
+  return [connection.state === 'online' ? 'ready' : 'warning',
+    connection.state === 'online' ? '在线' : '已配置', connection.message || '待实际请求验证'];
+}
+
 function renderProviderStatus(status) {
   state.providerStatus = status;
-  const credentialReady = Boolean(status.credential.configured);
-  const auditReady = status.audit.state === 'online';
-  const yibuTone = !credentialReady ? 'error' : auditReady ? 'ready' : 'warning';
-  const yibuLabel = !credentialReady ? '缺少 Key' : auditReady ? '就绪' : '检查代理';
-  const cutoutConfigured = Boolean(status.cutout.configured);
-  const modelCached = Boolean(status.cutout.model_cached);
-  const cutoutReady = cutoutConfigured && modelCached;
-  const cutoutTone = !cutoutConfigured ? 'error' : cutoutReady ? 'ready' : 'warning';
-  const cutoutLabel = !cutoutConfigured ? '缺少依赖' : cutoutReady ? '本地就绪' : '模型待下载';
-  const missing = status.cutout.missing_dependencies || [];
-  const cutoutDetail = missing.length
-    ? '缺少：' + missing.join('、')
-    : modelCached
-      ? '固定版本权重已缓存；客户图片不会上传'
-      : '依赖已安装；首次使用需要下载固定版本模型';
-
+  const cutout = status.cutout;
+  const cutoutReady = cutout.configured && cutout.model_cached;
   $('#providerCards').replaceChildren(
-    makeProviderCard(status.vision, yibuTone, yibuLabel, '凭据：' + status.credential.source),
-    makeProviderCard(status.image, yibuTone, yibuLabel, '输出尺寸：' + status.image.image_size),
-    makeProviderCard(status.cutout, cutoutTone, cutoutLabel, cutoutDetail),
+    makeProviderCard(status.vision, ...serviceDetails(status.vision)),
+    makeProviderCard(status.image, ...serviceDetails(status.image)),
+    makeProviderCard(cutout, cutoutReady ? 'ready' : 'warning',
+      cutoutReady ? '本地就绪' : '按需配置',
+      cutoutReady ? '客户图片不会上传' : '抠图需要本地依赖和模型权重'),
   );
-
-  const allReady = credentialReady && auditReady && cutoutReady;
-  const headerTone = !credentialReady ? 'error' : allReady ? 'ready' : 'warning';
-  $('#providerDot').className = 'provider-dot ' + headerTone;
-  $('#providerLabel').textContent = allReady ? 'Provider 就绪' : 'Provider 设置';
+  const configured = status.vision.configured && status.image.configured;
+  $('#providerDot').className = 'provider-dot ' + (configured ? 'ready' : 'warning');
+  $('#providerLabel').textContent = configured ? 'Provider 已配置' : 'Provider 设置';
   $('#credentialHint').textContent = '当前：' + status.credential.source + '。新 Key 留空会沿用。';
+  const usesYibu = [status.vision.provider, status.image.provider].some(value => value?.includes('.yibu:'));
   const audit = $('#auditStatus');
-  audit.className = 'audit-status ' + (auditReady ? 'ready' : 'error');
-  audit.textContent = '审计代理 · ' + status.audit.url + ' · ' + status.audit.message;
+  audit.hidden = !usesYibu;
+  audit.className = 'audit-status ' + (status.audit.state === 'online' ? 'ready' : 'warning');
+  audit.textContent = 'Yibu 审计代理 · ' + status.audit.url + ' · ' + status.audit.message;
 }
 
 function populateProviderForm(status) {
+  const services = status.services;
+  const vision = services['collage.providers.yibu:YibuVisionProvider'];
+  const image = services['collage.providers.yibu:YibuImageProvider'];
+  const intranet = services['collage.providers.intranet:IntranetVisionProvider'];
+  const qwen = services['collage.providers.qwen:QwenImageProvider'];
+  $('#defaultVision').innerHTML = serviceOptions('vision', status.selection.vision);
+  $('#defaultImage').innerHTML = serviceOptions('image', status.selection.image);
   $('#auditBaseUrl').value = status.audit.url || 'http://127.0.0.1:17860';
-  $('#vlmModel').value = status.vision.model || '';
-  $('#vlmMaxTokens').value = status.vision.max_tokens || '';
-  $('#vlmReasoning').value = status.vision.reasoning_effort || '';
-  $('#timeoutSeconds').value = status.vision.timeout_seconds || '';
-  $('#imageModel').value = status.image.model || '';
-  $('#imageSize').value = status.image.image_size || '2K';
+  $('#vlmModel').value = vision.model || '';
+  $('#vlmMaxTokens').value = vision.max_tokens || '';
+  $('#vlmReasoning').value = vision.reasoning_effort || '';
+  $('#timeoutSeconds').value = vision.timeout_seconds || '';
+  $('#imageModel').value = image.model || '';
+  $('#imageSize').value = image.image_size || '2K';
+  $('#intranetBaseUrl').value = intranet.base_url || '';
+  $('#intranetModel').value = intranet.model || 'Qwen/Qwen3.8-Flash-Next';
+  $('#intranetMaxTokens').value = intranet.max_tokens || '16384';
+  $('#intranetTimeout').value = intranet.timeout_seconds || '900';
+  $('#intranetCredentialHint').textContent = '当前：' + (intranet.credential?.source || '未配置');
+  $('#qwenBaseUrl').value = qwen.base_url || '';
+  $('#qwenTimeout').value = qwen.timeout_seconds || '900';
+  $('#clearIntranetCredentials').checked = false;
   const device = status.cutout.device || 'auto';
   const deviceSelect = $('#birefnetDevice');
   if (![...deviceSelect.options].some(option => option.value === device)) {
-    const option = document.createElement('option');
-    option.value = device;
-    option.textContent = device;
-    deviceSelect.append(option);
+    deviceSelect.add(new Option(device, device));
   }
   deviceSelect.value = device;
   $('#sharedPath').value = '';
   $('#sharedPath').placeholder = status.credential.shared_path_configured
-    ? '当前已配置 shared.py；留空沿用'
-    : '例如 D:\\codes\\creative-video-editor\\shared.py';
+    ? '当前已配置 shared.py；留空沿用' : '已有 shared.py 的本机路径';
   $('#birefnetModelPath').value = '';
   $('#clearCredentials').checked = false;
 }
@@ -698,6 +716,7 @@ function openProviderDialog() {
   $('#providerError').hidden = true;
   state.providerFormDirty = false;
   $('#yibuApiKey').value = '';
+  $('#intranetApiKey').value = '';
   $('#retryAfterSettingsLabel').hidden = !canRetry;
   $('#retryAfterSettings').checked = canRetry;
   if (state.providerStatus) populateProviderForm(state.providerStatus);
@@ -710,7 +729,18 @@ function openProviderDialog() {
 }
 
 function providerFormPayload() {
-  const payload = {};
+  const payload = {
+    default_vision_provider: $('#defaultVision').value,
+    default_image_provider: $('#defaultImage').value,
+    intranet_base_url: $('#intranetBaseUrl').value.trim(),
+    intranet_model: $('#intranetModel').value.trim(),
+    intranet_max_tokens: $('#intranetMaxTokens').value.trim(),
+    intranet_timeout: $('#intranetTimeout').value.trim(),
+    qwen_base_url: $('#qwenBaseUrl').value.trim(),
+    qwen_timeout: $('#qwenTimeout').value.trim(),
+  };
+  if ($('#clearIntranetCredentials').checked) payload.clear_intranet_credentials = true;
+  else if ($('#intranetApiKey').value.trim()) payload.intranet_api_key = $('#intranetApiKey').value.trim();
   const clearCredentials = $('#clearCredentials').checked;
   const apiKey = $('#yibuApiKey').value.trim();
   const sharedPath = $('#sharedPath').value.trim();
@@ -747,14 +777,7 @@ async function submitProviderSettings(event) {
   const submit = $('#providerSubmit');
   const retry = !$('#retryAfterSettingsLabel').hidden && $('#retryAfterSettings').checked;
   const projectId = state.currentId;
-  const {payload, credentialWillExist} = providerFormPayload();
-  if (retry && !credentialWillExist) {
-    showProviderError(new ApiError({
-      code: 'YIBU_CREDENTIAL_MISSING',
-      message: '请输入 Yibu API Key，或指定已有 shared.py 后再重试项目',
-    }, 400));
-    return;
-  }
+  const {payload} = providerFormPayload();
 
   submit.disabled = true;
   $('#providerError').hidden = true;
@@ -762,6 +785,8 @@ async function submitProviderSettings(event) {
     const request = api('/api/provider-settings', {method: 'POST', body: payload});
     $('#yibuApiKey').value = '';
     if (payload.yibu_api_key) payload.yibu_api_key = '';
+    $('#intranetApiKey').value = '';
+    if (payload.intranet_api_key) payload.intranet_api_key = '';
     const status = await request;
     renderProviderStatus(status);
     state.providerFormDirty = false;
@@ -770,7 +795,7 @@ async function submitProviderSettings(event) {
       try {
         await api('/api/projects/' + encodeURIComponent(projectId) + '/retry', {
           method: 'POST',
-          body: {},
+          body: {vision_provider: status.selection.vision, image_provider: status.selection.image},
         });
       } catch (error) {
         showProviderError(new ApiError({
@@ -811,15 +836,10 @@ function renderCreateProviderNotice() {
   let notice = $('#createProviderNotice');
   const status = state.providerStatus;
   const issues = [];
-  if (status && !status.credential.configured) {
-    issues.push('未配置 Yibu Key；只上传参考图会停在分析阶段。上传人工 Draft 仍可离线继续。');
-  } else if (status && status.audit.state !== 'online') {
-    issues.push('本机审计代理当前不可用；Yibu VLM 和图片编辑会暂停。');
-  }
-  if (status && !status.cutout.configured) {
-    issues.push('BiRefNet 可选依赖不完整；普通不透明图片的 cutout 槽会暂停。');
-  } else if (status && !status.cutout.model_cached) {
-    issues.push('BiRefNet 权重尚未缓存；首次使用 cutout 槽时需要下载模型。');
+  for (const [kind, id] of [['识别', '#createVision'], ['图片', '#createImage']]) {
+    const config = status?.services?.[$(id).value];
+    if (config && !config.configured) issues.push(kind + '服务尚未配置。');
+    else if (config && ['offline', 'invalid'].includes(config.connection?.state)) issues.push(kind + '服务：' + config.connection.message);
   }
   if (!issues.length) {
     notice?.remove();
@@ -845,11 +865,36 @@ function renderCreateProviderNotice() {
   notice.replaceChildren(message, button);
 }
 
+function renderProjectProviders(status) {
+  const panel = $('#projectProviders');
+  const providers = status.providers || {};
+  const hasTemplate = status.artifacts?.template_manifest?.exists;
+  const disabled = activeJob(status.task) || hasTemplate;
+  panel.innerHTML = '<strong>本项目服务</strong><div class="form-grid two">' +
+    '<label>识别服务<select id="projectVision"' + (disabled ? ' disabled' : '') + '>' +
+    serviceOptions('vision', providers.vision_provider, !providers.vision_provider) + '</select></label>' +
+    '<label>图片服务<select id="projectImage"' + (disabled ? ' disabled' : '') + '>' +
+    serviceOptions('image', providers.image_provider, !providers.image_provider) + '</select></label></div>' +
+    (hasTemplate ? '<p>已有素材继续保留。重做单件时可选择服务；修改背景请另存版本。</p>'
+      : '<button id="saveProjectProviders" class="button"' + (disabled ? ' disabled' : '') + '>保存本项目选择</button>');
+  if (!hasTemplate) $('#saveProjectProviders').onclick = async () => {
+    try {
+      await api('/api/projects/' + encodeURIComponent(status.project_id) + '/providers', {
+        method: 'POST', body: {vision_provider: $('#projectVision').value, image_provider: $('#projectImage').value},
+      });
+      toast('已保存；后续模型任务使用本项目选择');
+      await refreshCurrent(true);
+    } catch (error) { toast(describeError(error)); }
+  };
+}
+
 function openCreateDialog() {
   const dialog = $('#createDialog');
   $('#createError').hidden = true;
   const reviewer = window.localStorage.getItem('figcopy-reviewer');
   if (reviewer) $('#createForm').elements.reviewer.value = reviewer;
+  $('#createVision').innerHTML = serviceOptions('vision', state.providerStatus?.selection?.vision);
+  $('#createImage').innerHTML = serviceOptions('image', state.providerStatus?.selection?.image);
   renderCreateProviderNotice();
   dialog.showModal();
 }
@@ -867,6 +912,8 @@ async function submitCreate(event) {
   submit.disabled = true;
   errorNode.hidden = true;
   const form = new FormData(formElement);
+  if (!String(form.get('vision_provider') || '').trim()) form.set('vision_provider', $('#createVision').value);
+  if (!String(form.get('image_provider') || '').trim()) form.set('image_provider', $('#createImage').value);
   const projectId = String(form.get('project_id'));
   try {
     await api('/api/projects', {method: 'POST', body: form});
@@ -897,12 +944,15 @@ async function boot() {
 
 $('#newProject').onclick = openCreateDialog;
 $('#providerSettings').onclick = openProviderDialog;
+$('#createVision').onchange = renderCreateProviderNotice;
+$('#createImage').onchange = renderCreateProviderNotice;
 $('#providerForm').onsubmit = submitProviderSettings;
 $('#providerForm').oninput = () => { state.providerFormDirty = true; };
 $('#providerDialog').addEventListener('close', () => {
   const returnToCreate = state.returnToCreateAfterProvider;
   state.returnToCreateAfterProvider = false;
   $('#yibuApiKey').value = '';
+  $('#intranetApiKey').value = '';
   $('#providerError').hidden = true;
   if (returnToCreate) window.setTimeout(openCreateDialog, 0);
 });

@@ -134,7 +134,7 @@ input:focus, textarea:focus { border-color: #697587 !important; box-shadow: 0 0 
 .slot-card p { color: var(--muted); font-size: 12px; margin: 5px 0 13px; }
 .slot-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
 .slot-controls .wide { grid-column: 1 / -1; }
-.slot-controls label, .retry-form label, .approval-form label { color: #aeb5c0; font-size: 11px; display: grid; gap: 6px; }
+.slot-controls label, .retry-form label, .approval-form label, #projectProviders label { color: #aeb5c0; font-size: 11px; display: grid; gap: 6px; }
 .slot-controls input, .retry-form input, .approval-form textarea { border: 1px solid var(--line); border-radius: 8px; padding: 9px; background: #0c0f13; color: var(--text); width: 100%; }
 .slot-card details { color: var(--muted); font-size: 11px; margin-top: 10px; }
 .slot-card summary { cursor: pointer; }
@@ -192,7 +192,7 @@ input:focus, textarea:focus { border-color: #697587 !important; box-shadow: 0 0 
 .settings-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 14px; }
 .settings-heading h3 { margin: 0; font-size: 15px; }
 .settings-heading span { color: var(--muted); font-size: 11px; }
-.provider-dialog select { width: 100%; border: 1px solid var(--line); border-radius: 10px; background: #0e1116; color: var(--text); padding: 10px 12px; outline: none; }
+label > select { width: 100%; border: 1px solid var(--line); border-radius: 10px; background: #0e1116; color: var(--text); padding: 10px 12px; outline: none; }
 .provider-dialog label > small { color: var(--muted); font-size: 10px; line-height: 1.45; }
 .provider-dialog .danger-check { color: #ffaaa2; margin-top: 4px; }
 .retry-after-settings { display: flex !important; align-items: center; border: 1px solid rgba(121,219,255,.25); background: rgba(121,219,255,.05); border-radius: 10px; padding: 11px 12px; margin-top: 18px; }
@@ -227,3 +227,6 @@ input:focus, textarea:focus { border-color: #697587 !important; box-shadow: 0 0 
   .project-heading { align-items: flex-start; }
   .welcome { padding: 26px 18px; }
 }
+
+#projectProviders { padding: 18px; margin-bottom: 16px; }
+#projectProviders .form-grid { margin: 12px 0; }

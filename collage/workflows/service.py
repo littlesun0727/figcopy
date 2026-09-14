@@ -14,12 +14,11 @@ from ..core.io import (
     read_json,
 )
 from ..imaging.operations import normalize_image
+from ..providers.selection import default_provider, YIBU_VISION
 from ..projects import ProjectPaths, ProjectStore
 from .inputs import import_bindings
 from .model import (
     DEFAULT_CUTOUT_PROVIDER,
-    DEFAULT_IMAGE_PROVIDER,
-    DEFAULT_VISION_PROVIDER,
     new_workflow,
     project_status_for_stage,
     validate_workflow,
@@ -92,11 +91,16 @@ class WorkflowService:
 
         # Manual import skips initial analysis, but an explicitly configured VLM
         # remains available for customer-driven corrections of that imported draft.
+        configured_vision = default_provider("vision")
         vision_provider = vision_provider_spec or (
-            None if manual_draft_path is not None else DEFAULT_VISION_PROVIDER
+            None
+            if manual_draft_path is not None and configured_vision == YIBU_VISION
+            else configured_vision
         )
         image_provider = (
-            None if fixture_provider else image_provider_spec or DEFAULT_IMAGE_PROVIDER
+            None
+            if fixture_provider
+            else image_provider_spec or default_provider("image")
         )
         cutout_provider = cutout_provider_spec or DEFAULT_CUTOUT_PROVIDER
         workflow = new_workflow(

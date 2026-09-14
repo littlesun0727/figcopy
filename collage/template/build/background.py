@@ -25,6 +25,7 @@ from ...imaging.operations import (
     make_blend_mask,
     protected_background_compose,
 )
+from ...providers.selection import cache_configuration
 from ...providers import GeneratedImage, ImageProvider, ProviderAudit
 from .common import (
     _audit_from_cache,
@@ -87,6 +88,8 @@ def _provider_background(
         ),
         operation="background",
     )
+    if cache_configuration(provider) and generated.raw_image is not None:
+        atomic_save_image(generated.raw_image, cache.root.parent / "background_raw.png")
     if generated.transform is not None:
         transform_record = {
             **transform_record,
@@ -181,6 +184,7 @@ def _build_background(
         key_data.update(
             {
                 "provider": capabilities.name,
+                **cache_configuration(provider),
                 "requested_model": capabilities.requested_model,
                 "mask_polarity": capabilities.mask_polarity,
                 "output_sizes": [list(size) for size in capabilities.output_sizes],

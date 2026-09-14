@@ -411,6 +411,7 @@ def fork_layout(
     *,
     overlay_id: str | None = None,
     image_provider=None,
+    image_provider_spec: str | None = None,
 ) -> dict:
     """Create a new package and local render; all prior assets and approvals stay immutable."""
     source = store.open(project_id)
@@ -419,6 +420,10 @@ def fork_layout(
         template = apply_layout(source, payload)
         manifest = store.get_manifest(project_id)
         workflow = copy.deepcopy(validate_workflow(manifest.get("workflow")))
+        if image_provider_spec is not None:
+            workflow["options"].update(
+                image_provider=image_provider_spec, fixture_provider=False
+            )
         kind = "overlay" if overlay_id else "layout"
         new_id = project_id[:38] + f"-{kind}-" + uuid.uuid4().hex[:10]
         target = store.create(
