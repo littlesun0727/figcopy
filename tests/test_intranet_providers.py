@@ -122,7 +122,13 @@ def model_server():
                     self.respond(b"broken image", mime="image/png")
                     return
                 if self.path == "/edit":
-                    size = (data["width"], data["height"])
+                    if set(data) != {"image_base64", "prompt", "seed"}:
+                        self.respond({"error": "UNSUPPORTED_FIELDS"}, 422)
+                        return
+                    with Image.open(
+                        io.BytesIO(base64.b64decode(data["image_base64"]))
+                    ) as source:
+                        size = source.size
                 else:
                     source = data["image"]
                     if isinstance(source, list):
@@ -262,7 +268,7 @@ def test_qwen_mapping_raw_output_and_wire_contract():
         assert result.image.size == reference.size
         assert result.raw_image.size != reference.size
         payload = server.calls[0][1]
-        assert set(payload) == {"image_base64", "prompt", "seed", "width", "height"}
+        assert set(payload) == {"image_base64", "prompt", "seed"}
         assert "mask" not in payload and server.calls[0][2] is None
         overlay = generate(provider)
         assert overlay.image is overlay.raw_image

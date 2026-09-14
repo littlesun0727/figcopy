@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from ...core.errors import CollageError
+from ...core.diagnostics import analysis_attempt, analysis_phase, capture_evidence
 from ...core.io import (
     atomic_write_json,
     read_json,
@@ -23,7 +24,7 @@ from ..analysis import ANALYSIS_PROMPT, DEFAULT_PRODUCT_POLICY, _draw_draft_prev
 from .background_source import CORE_FIELDS, background_decision, edited_review_draft
 
 LOGGER = logging.getLogger(__name__)
-FEEDBACK_PROMPT_VERSION = "collage-review-feedback/5"
+FEEDBACK_PROMPT_VERSION = "collage-review-feedback/6"
 
 
 def review_revision(draft: dict[str, Any]) -> str:
@@ -197,20 +198,39 @@ def revise_draft(
             "开始根据客户问答纠正识别 | questions=%s", len(current["questions"])
         )
         try:
-            raw, audit = provider.analyze(
-                reference.read_bytes(),
-                media_type="image/png",
-                canvas=current["canvas"],
-                product_policy=policy,
-                prompt=prompt,
-            )
-            atomic_write_json(
-                request_dir / "response.json", {"result": raw, "audit": audit.as_dict()}
-            )
-            corrected = _corrected_draft(current, raw, audit.as_dict())
-            result = _persist_correction(
-                draft_path, reference, corrected, request_path, request
-            )
+            with analysis_attempt(
+                draft_path.parent,
+                {
+                    "kind": "correction",
+                    "provider": provider.name,
+                    "model": provider.requested_model,
+                    "fixture": bool(getattr(provider, "fixture", False)),
+                    "prompt_version": FEEDBACK_PROMPT_VERSION,
+                },
+                secrets=(getattr(getattr(provider, "settings", None), "api_key", ""),),
+            ):
+                capture_evidence("prompt.txt", prompt)
+                analysis_phase("requesting_model")
+                raw, audit = provider.analyze(
+                    reference.read_bytes(),
+                    media_type="image/png",
+                    canvas=current["canvas"],
+                    product_policy=policy,
+                    prompt=prompt,
+                )
+                capture_evidence("candidate.json", raw)
+                capture_evidence("audit.json", audit.as_dict())
+                atomic_write_json(
+                    request_dir / "response.json",
+                    {"result": raw, "audit": audit.as_dict()},
+                )
+                analysis_phase("validating_candidate")
+                corrected = _corrected_draft(current, raw, audit.as_dict())
+                capture_evidence("assembled_draft.json", corrected)
+                analysis_phase("saving_draft")
+                result = _persist_correction(
+                    draft_path, reference, corrected, request_path, request
+                )
             LOGGER.info(
                 "识别纠正完成，等待客户复核 | remaining_questions=%s",
                 len(corrected["questions"]),

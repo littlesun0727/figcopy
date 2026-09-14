@@ -27,7 +27,7 @@ def normalize_image(input_path: Path, output_path: Path | None = None) -> Image.
     if output_path is not None:
         atomic_save_image(normalized, output_path)
         LOGGER.info(
-            "规范化图片已保存 | output=%s size=%sx%s", output_path, *normalized.size
+            "规范化图片已保存 | file=%s size=%sx%s", output_path.name, *normalized.size
         )
     return normalized
 

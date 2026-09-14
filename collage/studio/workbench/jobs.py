@@ -8,8 +8,11 @@ import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
+from pathlib import Path
 
 from ...core.errors import CollageError, SpecValidationError
+from ...core.privacy import safe_value
+from .job_logs import JobLogStore
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,11 +24,12 @@ def _utc_now() -> str:
 class JobRegistry:
     """Keep transient job progress while durable stage state stays in project.json."""
 
-    def __init__(self) -> None:
+    def __init__(self, logs_dir: Path | None = None) -> None:
         self._lock = threading.Lock()
         self._jobs: dict[str, dict[str, Any]] = {}
         self._latest_by_project: dict[str, str] = {}
         self._inline_projects: set[str] = set()
+        self.logs = JobLogStore(logs_dir)
 
     def submit(
         self,
@@ -61,6 +65,7 @@ class JobRegistry:
             }
             self._jobs[job_id] = record
             self._latest_by_project[project_id] = job_id
+            self.logs.update(record)
 
         thread = threading.Thread(
             target=self._run,
@@ -77,7 +82,10 @@ class JobRegistry:
         with self._lock:
             job_id = self._latest_by_project.get(project_id)
             record = self._jobs.get(job_id or "")
-            return self._public(record) if record is not None else None
+            if record is not None:
+                return self._public(record)
+        history = self.logs.history(project_id)
+        return self._public(history[0]) if history else None
 
     def active_project_ids(self) -> set[str]:
         """Return project identifiers that currently have queued or running work."""
@@ -105,7 +113,14 @@ class JobRegistry:
                 self._inline_projects.discard(project_id)
 
     def _run(self, job_id: str, operation: Callable[[], Any]) -> None:
+        with self.logs.capture(job_id):
+            self._execute(job_id, operation)
+
+    def _execute(self, job_id: str, operation: Callable[[], Any]) -> None:
         self._update(job_id, state="running")
+        LOGGER.info(
+            "工作台任务开始 | job=%s kind=%s", job_id, self._jobs[job_id]["kind"]
+        )
         try:
             result = operation()
         except CollageError as exc:
@@ -116,14 +131,15 @@ class JobRegistry:
                 exc.message,
             )
             if isinstance(exc, SpecValidationError):
-                for issue in exc.issues[:5]:
+                for issue in exc.issues:
                     LOGGER.warning(
-                        "规格校验问题 | job=%s path=%s code=%s",
+                        "规格校验问题 | job=%s path=%s code=%s message=%s",
                         job_id,
                         issue.path,
                         issue.code,
+                        issue.message,
                     )
-            self._update(job_id, state="failed", error=exc.as_dict())
+            self._update(job_id, state="failed", error=safe_value(exc.as_dict()))
         except Exception as exc:  # pragma: no cover - final containment boundary
             LOGGER.exception("工作台任务发生未预期错误 | job=%s", job_id)
             self._update(
@@ -144,6 +160,7 @@ class JobRegistry:
                 and isinstance(result, dict)
                 else None
             )
+            LOGGER.info("工作台任务完成 | job=%s", job_id)
             self._update(job_id, state="succeeded", error=None, result=destination)
 
     def _update(self, job_id: str, **changes: Any) -> None:
@@ -151,6 +168,7 @@ class JobRegistry:
             record = self._jobs[job_id]
             record.update(changes)
             record["updated_at"] = _utc_now()
+            self.logs.update(record)
 
     @staticmethod
     def _public(record: dict[str, Any] | None) -> dict[str, Any]:

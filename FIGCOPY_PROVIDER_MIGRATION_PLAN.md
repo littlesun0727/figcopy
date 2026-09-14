@@ -72,7 +72,7 @@ A100 服务独立部署并常驻，Figcopy 只通过 HTTP 调用。模型加载�
 A100 图片：
 
 - 使用现有 `GET /health`、`POST /edit`。
-- 请求使用 `image_base64`、`prompt`、`seed`，按需要传 `width`、`height`。
+- 请求使用 `image_base64`、`prompt`、`seed`。2026-09-14 按用户提供的部署接口示例修订：不再附带 `width`、`height`，尺寸适配体现在输入图片像素中。
 - 成功响应按 PNG 二进制解码；错误响应按 HTTP 状态和 JSON 错误处理。
 - 40 步、CFG 4.0 继续由已部署服务固定；客户端不发送服务未支持的参数。
 - 分别实现背景清版和独立装饰制作的 Prompt。

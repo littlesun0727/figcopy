@@ -11,6 +11,7 @@ from typing import Any
 from PIL import ImageDraw
 
 from ..core.errors import CollageError
+from ..core.diagnostics import analysis_attempt, analysis_phase, capture_evidence
 from ..core.io import (
     atomic_save_image,
     atomic_write_bytes,
@@ -26,7 +27,7 @@ from ..schemas import validate_draft
 from ..schemas.draft_prompt import DRAFT_PROMPT
 
 LOGGER = logging.getLogger(__name__)
-PROMPT_VERSION = "collage-draft/7"
+PROMPT_VERSION = "collage-draft/8"
 ANALYSIS_PROMPT = DRAFT_PROMPT
 DEFAULT_PRODUCT_POLICY: dict[str, Any] = {
     "goal": "fixed_layout_customer_content_replacement",
@@ -83,6 +84,34 @@ def analyze_reference(
             "OUTPUT_EXISTS", f"Draft 已存在：{draft_path}；如需重做请显式使用 --force"
         )
     output_dir.mkdir(parents=True, exist_ok=True)
+    settings = getattr(provider, "settings", None)
+    with analysis_attempt(
+        output_dir,
+        {
+            "provider": getattr(provider, "name", "manual-import"),
+            "model": getattr(provider, "requested_model", None),
+            "fixture": bool(getattr(provider, "fixture", False)),
+            "prompt_version": PROMPT_VERSION,
+            "max_tokens": getattr(settings, "vlm_max_tokens", None),
+            "reasoning_effort": getattr(settings, "vlm_reasoning_effort", None),
+        },
+        secrets=(getattr(settings, "api_key", ""),),
+    ):
+        return _analyze_reference(
+            reference_path,
+            output_dir,
+            manual_draft_path=manual_draft_path,
+            provider=provider,
+            product_policy=product_policy,
+        )
+
+
+def _analyze_reference(
+    reference_path, output_dir, *, manual_draft_path, provider, product_policy
+):
+    draft_path = output_dir / "draft.json"
+    capture_evidence("prompt.txt", ANALYSIS_PROMPT)
+    capture_evidence("policy.json", product_policy or DEFAULT_PRODUCT_POLICY)
     atomic_write_json(
         output_dir / "analysis_policy.json", product_policy or DEFAULT_PRODUCT_POLICY
     )
@@ -94,10 +123,19 @@ def analyze_reference(
         "coordinate_space": "canvas_px",
         "rect_format": "xywh",
     }
+    capture_evidence(
+        "input.json", {"canvas": canvas, "source_sha256": sha256_file(normalized_path)}
+    )
 
     if manual_draft_path is not None:
-        LOGGER.info("导入人工草稿 | path=%s", manual_draft_path)
-        raw = validate_draft(read_json(manual_draft_path), require_metadata=False)
+        LOGGER.info("导入人工草稿 | file=%s", manual_draft_path.name)
+        capture_evidence(
+            "response.txt", manual_draft_path.read_text(encoding="utf-8-sig")
+        )
+        raw = read_json(manual_draft_path)
+        capture_evidence("candidate.json", raw)
+        analysis_phase("validating_candidate")
+        raw = validate_draft(raw, require_metadata=False)
         audit = ProviderAudit("manual-import", None, None, None, False, 0)
     elif provider is not None:
         policy = product_policy or DEFAULT_PRODUCT_POLICY
@@ -128,6 +166,8 @@ def analyze_reference(
                     cache_hit=True,
                 )
                 LOGGER.info("VLM Draft 缓存命中 | key=%s", cache_key[:12])
+                capture_evidence("candidate.json", raw)
+                capture_evidence("audit.json", audit.as_dict())
             except (CollageError, KeyError, TypeError, ValueError):
                 cached = None
         if cached is None:
@@ -137,6 +177,7 @@ def analyze_reference(
                 provider.requested_model,
             )
             started = time.monotonic()
+            analysis_phase("requesting_model")
             raw, audit = provider.analyze(
                 normalized_path.read_bytes(),
                 media_type="image/png",
@@ -153,8 +194,11 @@ def analyze_reference(
                     audit.fixture,
                     round((time.monotonic() - started) * 1000),
                 )
+            capture_evidence("candidate.json", raw)
+            capture_evidence("audit.json", audit.as_dict())
+            analysis_phase("validating_candidate")
+            LOGGER.info("校验模型候选草稿")
             raw = validate_draft(raw, require_metadata=False)
-            atomic_write_json(cache_path, {"draft": raw, "audit": audit.as_dict()})
     else:
         raise CollageError(
             "VISION_PROVIDER_UNAVAILABLE",
@@ -181,11 +225,17 @@ def analyze_reference(
         "created_at": _utc_now(),
         **core_fields,
     }
+    capture_evidence("assembled_draft.json", draft)
+    analysis_phase("validating_draft")
     validate_draft(draft)
+    # Cache only after canvas-aware validation also succeeds.
+    if provider is not None and manual_draft_path is None and cached is None:
+        atomic_write_json(cache_path, {"draft": raw, "audit": audit.as_dict()})
+    analysis_phase("saving_draft")
     atomic_write_json(draft_path, draft)
     atomic_write_bytes(
         output_dir / "analysis_prompt.txt", (ANALYSIS_PROMPT + "\n").encode("utf-8")
     )
     _draw_draft_preview(normalized_path, draft, output_dir / "draft_preview.png")
-    LOGGER.info("候选草稿已生成 | output=%s", draft_path)
+    LOGGER.info("候选草稿已生成 | file=%s", draft_path.name)
     return draft_path

@@ -9,13 +9,15 @@ DRAFT_PROMPT = (
 【识别原则】
 客户槽位以实际替换需求为准，不拆解保留底板中的报纸、纸纹等细节。每件需要独立编辑的装饰、手写文字、回形针、星芒分别作为 overlay；无需独立编辑且不跨照片层的装饰可合组，不合成整张前景。
 照片区分 photo、photo_feather、cutout；不能因为有人物就推断要抠图。无法确定的图片模式用 unknown。
-文字按图逐字识别；不可辨认时用 null 并在 questions 中用中文说明位置、疑点及需要确认的内容，不猜测文字、品牌、证据或数值。精确内容标记 requires_exact_content。
+文字按图逐字识别；不可辨认时仅在 text_content 或 default_text 使用 null，并在 questions 中用中文说明位置、疑点及需要确认的内容，不猜测文字、品牌、证据或数值。精确内容标记 requires_exact_content。
 
 【字段与坐标】
 所有 id 唯一，供引用。所有 rect 使用输入画布原始像素 [x,y,width,height]，宽高为正；source_rect 位于参考图内，target_rect 表示建议的排版范围。不要使用显示预览尺寸。附属元素可保留相对照片的偏移与外扩。
 slots 每项必填：id、label、type、mode、source_rect、target_rect、upload_hint、review_notes。
 type 为 image 或 text；图片 mode 取 product_policy.image_modes，文字 mode 为 null，可带 default_text（字符串或 null）。
 overlays 每项必填：id、label、source_rect、target_rect、action、generation_brief、requires_exact_content、review_notes、attachment；可带 text_content、shape。
+generation_brief 必须是字符串，不能缺失、为 null、对象或数组；basic_shape 无需生成说明时填空字符串，reference_generate 填完整单件外观说明。所有 review_notes、upload_hint 也必须是字符串，无内容时填空字符串。
+questions 必须是非空字符串组成的数组，例如 ["右下角的文字是否需要保留？"]；没有问题时填 []。每项不能为对象、null 或空字符串，不使用 {"question":"..."} 这样的结构。
 action 取 product_policy.overlay_actions：可用代码准确绘制的简单图形用 basic_shape，shape 按下方契约提供；其他装饰用 reference_generate，generation_brief 描述完整单件的外观，source_rect 只作风格参照，不直接裁成成品。text_content 为完整文字或 null。requires_exact_content 为布尔值。
 
 【背景来源】

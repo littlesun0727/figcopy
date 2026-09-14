@@ -5,6 +5,14 @@ from __future__ import annotations
 import logging
 import sys
 
+from .privacy import safe_text
+
+
+class _SafeFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:
+        return safe_text(super().format(record))
+
+
 # 第三方 HTTP debug 可能包含临时授权头；Pillow/filelock 的逐块日志也会淹没阶段信息。
 _NOISY_LOGGERS = (
     "PIL",
@@ -29,11 +37,19 @@ def configure_logging(verbose: bool = False) -> None:
             except OSError:
                 pass
     level = logging.DEBUG if verbose else logging.INFO
+    logging.getLogger("collage").setLevel(level)
     logging.basicConfig(
         level=level,
         format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
         datefmt="%H:%M:%S",
         force=True,
     )
+    for handler in logging.getLogger().handlers:
+        handler.setFormatter(
+            _SafeFormatter(
+                "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+                datefmt="%H:%M:%S",
+            )
+        )
     for logger_name in _NOISY_LOGGERS:
         logging.getLogger(logger_name).setLevel(logging.WARNING)

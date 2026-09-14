@@ -9,6 +9,7 @@ import time
 from typing import Any
 
 from ..core.errors import CollageError
+from ..core.diagnostics import analysis_phase, capture_evidence
 from ..schemas.draft_prompt import DRAFT_PROMPT
 from .base import ProviderAudit
 
@@ -154,6 +155,26 @@ class ChatVisionProvider:
             operation="analyze-reference",
             auth_style="bearer",
         )
+        # Persist before content parsing or truncation checks can reject this response.
+        capture_evidence("response.json", response)
+        capture_evidence(
+            "response_metadata.json",
+            {
+                "request_id": _request_id(response, headers),
+                "model": response.get("model"),
+                "finish_reason": _chat_finish_reason(response),
+                "usage": response.get("usage"),
+            },
+        )
+        analysis_phase("parsing_response")
+        text = _assistant_text(response)
+        capture_evidence("response.txt", text)
+        LOGGER.info(
+            "收到 VLM 回答 | model=%s characters=%s finish_reason=%s",
+            self.requested_model,
+            len(text),
+            _chat_finish_reason(response),
+        )
         finish_reason = _chat_finish_reason(response)
         if finish_reason and finish_reason.lower() in {
             "length",
@@ -169,7 +190,7 @@ class ChatVisionProvider:
                     "max_tokens": self.settings.vlm_max_tokens,
                 },
             )
-        draft = _parse_json_object(_assistant_text(response))
+        draft = _parse_json_object(text)
         actual_model = response.get("model")
         audit = ProviderAudit(
             self.name,

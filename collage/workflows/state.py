@@ -7,6 +7,7 @@ import re
 from typing import Any
 
 from ..core.errors import CollageError
+from ..core.privacy import safe_value
 from ..projects import ProjectPaths, ProjectStore
 from ..template.validation import validate_package
 from .model import project_status_for_stage, utc_now, validate_workflow
@@ -108,11 +109,11 @@ def record_failure(
     workflow["resume_stage"] = current
     workflow["stage_updated_at"] = timestamp
     workflow["wait"] = None
-    # Provider details can contain local paths, so only persist stable public fields.
-    workflow["last_error"] = {
-        "code": error.code,
-        "message": _safe_error_message(error.message, project),
-    }
+    # Preserve every field issue and transport detail after sanitizing their values.
+    workflow["last_error"] = safe_value(error.as_dict())
+    workflow["last_error"]["message"] = _safe_error_message(
+        workflow["last_error"]["message"], project
+    )
     workflow.setdefault("history", []).append(
         {"stage": failure_stage, "at": timestamp, "code": error.code}
     )

@@ -98,9 +98,21 @@ class Browser:
         )
         active = profile / "DevToolsActivePort"
         deadline = time.monotonic() + 20
-        while not active.exists() and time.monotonic() < deadline:
-            time.sleep(0.1)
-        port = int(active.read_text().splitlines()[0])
+        port = None
+        while time.monotonic() < deadline:
+            try:
+                # Chromium creates this file before releasing its Windows write
+                # handle; existence alone does not mean it is readable yet.
+                port = int(active.read_text(encoding="utf-8").splitlines()[0])
+                break
+            except (OSError, ValueError, IndexError):
+                if self.process.poll() is not None:
+                    break
+                time.sleep(0.1)
+        if port is None:
+            self.process.terminate()
+            self.process.wait(timeout=5)
+            raise RuntimeError("Browser debug endpoint did not become ready")
         with urllib.request.urlopen(
             f"http://127.0.0.1:{port}/json", timeout=5
         ) as response:

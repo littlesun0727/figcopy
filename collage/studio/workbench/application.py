@@ -10,7 +10,14 @@ from pathlib import Path
 from typing import Any
 
 from ...core.errors import CollageError
-from ...core.io import atomic_write_json, read_json, resolve_input_path, sha256_file
+from ...core.io import (
+    atomic_write_json,
+    read_json,
+    resolve_input_path,
+    sha256_file,
+    safe_package_path,
+)
+from ...core.privacy import safe_value
 from ...projects import DataPaths, ProjectPaths, ProjectStore
 from ...providers import VisionProvider, load_provider
 from ...providers.selection import provider_overrides
@@ -44,6 +51,21 @@ _START_UPLOADS = {
     "allowed_mask",
 }
 
+_DIAGNOSTIC_FILES = {
+    "attempt.json",
+    "prompt.txt",
+    "policy.json",
+    "input.json",
+    "transport_response.txt",
+    "response.json",
+    "response.txt",
+    "response_metadata.json",
+    "candidate.json",
+    "assembled_draft.json",
+    "audit.json",
+    "validation.json",
+}
+
 
 class WorkbenchApplication:
     """Translate browser actions into the same resumable WorkflowService calls as CLI."""
@@ -58,7 +80,7 @@ class WorkbenchApplication:
         self.paths = paths.ensure()
         self.store = ProjectStore(self.paths)
         self.workflow = WorkflowService(self.store)
-        self.jobs = jobs or JobRegistry()
+        self.jobs = jobs or JobRegistry(self.paths.logs / "jobs")
         self.provider_settings = provider_settings or ProviderRuntimeSettings()
 
     def provider_status(self, *, probe_audit: bool = False) -> dict[str, Any]:
@@ -216,6 +238,39 @@ class WorkbenchApplication:
 
         self.paths.project(project_id)
         return self.jobs.latest(project_id)
+
+    def diagnostics(
+        self, project_id: str, *, job_id: str | None = None, after: int = 0
+    ) -> dict:
+        """Expose sanitized task history and explicitly allowlisted analysis evidence."""
+        project = self.paths.project(project_id)
+        result = self.jobs.logs.snapshot(project_id, job_id, after)
+        attempts = []
+        directory = project.analysis / "attempts"
+        for path in sorted(directory.glob("*/attempt.json"), reverse=True)[:30]:
+            try:
+                record = safe_value(read_json(path))
+                identifier = path.parent.name
+                files = {}
+                for name in record.get("files", []):
+                    if name in _DIAGNOSTIC_FILES and (path.parent / name).is_file():
+                        files[name] = (
+                            f"/api/projects/{project_id}/diagnostics/{identifier}/{name}"
+                        )
+                attempts.append({**record, "id": identifier, "files": files})
+            except CollageError:
+                continue
+        result["attempts"] = attempts
+        return result
+
+    def diagnostic_file(self, project_id: str, attempt_id: str, name: str) -> Path:
+        project = self.store.open(project_id)
+        if name not in _DIAGNOSTIC_FILES:
+            raise CollageError("ARTIFACT_NOT_FOUND", "找不到该诊断文件")
+        path = safe_package_path(project.analysis / "attempts", f"{attempt_id}/{name}")
+        if not path.is_file():
+            raise CollageError("ARTIFACT_NOT_FOUND", "找不到该诊断文件")
+        return path
 
     def start_project(self, form: MultipartForm) -> dict[str, Any]:
         """Validate a create form and enqueue reference analysis."""

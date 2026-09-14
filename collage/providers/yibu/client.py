@@ -10,6 +10,8 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from ...core.errors import CollageError
+from ...core.diagnostics import capture_evidence
+from ...core.privacy import safe_text
 from .constants import MAX_RESPONSE_BYTES
 from .settings import YibuSettings, _safe_error_text, _validated_audit_base_url
 
@@ -133,6 +135,13 @@ class _YibuAuditClient:
                 f"yibu 审计请求失败：{type(exc).__name__}",
                 details={"operation": operation},
             ) from exc
+        if path == "/v1/chat/completions":
+            capture_evidence(
+                "transport_response.txt",
+                safe_text(
+                    body.decode("utf-8", "replace"), secrets=(self.settings.api_key,)
+                ),
+            )
         try:
             decoded = json.loads(body)
         except json.JSONDecodeError as exc:

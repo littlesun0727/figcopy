@@ -11,6 +11,8 @@ import urllib.request
 from urllib.parse import urlsplit
 
 from ..core.errors import CollageError
+from ..core.diagnostics import capture_evidence
+from ..core.privacy import safe_text, safe_value
 
 LOGGER = logging.getLogger(__name__)
 MAX_RESPONSE_BYTES = 64 * 1024 * 1024
@@ -88,8 +90,10 @@ class ServiceClient:
                 raw = response.read(MAX_RESPONSE_BYTES + 1)
                 response_headers = {k.lower(): v for k, v in response.headers.items()}
         except urllib.error.HTTPError as exc:
+            error_body = ""
             try:
-                error = json.loads(exc.read(4096))
+                error_body = exc.read(16385).decode("utf-8", "replace")
+                error = json.loads(error_body)
             except (ValueError, OSError):
                 error = {}
             if (
@@ -110,7 +114,24 @@ class ServiceClient:
             raise CollageError(
                 code,
                 f"内网服务返回 HTTP {exc.code}",
-                details={"http_status": exc.code, "request_state": "failed"},
+                details={
+                    "http_status": exc.code,
+                    "request_state": "failed",
+                    "operation": operation,
+                    "request_id": safe_text(
+                        exc.headers.get("x-request-id", ""), secrets=(self.api_key,)
+                    ),
+                    "response": safe_text(
+                        json.dumps(
+                            safe_value(error, secrets=(self.api_key,)),
+                            ensure_ascii=False,
+                        )
+                        if error
+                        else error_body,
+                        secrets=(self.api_key,),
+                        limit=16384,
+                    ),
+                },
             ) from exc
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             reason = getattr(exc, "reason", exc)
@@ -128,6 +149,10 @@ class ServiceClient:
 
     def post_json(self, path, payload, *, model, operation, auth_style):
         raw, headers = self.request(path, payload, operation=operation)
+        capture_evidence(
+            "transport_response.txt",
+            safe_text(raw.decode("utf-8", "replace"), secrets=(self.api_key,)),
+        )
         try:
             result = json.loads(raw)
         except ValueError as exc:

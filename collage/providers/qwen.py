@@ -90,7 +90,7 @@ class QwenImageProvider:
             {
                 "endpoint": self.settings.base_url,
                 "seed": self.settings.seed,
-                "adapter": 1,
+                "adapter": 2,
                 "pixels": 1024**2,
                 "steps": 40,
                 "cfg": 4.0,
@@ -114,8 +114,8 @@ class QwenImageProvider:
             "image_base64": base64.b64encode(encoded.getvalue()).decode("ascii"),
             "prompt": prompt,
             "seed": seed,
-            "width": target_size[0],
-            "height": target_size[1],
+            # /edit accepts three fields. Prepared pixels carry the input size;
+            # the service determines the output dimensions.
         }
         LOGGER.info("等待图片服务 | operation=%s model=%s", operation, MODEL)
         if not self._lock.acquire(timeout=max(0, deadline - time.monotonic())):

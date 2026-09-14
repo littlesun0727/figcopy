@@ -18,6 +18,15 @@
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+.diagnostic-panel, .diagnostic-error { margin: 14px 0; padding: 18px; }
+.diagnostic-panel > summary, .analysis-attempt > summary { cursor: pointer; }
+.diagnostic-panel .action-row { margin-top: 14px; }
+.diagnostic-panel pre, .diagnostic-error pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; font-size: 12px; line-height: 1.6; }
+#taskLog { min-height: 60px; padding: 12px; background: #0b0d10; border-radius: 8px; }
+.validation-issues { padding-left: 24px; max-height: 300px; overflow: auto; }
+.validation-issues li { margin: 10px 0; overflow-wrap: anywhere; }
+.analysis-attempt { margin-top: 14px; border-top: 1px solid #3a424f; padding-top: 12px; }
+.analysis-attempt a { color: var(--cyan); }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--bg); color: var(--text); }
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }

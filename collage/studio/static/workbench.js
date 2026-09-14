@@ -370,7 +370,7 @@ function renderApproval(status, complete = false) {
 }
 
 function renderRetry(status) {
-  const error = status.last_error || status.task?.error;
+  const error = projectError(status);
   $('#actionPanel').innerHTML = `
     ${actionHeader('RECOVERY', status.stage === 'blocked' ? '流程需要补充配置' : '这一步没有完成', error?.message || status.next_action)}
     <div class='action-row provider-recovery'><button id='openProviderFromRetry' class='button primary' type='button'>配置 Key 与 Provider</button></div>
@@ -500,9 +500,11 @@ function renderProject(status) {
   const task = status.task;
   $('#taskBanner').hidden = !activeJob(task);
   $('#taskBanner').textContent = activeJob(task) ? (JOB_LABELS[task.kind] || '后台任务执行中') : '';
-  const error = status.last_error || (task?.state === 'failed' ? task.error : null);
+  const error = projectError(status);
   $('#errorBanner').hidden = !error;
   $('#errorBanner').textContent = error ? describeError(error) : '';
+  renderErrorDetails(error);
+  refreshDiagnostics();
 
   if (activeJob(task)) {
     renderRunning(status);
@@ -586,6 +588,7 @@ async function refreshAll() {
   try {
     await loadProjects();
     await refreshCurrent();
+    await refreshDiagnostics();
     $('#connectionState').classList.remove('offline');
     $('#connectionState').innerHTML = '<i></i> 本机运行';
   } catch (_error) {

@@ -13,7 +13,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlsplit, parse_qs
 
 from ...core.errors import CollageError
 from ...projects import DataPaths
@@ -34,6 +34,7 @@ def _read_text_resource(*parts: str) -> str:
 WORKBENCH_HTML = _read_text_resource("templates", "workbench.html")
 WORKBENCH_CSS = _read_text_resource("static", "workbench.css")
 WORKBENCH_JS = _read_text_resource("static", "workbench.js")
+DIAGNOSTICS_JS = _read_text_resource("static", "diagnostics.js")
 
 
 def _hostname(value: str) -> str | None:
@@ -232,6 +233,13 @@ def create_workbench_server(
                         WORKBENCH_CSS.encode("utf-8"),
                     )
                     return
+                if path == "/static/diagnostics.js":
+                    self._send(
+                        HTTPStatus.OK,
+                        "text/javascript; charset=utf-8",
+                        DIAGNOSTICS_JS.encode("utf-8"),
+                    )
+                    return
                 if path == "/static/workbench.js":
                     self._send(
                         HTTPStatus.OK,
@@ -291,6 +299,34 @@ def create_workbench_server(
                     self._not_found()
                     return
                 project_id, rest = routed
+                if rest == ["diagnostics"]:
+                    query = parse_qs(parsed.query)
+                    try:
+                        after = int(query.get("after", ["0"])[0])
+                        if after < 0:
+                            raise ValueError()
+                    except ValueError as exc:
+                        raise CollageError(
+                            "INVALID_REQUEST", "日志游标必须是非负整数"
+                        ) from exc
+                    self._json(
+                        HTTPStatus.OK,
+                        app.diagnostics(
+                            project_id,
+                            job_id=query.get("job_id", [None])[0],
+                            after=after,
+                        ),
+                    )
+                    return
+                if len(rest) == 3 and rest[0] == "diagnostics":
+                    artifact = app.diagnostic_file(project_id, rest[1], rest[2])
+                    # Force text display: model output is evidence, never executable HTML.
+                    self._send(
+                        HTTPStatus.OK,
+                        "text/plain; charset=utf-8",
+                        artifact.read_bytes(),
+                    )
+                    return
                 if rest == ["layout", "preview"]:
                     self._send(
                         HTTPStatus.OK,

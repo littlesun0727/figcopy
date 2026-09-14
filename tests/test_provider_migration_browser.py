@@ -58,7 +58,7 @@ def test_provider_choices_in_browser(tmp_path, monkeypatch, mode):
                 {"url": base + ("/projects/browser-retry" if mode == "retry" else "/")},
             )
             browser.until(
-                "state.providerStatus !== null && document.querySelector('#providerSettings') !== null"
+                "typeof state !== 'undefined' && state.providerStatus !== null && document.querySelector('#providerSettings') !== null"
             )
             if mode == "retry":
                 browser.until("document.querySelector('#retryForm') !== null")

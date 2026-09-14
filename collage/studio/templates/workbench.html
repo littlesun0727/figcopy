@@ -61,6 +61,18 @@
         <ol id="stageSteps" class="stage-steps" aria-label="工作流进度"></ol>
         <div id="taskBanner" class="task-banner" hidden></div>
         <div id="errorBanner" class="error-banner" hidden></div>
+        <div id="errorDetails" class="panel diagnostic-error" hidden></div>
+        <details id="diagnosticsPanel" class="panel diagnostic-panel">
+          <summary>运行日志与分析诊断</summary>
+          <div class="action-row">
+            <label>查看任务<select id="diagnosticJob"><option value="">最新任务</option></select></label>
+            <a id="downloadDiagnostics" class="button quiet" download="diagnostics.json">下载诊断记录</a>
+          </div>
+          <p id="diagnosticHint">任务执行时自动更新</p>
+          <pre id="taskLog" tabindex="0" aria-label="当前任务运行日志"></pre>
+          <div id="diagnosticError" class="diagnostic-error"></div>
+          <div id="analysisAttempts"></div>
+        </details>
         <div id="projectProviders" class="panel"></div>
         <div id="overlayActions" class="panel" hidden></div>
 
@@ -212,6 +224,7 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" hidden></div>
+  <script src="/static/diagnostics.js"></script>
   <script src="/static/workbench.js"></script>
 </body>
 </html>
