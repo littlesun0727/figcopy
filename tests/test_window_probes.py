@@ -85,8 +85,8 @@ def test_intruding_foreground_is_rejected_even_with_valid_asset_hash(
 def test_wrong_foreground_order_and_missing_expectations(window_case: Path) -> None:
     root = window_case / "template"
     spec = read_json(root / "template.json")
-    tape = spec["layers"].pop()
-    spec["layers"].insert(1, tape)
+    tape = spec["layer_order"].pop()
+    spec["layer_order"].insert(1, tape)
     atomic_write_json(root / "template.json", spec)
     report = read_json(
         probe_template(
@@ -119,7 +119,7 @@ def test_provenance_never_impersonates_human_approval(window_case: Path) -> None
     spec = read_json(window_case / "build.json")
     assert "review" not in validate_build_spec(spec)
     template = validate_package(window_case / "template", require_ready=False)
-    assert template["version"] == "collage-template/2"
+    assert template["version"] == "collage-template/4"
     assert template["status"] == "needs_validation"
     assert template["review"]["reviewer"] is None
     assert template["review"]["visual_approved"] is False
@@ -192,8 +192,8 @@ def test_cli_probe_failure_has_nonzero_exit_and_report(
     root = window_case / "template"
     spec = read_json(root / "template.json")
     # 将 main_photo 放在所有小窗口之后，模拟层序错误导致小窗口全部消失。
-    main_slot = spec["layers"].pop(1)
-    spec["layers"].append(main_slot)
+    main_slot = spec["layer_order"].pop(1)
+    spec["layer_order"].append(main_slot)
     atomic_write_json(root / "template.json", spec)
     code = main(
         ["probe", "--template", str(root), "--out", str(window_case / "cli-bad")]

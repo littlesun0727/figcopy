@@ -10,6 +10,9 @@ from collage.core.logging import configure_logging
 def test_verbose_keeps_project_debug_but_suppresses_noisy_http_logs() -> None:
     configure_logging(True)
 
-    assert logging.getLogger("collage.providers.birefnet").getEffectiveLevel() <= logging.DEBUG
+    assert (
+        logging.getLogger("collage.providers.birefnet").getEffectiveLevel()
+        <= logging.DEBUG
+    )
     assert logging.getLogger("httpcore").getEffectiveLevel() == logging.WARNING
     assert logging.getLogger("PIL").getEffectiveLevel() == logging.WARNING

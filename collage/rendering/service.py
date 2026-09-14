@@ -21,6 +21,7 @@ from ..imaging.operations import rect_to_box
 from ..schemas import validate_bindings
 from ..schemas.background import background_slot_id
 from ..template.validation import validate_package
+from ..template.layout import compile_layers
 from .bindings import prepare_bindings
 from .image_layer import _render_image_slot
 from .layout import _fit_to_rect, _rotate_and_place
@@ -40,7 +41,7 @@ def render_template(
 
     root = template_dir.resolve()
     template = validate_package(root, require_ready=require_ready)
-    LOGGER.info("开始本地合成 | layers=%s", len(template["layers"]))
+    LOGGER.info("开始本地合成 | layers=%s", len(compile_layers(template)))
     result = _render_layers(root, template, prepared)
     LOGGER.info("本地合成完成")
     return result
@@ -60,7 +61,8 @@ def _render_layers(
     )
     assets = {asset["id"]: asset for asset in template["assets"]}
     slots = {slot["id"]: slot for slot in template["slots"]}
-    for index, layer in enumerate(template["layers"], start=1):
+    layers = compile_layers(template)
+    for index, layer in enumerate(layers, start=1):
         if layer["type"] == "asset":
             asset = assets[layer["asset_id"]]
             source = decode_image(safe_package_path(root, asset["path"]), mode="RGBA")
@@ -75,7 +77,7 @@ def _render_layers(
             LOGGER.debug(
                 "已合成图层 %s/%s | asset=%s",
                 index,
-                len(template["layers"]),
+                len(layers),
                 asset["id"],
             )
         else:
@@ -98,9 +100,7 @@ def _render_layers(
                     )
             else:
                 _render_text_slot(root, canvas, slot, binding)
-            LOGGER.debug(
-                "已合成图层 %s/%s | slot=%s", index, len(template["layers"]), slot["id"]
-            )
+            LOGGER.debug("已合成图层 %s/%s | slot=%s", index, len(layers), slot["id"])
     return canvas
 
 

@@ -24,7 +24,6 @@ from ...imaging.chroma import CHROMA_PROCESSING_VERSION, require_chroma_backend
 from ...imaging.operations import (
     alpha_is_meaningful,
     choose_chroma_key,
-    chroma_alpha_is_clean,
     parse_color,
     rect_to_box,
     remove_chroma_background,
@@ -40,11 +39,13 @@ from .common import (
 from .asset_validation import (
     alpha_completeness,
     asset_fingerprint,
-    semantic_completeness,
+    content_box,
+    overlay_warning,
 )
 
 LOGGER = logging.getLogger(__name__)
 OVERLAY_PROMPT_VERSION = "reference-overlay/5"
+OVERLAY_PIPELINE_VERSION = "candidate-overlay/1"
 
 
 def _draw_dashed_rectangle(
@@ -108,17 +109,15 @@ def _provider_overlay(
 ) -> tuple[
     Image.Image, ProviderAudit, str, tuple[int, int, int] | None, dict[str, Any]
 ]:
+    """Generate once or reuse saved pixels; local findings never trigger model repair."""
     capabilities = provider.capabilities
     if not capabilities.supports_reference_image:
         raise CollageError(
-            "IMAGE_PROVIDER_CAPABILITY_MISSING",
-            "图片 provider 不支持参考图片输入，无法制作 overlay",
-            details={"provider": capabilities.name},
+            "IMAGE_PROVIDER_CAPABILITY_MISSING", "图片 provider 不支持参考图片输入"
         )
-    requested_mode = overlay["background_mode"]
     effective_mode = (
-        requested_mode
-        if requested_mode == "chroma_key" or capabilities.supports_transparency
+        overlay["background_mode"]
+        if capabilities.supports_transparency
         else "chroma_key"
     )
     processing_version = (
@@ -127,217 +126,148 @@ def _provider_overlay(
     cached = cache.get("overlay", cache_key)
     if (
         cached is not None
-        and cached.metadata.get("validated_version") == OVERLAY_PROMPT_VERSION
+        and cached.metadata.get("pipeline_version") == OVERLAY_PIPELINE_VERSION
         and cached.metadata.get("processing_version") == processing_version
         and cached.metadata.get("image_fingerprint") == asset_fingerprint(cached.image)
     ):
         metadata = cached.metadata
-        key = tuple(metadata["chroma_key"]) if metadata.get("chroma_key") else None
         return (
             cached.image,
             _audit_from_cache(metadata),
             metadata["background_mode"],
-            key,
+            tuple(metadata["chroma_key"]) if metadata.get("chroma_key") else None,
             metadata["transform"],
         )
+
     key = None
     if effective_mode == "chroma_key":
         require_chroma_backend()
         key = (
             tuple(overlay["chroma_key"])
-            if overlay["chroma_key"]
+            if overlay.get("chroma_key")
             else choose_chroma_key(crop)
         )
     provider_crop = crop
     transform_record = _identity_transform(crop.size)
     target_size = _choose_provider_size(crop.size, capabilities.output_sizes)
     if target_size is not None:
-        fill = (
-            (*key, 255)
-            if effective_mode == "chroma_key" and key is not None
-            else (0, 0, 0, 0)
-        )
+        fill = (*key, 255) if key else (0, 0, 0, 0)
         provider_crop, transform = pad_for_model(crop, target_size, fill=fill)
         transform_record = {"kind": "contain_padding", **transform.as_dict()}
-    LOGGER.info(
-        "调用图片 provider 制作 overlay | id=%s provider=%s mode=%s",
-        overlay["id"],
-        capabilities.name,
-        effective_mode,
-    )
+
     attempt_root = cache.root.parent / "overlay_attempts" / cache_key
     attempt_root.mkdir(parents=True, exist_ok=True)
-    issues: list[str] = []
-    semantic = {}
-    for attempt in range(2):
-        record_path = attempt_root / f"{attempt}.json"
-        raw_path = attempt_root / f"{attempt}_raw.png"
-        request_brief = (
+    records = sorted(
+        (path for path in attempt_root.glob("*.json") if path.stem.isdigit()),
+        key=lambda path: int(path.stem),
+        reverse=True,
+    )
+    # Old rejected outputs are still usable candidates. Reuse the latest saved
+    # output, even if its optional VLM inspection was interrupted.
+    saved = next(
+        (path for path in records if path.with_name(path.stem + "_raw.png").is_file()),
+        None,
+    )
+    already_processed = False
+    if saved is not None:
+        record = read_json(saved)
+        if record.get("status") not in {"generated", "accepted", "rejected"}:
+            raise CollageError(
+                "OVERLAY_REQUEST_UNCERTAIN", "素材请求尚无已确认的完整输出"
+            )
+        raw_path = saved.with_name(saved.stem + "_raw.png")
+        if record.get("raw_sha256") != sha256_file(raw_path):
+            raise CollageError("OVERLAY_EVIDENCE_CHANGED", "素材原始输出哈希不一致")
+        raw = decode_image(raw_path)
+        audit = _audit_from_cache(record)
+        attempt = int(saved.stem)
+        LOGGER.info("复用已保存素材 | id=%s attempt=%s", overlay["id"], attempt + 1)
+    elif records:
+        raise CollageError(
+            "OVERLAY_REQUEST_UNCERTAIN",
+            "该件请求已有记录但无完整输出，请检查记录或手动重做",
+        )
+    elif cached is not None:
+        # Historical packages may only retain their normalized cache image.
+        raw, audit = cached.image, _audit_from_cache(cached.metadata)
+        already_processed = bool(cached.metadata.get("normalized"))
+        attempt = 0
+    else:
+        attempt = 0
+        brief = (
             overlay["generation_brief"]
             + "\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。"
             "保留所有细线，四周至少留 8% 空白。"
         )
         if overlay.get("text_content"):
-            request_brief += (
-                "\n必须逐字包含且仅包含客户确认的文字：" + overlay["text_content"]
-            )
-        if attempt:
-            request_brief += "\n上一张检查失败，请重新生成完整素材并修正：" + ", ".join(
-                issues
-            )
-            request_brief += "\n检查观察：" + str(
-                semantic.get("result", {}).get("issues", [])
-            )
-        if record_path.exists():
-            record = read_json(record_path)
-            # Keep uncertain requests blocked even if a new local keyer fails a technical gate.
-            if record.get("inspection_status") == "pending":
-                raise CollageError(
-                    "OVERLAY_INSPECTION_UNCERTAIN",
-                    "素材视觉检查已发送但未落盘，停止自动重复请求",
-                )
-            if (
-                record.get("status") == "rejected"
-                and record.get("processing_version") == processing_version
-            ):
-                issues = record["issues"]
-                semantic = record.get("semantic", {})
-                continue
-            # A completed output may be reused; a transport timeout cannot safely be replayed.
-            if (
-                record.get("status") not in {"generated", "accepted", "rejected"}
-                or not raw_path.exists()
-            ):
-                raise CollageError(
-                    "OVERLAY_REQUEST_UNCERTAIN",
-                    "该素材请求已发送但结果未落盘，停止自动重复计费",
-                )
-            if record.get("raw_sha256") != sha256_file(raw_path):
-                raise CollageError(
-                    "OVERLAY_EVIDENCE_CHANGED",
-                    "素材原始输出与已检查证据不一致，停止复用",
-                )
-            raw = decode_image(raw_path)
-            audit = _audit_from_cache(record)
-        else:
-            record = {"status": "pending", "attempt": attempt, "prompt": request_brief}
-            atomic_write_json(record_path, record)
-            generated = provider.make_overlay(
-                provider_crop,
-                brief=request_brief,
-                background_mode=effective_mode,
-                chroma_key=key,
-            )
-            raw = (
-                generated.raw_image
-                if generated.raw_image is not None
-                else generated.image
-            )
-            audit = generated.audit
-            atomic_save_image(raw, raw_path)
-            record.update(
-                status="generated",
-                audit=audit.as_dict(),
-                raw_sha256=sha256_file(raw_path),
-                provider_transform=generated.transform,
-            )
-            atomic_write_json(record_path, record)
+            brief += "\n必须逐字包含且仅包含客户确认的文字：" + overlay["text_content"]
+        record = {"status": "pending", "attempt": attempt, "prompt": brief}
+        record_path = attempt_root / "0.json"
+        atomic_write_json(record_path, record)
         LOGGER.info(
-            "检查素材完整性与透明边缘 | id=%s attempt=%s", overlay["id"], attempt + 1
+            "生成单件装饰 | id=%s provider=%s", overlay["id"], capabilities.name
         )
-        mapped = raw.convert("RGBA")
-        if effective_mode == "chroma_key":
-            mapped = remove_chroma_background(
-                mapped, key or (255, 0, 255), tolerance=overlay["chroma_tolerance"]
-            )
-        technical = alpha_completeness(mapped)
-        issues = list(technical["issues"])
-        if effective_mode == "chroma_key" and not chroma_alpha_is_clean(mapped):
-            issues.append("OPAQUE_OVERLAY")
-        # PyAV supplies the soft matte and corrected colors. Erosion would change
-        # the user-reviewed output and can remove an entire one-pixel stroke.
-        cleaned = mapped
-        retained = 1.0
-        # Inspect the actual file pixels at their final resolution, before trimming.
-        if cleaned.size != crop.size:
-            cleaned, output_transform = pad_for_model(cleaned, crop.size)
-            transform_record["output_mapping"] = {
-                "kind": "contain_padding",
-                **output_transform.as_dict(),
-            }
-        if cleaned.getchannel("A").getbbox() is None:
-            issues.append("EMPTY_OVERLAY")
-        atomic_save_image(cleaned, attempt_root / f"{attempt}_candidate.png")
-        semantic = {}
-        candidate_fingerprint = asset_fingerprint(cleaned)
-        if not issues:
-            # A different local keyer must not inherit a verdict for old candidate pixels.
-            # Keep the generation cache key unchanged so raw outputs and the two-call cap survive.
-            if (
-                record.get("semantic")
-                and record.get("processing_version") == processing_version
-                and (
-                    processing_version is None
-                    or record.get("inspection_fingerprint") == candidate_fingerprint
-                )
-            ):
-                semantic = record["semantic"]
-            else:
-                record["inspection_status"] = "pending"
-                atomic_write_json(record_path, record)
-                semantic = semantic_completeness(provider, crop, cleaned, overlay)
-            issues.extend(semantic["issues"])
+        generated = provider.make_overlay(
+            provider_crop, brief=brief, background_mode=effective_mode, chroma_key=key
+        )
+        raw = (
+            generated.raw_image if generated.raw_image is not None else generated.image
+        )
+        audit = generated.audit
+        raw_path = attempt_root / "0_raw.png"
+        atomic_save_image(raw, raw_path)
         record.update(
-            status="rejected" if issues else "accepted",
-            issues=issues,
-            technical=technical,
-            alpha_mass_retained=retained,
-            semantic=semantic,
-            inspection_status="complete",
-            processing_version=processing_version,
-            inspection_fingerprint=candidate_fingerprint,
+            status="generated",
+            audit=audit.as_dict(),
+            raw_sha256=sha256_file(raw_path),
+            provider_transform=generated.transform,
         )
         atomic_write_json(record_path, record)
-        if issues:
-            LOGGER.warning(
-                "素材检查未通过 | id=%s attempt=%s codes=%s",
-                overlay["id"],
-                attempt + 1,
-                issues,
-            )
-            continue
-        mapped = cleaned
-        transform_record["completeness"] = {
-            "attempt": attempt + 1,
-            "technical": technical,
-            "semantic": semantic,
-            "alpha_mass_retained": retained,
-            "processing_version": processing_version,
-        }
-        cache.put(
-            "overlay",
-            cache_key,
-            mapped,
-            {
-                "audit": audit.as_dict(),
-                "background_mode": effective_mode,
-                "chroma_key": list(key) if key else None,
-                "transform": transform_record,
-                "normalized": True,
-                "validated_version": OVERLAY_PROMPT_VERSION,
-                "processing_version": processing_version,
-                "image_fingerprint": asset_fingerprint(mapped),
-            },
+
+    mapped = raw.convert("RGBA")
+    if effective_mode == "chroma_key" and not already_processed:
+        mapped = remove_chroma_background(
+            mapped, key, tolerance=overlay["chroma_tolerance"]
         )
-        return mapped, audit, effective_mode, key, transform_record
-    raise CollageError(
-        "OVERLAY_COMPLETENESS_FAILED",
-        "素材在一次局部重试后仍不完整，请检查单件素材记录",
-        details={"overlay_id": overlay["id"], "issues": issues},
+    technical = alpha_completeness(mapped)
+    transform_record.update(
+        content_box=content_box(mapped, key if not already_processed else None, raw),
+        technical=technical,
     )
+    # Preserve full resolution. Template placement will use the foreground bounds,
+    # while this uncropped evidence remains available for visual review.
+    atomic_save_image(mapped, attempt_root / f"{attempt}_processed.png")
+    atomic_write_json(
+        attempt_root / f"{attempt}_processing.json",
+        {
+            "pipeline_version": OVERLAY_PIPELINE_VERSION,
+            "processing_version": processing_version,
+            "status": "candidate",
+            "semantic_checked": False,
+            **transform_record,
+        },
+    )
+    cache.put(
+        "overlay",
+        cache_key,
+        mapped,
+        {
+            "audit": audit.as_dict(),
+            "background_mode": effective_mode,
+            "chroma_key": list(key) if key else None,
+            "transform": transform_record,
+            "normalized": True,
+            "pipeline_version": OVERLAY_PIPELINE_VERSION,
+            "processing_version": processing_version,
+            "image_fingerprint": asset_fingerprint(mapped),
+        },
+    )
+    return mapped, audit, effective_mode, key, transform_record
 
 
 def _overlay_edge_preview(image: Image.Image, path: Path) -> None:
+    image = image.copy()
+    image.thumbnail((800, 600), Image.Resampling.LANCZOS)
     margin = 16
     width = image.width * 2 + margin * 3
     height = image.height + margin * 2
@@ -360,7 +290,7 @@ def _build_overlay(
     work_dir: Path,
     cache: NodeCache,
     provider: ImageProvider | None,
-) -> tuple[dict[str, Any], ProviderAudit, tuple[int, int, int, int] | None]:
+) -> tuple[dict[str, Any], ProviderAudit, tuple[int, int, int, int] | None, list[dict]]:
     key: tuple[int, int, int] | None = None
     if overlay["action"] == "basic_shape":
         generated = _make_basic_shape(overlay)
@@ -383,6 +313,8 @@ def _build_overlay(
                 "OVERLAY_CROP_MISSING", f"overlay {overlay['id']} 缺少原参考 crop"
             )
         capabilities = provider.capabilities
+        # Retain the legacy key fields so existing paid outputs remain discoverable;
+        # the inspection model is not invoked by the candidate pipeline.
         cache_key = stable_hash(
             {
                 "source_sha256": spec["reference"]["sha256"],
@@ -409,15 +341,12 @@ def _build_overlay(
             provider, crop, overlay, cache, cache_key
         )
 
+    original = generated
     if (
         overlay["action"] == "reference_generate"
         and overlay["prepared_asset"] is not None
         and overlay["background_mode"] == "chroma_key"
     ):
-        if crop is None:
-            raise CollageError(
-                "OVERLAY_CROP_MISSING", f"overlay {overlay['id']} 缺少原参考 crop"
-            )
         key = (
             tuple(overlay["chroma_key"])
             if overlay["chroma_key"]
@@ -427,23 +356,26 @@ def _build_overlay(
             generated, key, tolerance=overlay["chroma_tolerance"]
         )
     rgba = generated.convert("RGBA")
+    warnings = []
     if overlay["action"] in {"reference_generate", "preserve"}:
-        if key is not None and not chroma_alpha_is_clean(rgba):
-            raise CollageError(
-                "OPAQUE_OVERLAY",
-                f"overlay {overlay['id']} 的色键背景仍覆盖边缘；请重试或提供透明 PNG",
-            )
-        if key is None and not alpha_is_meaningful(rgba):
-            raise CollageError(
-                "OPAQUE_OVERLAY",
-                f"overlay {overlay['id']} 的 alpha 全白；不能把扩展名或棋盘格当作透明通道",
-            )
-    # Keep the validated transparent margins. Trimming would hide boundary failures
-    # and change the scale relationship between the isolated subject and its layer.
+        technical = transform_record.get("technical") or alpha_completeness(rgba)
+        warnings = [overlay_warning(overlay, code) for code in technical["issues"]]
     visible_bbox = rgba.getchannel("A").getbbox()
+    if overlay["action"] == "reference_generate":
+        visible_bbox = (
+            transform_record["content_box"]
+            if "content_box" in transform_record
+            else content_box(rgba, key, original)
+        )
+        atomic_save_image(rgba, work_dir / f"overlay_{overlay['id']}_full.png")
+        if visible_bbox is not None:
+            transform_record["content_box"] = list(visible_bbox)
+            # The target rect describes the subject, not model-generated margins.
+            # Crop only the template copy; keep the full-resolution evidence above.
+            rgba = rgba.crop(visible_bbox)
     if visible_bbox is None:
         raise CollageError(
-            "EMPTY_OVERLAY", f"固定叠加素材 {overlay['id']} 没有可见像素"
+            "EMPTY_OVERLAY", f"固定叠加素材 {overlay['id']} 没有可见内容"
         )
     output_path = output_dir / "assets" / f"overlay_{overlay['id']}.png"
     atomic_save_image(rgba, output_path)
@@ -457,8 +389,7 @@ def _build_overlay(
         "id": overlay["id"],
         "path": f"assets/overlay_{overlay['id']}.png",
         "role": "overlay",
-        "requires_alpha": overlay["action"] == "reference_generate"
-        or alpha_is_meaningful(rgba),
+        "requires_alpha": alpha_is_meaningful(rgba),
         "sha256": sha256_file(output_path),
     }
-    return asset, audit, visible_bbox
+    return asset, audit, visible_bbox, warnings

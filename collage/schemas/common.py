@@ -91,11 +91,14 @@ def _number(
     minimum: float | None = None,
     maximum: float | None = None,
 ) -> bool:
-    if (
-        isinstance(value, bool)
-        or not isinstance(value, (int, float))
-        or not math.isfinite(float(value))
-    ):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        _issue(issues, path, "必须是有限数值", "INVALID_TYPE")
+        return False
+    try:
+        finite = math.isfinite(value)
+    except OverflowError:
+        finite = False
+    if not finite:
         _issue(issues, path, "必须是有限数值", "INVALID_TYPE")
         return False
     if minimum is not None and value < minimum:
@@ -135,7 +138,7 @@ def _identifier(value: Any, path: str, issues: list[ValidationIssue]) -> bool:
 def _enum(
     value: Any, allowed: set[str], path: str, issues: list[ValidationIssue]
 ) -> bool:
-    if value not in allowed:
+    if not isinstance(value, str) or value not in allowed:
         _issue(issues, path, f"必须是：{', '.join(sorted(allowed))}", "INVALID_ENUM")
         return False
     return True

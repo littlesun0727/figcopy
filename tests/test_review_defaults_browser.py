@@ -40,6 +40,7 @@ def test_review_acceptance_in_browser(tmp_path, monkeypatch, mode):
             "label": label,
             "source_rect": [10, y, 130, 30],
             "target_rect": [10, y, 130, 30],
+            "attachment": None,
             "action": "reference_generate",
             "generation_brief": "fixture lettering",
             "requires_exact_content": False,

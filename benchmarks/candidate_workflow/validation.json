@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-14",
+  "tests": {
+    "passed": 321,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 67.14,
+    "browser_tests": 9
+  },
+  "fixture_tests": true,
+  "new_real_model_calls": 0,
+  "real_output_local_replay": {
+    "source": "existing real Seedream output from test2, attempt 2",
+    "validation": "offline local processing and existing renderer only",
+    "new_model_calls": 0,
+    "fixture_generation": false,
+    "raw_size": [
+      4704,
+      864
+    ],
+    "old_candidate_size": [
+      484,
+      89
+    ],
+    "new_asset_size": [
+      2887,
+      477
+    ],
+    "source_content_box": [
+      334,
+      219,
+      3221,
+      696
+    ],
+    "target_rect": [
+      73,
+      92,
+      464,
+      69
+    ],
+    "old_rendered_ink_box": [
+      70,
+      17,
+      301,
+      56
+    ],
+    "new_rendered_ink_box": [
+      23,
+      0,
+      441,
+      69
+    ],
+    "warnings": [
+      {
+        "overlay_id": "eng_handwriting",
+        "label": "左上英文手写句",
+        "code": "OVERLAY_EDGE_CLIPPED",
+        "message": "边缘存在可见像素，请结合整图检查",
+        "skipped": false
+      }
+    ],
+    "source_attempt_records_unchanged": true
+  },
+  "checks": {
+    "changed_files_ruff": "passed",
+    "git_diff_check": "passed"
+  }
+}

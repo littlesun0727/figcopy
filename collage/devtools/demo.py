@@ -109,8 +109,8 @@ def create_demo(output_dir: Path) -> Path:
         atomic_save_image(image, paths[key])
 
     reviewed = {
-        "version": "collage-reviewed/1",
-        "status": "reviewed",
+        "version": "collage-build/4",
+        "status": "planned",
         "reference": {
             "path": "../inputs/reference.png",
             "sha256": sha256_file(paths["reference"]),
@@ -161,6 +161,7 @@ def create_demo(output_dir: Path) -> Path:
                 "label": "紫色星形",
                 "source_rect": [170, 140, 120, 100],
                 "target_rect": [170, 140, 120, 100],
+                "attachment": None,
                 "action": "reference_generate",
                 "generation_brief": "保持星形、紫色和白色描边；这是预制测试素材。",
                 "requires_exact_content": False,

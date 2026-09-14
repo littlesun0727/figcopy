@@ -7,7 +7,11 @@
 <title>Collage Draft Review</title>
 <link rel="stylesheet" href="/static/review.css">
 <main>
-  <div class="stage"><div class="canvas-wrap"><canvas id="view"></canvas></div></div>
+  <div class="stage review-stage">
+    <section><p>参考图与位置编辑</p><div class="canvas-wrap"><canvas id="view"></canvas></div></section>
+    <section><p>当前结构预览</p><img id="structurePreview" alt="照片与附属装饰的遮挡预览">
+      <p id="structureHint" class="muted">编号色块代表待上传照片；粉色块代表待生成装饰。</p></section>
+  </div>
   <aside>
     <a id="returnLink" class="return-link" hidden>← 返回项目</a>
     <h1>确认模板</h1>

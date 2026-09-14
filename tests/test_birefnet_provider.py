@@ -98,9 +98,7 @@ def test_invalid_device_has_stable_business_error(
 def test_missing_local_model_has_stable_business_error(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setenv(
-        "COLLAGE_BIREFNET_MODEL_PATH", str(tmp_path / "does-not-exist")
-    )
+    monkeypatch.setenv("COLLAGE_BIREFNET_MODEL_PATH", str(tmp_path / "does-not-exist"))
     with pytest.raises(CollageError) as caught:
         BiRefNetSettings.from_env()
     assert caught.value.code == "BIREFNET_MODEL_NOT_FOUND"

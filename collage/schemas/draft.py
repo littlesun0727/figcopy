@@ -6,8 +6,9 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..core.errors import SpecValidationError, ValidationIssue
-from .background import validate_slot_background
-from .template import _validate_shape
+from .background import background_slot_id, validate_slot_background
+from .attachments import validate_attachments
+from .shapes import validate_shape
 from .common import (
     DRAFT_IMAGE_MODES,
     LAYER_TYPES,
@@ -95,6 +96,7 @@ def _draft_overlay(
             "source_rect",
             "target_rect",
             "action",
+            "attachment",
             "generation_brief",
             "requires_exact_content",
             "review_notes",
@@ -106,7 +108,10 @@ def _draft_overlay(
     if "text_content" in overlay:
         _string(overlay["text_content"], f"{path}.text_content", issues, nullable=True)
     if overlay.get("shape") is not None:
-        _validate_shape(overlay["shape"], f"{path}.shape", issues)
+        if overlay.get("action") == "basic_shape":
+            validate_shape(overlay["shape"], f"{path}.shape", issues)
+        else:
+            _issue(issues, f"{path}.shape", "reference_generate 的 shape 必须为 null")
     _identifier(overlay.get("id"), f"{path}.id", issues)
     _string(overlay.get("label"), f"{path}.label", issues)
     if _rect(overlay.get("source_rect"), f"{path}.source_rect", issues, source=True):
@@ -251,11 +256,7 @@ def validate_draft(value: Any, *, require_metadata: bool = True) -> dict[str, An
     for collision in sorted(slot_ids & overlay_ids):
         _issue(issues, "$", f"slot 与 overlay 的 ID 冲突：{collision}", "DUPLICATE_ID")
 
-    slot_background = draft.get("version") == "collage-draft/2" or (
-        not require_metadata
-        and isinstance(draft.get("background"), Mapping)
-        and draft["background"].get("mode") == "slot"
-    )
+    slot_background = background_slot_id(draft) is not None
     background_slot = None
     if slot_background:
         background_slot = validate_slot_background(
@@ -287,7 +288,7 @@ def validate_draft(value: Any, *, require_metadata: bool = True) -> dict[str, An
         "$.layer_order",
         issues,
         slot_ids,
-        overlay_ids,
+        validate_attachments(overlays, slots, background_slot, issues),
         background_slot,
     )
 
@@ -297,8 +298,13 @@ def validate_draft(value: Any, *, require_metadata: bool = True) -> dict[str, An
             _string(question, f"$.questions[{index}]", issues)
 
     if require_metadata:
-        if draft.get("version") not in {"collage-draft/1", "collage-draft/2"}:
-            _issue(issues, "$.version", "必须是 collage-draft/1 或 collage-draft/2")
+        if draft.get("version") != "collage-draft/3":
+            _issue(
+                issues,
+                "$.version",
+                "需要 collage-draft/3，请新建项目",
+                "UNSUPPORTED_SPEC_VERSION",
+            )
         if draft.get("status") != "draft":
             _issue(issues, "$.status", "草稿状态必须是 draft")
         source = _object(draft.get("source"), "$.source", issues)

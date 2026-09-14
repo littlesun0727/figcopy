@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import base64
+import copy
+import math
 import io
 import logging
 from pathlib import Path
@@ -21,6 +23,8 @@ from ..core.locking import project_edit_lock
 from ..imaging.operations import load_mask
 from ..schemas import validate_draft
 from ..schemas.background import background_slot_id, validate_slot_background
+from ..template.layout import expanded_order, transform_attachments
+from ..template.structure_preview import render_structure
 from ..template.review import (
     automatic_remove_mask,
     automatic_review_notes,
@@ -32,7 +36,7 @@ from ..template.review import (
 )
 from ..template.review.background_source import background_decision, edited_review_draft
 from ..template.review.feedback import review_revision
-from ..template.review.service import default_slot_review_fields
+from ..template.review.service import default_slot_review_fields, suggested_edge_fade_px
 
 LOGGER = logging.getLogger(__name__)
 
@@ -183,11 +187,130 @@ class ReviewSession:
             len(self.draft["questions"]),
         )
 
+    def layout(self, payload: dict) -> dict:
+        """Edit one in-memory structural revision; no files or model requests."""
+        if payload.get("revision") != self.review_options["revision"]:
+            raise CollageError("REVIEW_REVISION_CONFLICT", "识别结果已更新，请重新载入")
+        draft = edited_review_draft(self.draft, payload)
+        options = copy.deepcopy(self.review_options)
+        for kind in ("slots", "overlays"):
+            overrides = validate_override_map(
+                payload.get(kind[:-1] + "_overrides", {}), source="结构预览"
+            )
+            for identifier, fields in overrides.items():
+                if identifier not in options[kind]:
+                    raise CollageError("UNKNOWN_OVERRIDE_ID", "预览引用了未知元素")
+                options[kind][identifier].update(fields)
+        change = payload.get("change")
+        if change is not None:
+            if not isinstance(change, dict):
+                raise CollageError("INVALID_LAYOUT", "布局修改必须是 object")
+            kind = change.get("kind")
+            if kind not in {"slot", "overlay"}:
+                raise CollageError("INVALID_LAYOUT", "未知元素类型")
+            item = next(
+                (item for item in draft[kind + "s"] if item["id"] == change.get("id")),
+                None,
+            )
+            if item is None or item["id"] == background_slot_id(draft):
+                raise CollageError("LAYOUT_LAYER_LOCKED", "请选择非背景元素")
+            if "attachment" in change:
+                if kind != "overlay":
+                    raise CollageError("INVALID_ATTACHMENT", "只有装饰可以设置归属")
+                previous = item["attachment"]
+                item["attachment"] = change["attachment"]
+                reference = {"type": "overlay", "id": item["id"]}
+                if item["attachment"] is not None:
+                    draft["layer_order"] = [
+                        layer for layer in draft["layer_order"] if layer != reference
+                    ]
+                elif reference not in draft["layer_order"]:
+                    parent = {"type": "slot", "id": previous["slot_id"]}
+                    draft["layer_order"].insert(
+                        draft["layer_order"].index(parent) + 1, reference
+                    )
+            if "rect" in change or "rotation_deg" in change:
+                fields = options[kind + "s"][item["id"]]
+                rect = change.get("rect", item["target_rect"])
+                rotation = change.get("rotation_deg", fields["rotation_deg"])
+                if (
+                    not isinstance(rect, list)
+                    or len(rect) != 4
+                    or any(
+                        isinstance(v, bool)
+                        or not isinstance(v, (int, float))
+                        or not math.isfinite(v)
+                        for v in [*rect, rotation]
+                    )
+                    or min(rect[2:]) < 1
+                    or abs(rotation) > 3600
+                ):
+                    raise CollageError("INVALID_LAYOUT", "位置、尺寸或角度不合法")
+                if kind == "slot":
+                    children = [
+                        {
+                            **child,
+                            "rotation_deg": options["overlays"][child["id"]][
+                                "rotation_deg"
+                            ],
+                        }
+                        for child in draft["overlays"]
+                    ]
+                    transform_attachments(
+                        children,
+                        item["id"],
+                        item["target_rect"],
+                        rect,
+                        fields["rotation_deg"],
+                        rotation,
+                        rect_key="target_rect",
+                    )
+                    for child, transformed in zip(
+                        draft["overlays"], children, strict=True
+                    ):
+                        child["target_rect"] = transformed["target_rect"]
+                        options["overlays"][child["id"]]["rotation_deg"] = transformed[
+                            "rotation_deg"
+                        ]
+                if kind == "slot" and item["type"] == "image":
+                    old_default = suggested_edge_fade_px(item["target_rect"])
+                    new_default = suggested_edge_fade_px(rect)
+                    if (
+                        item["mode"] == "photo_feather"
+                        and fields["edge_fade_px"] == old_default
+                    ):
+                        fields["edge_fade_px"] = new_default
+                    options["edge_fade_suggestions"][item["id"]] = new_default
+                item["target_rect"] = list(rect)
+                fields["rotation_deg"] = rotation
+        draft = validate_draft(draft)
+        # Reuse existing numeric constraints before allocating preview rasters.
+        for kind in ("slots", "overlays"):
+            for item in draft[kind]:
+                rotation = options[kind][item["id"]]["rotation_deg"]
+                if (
+                    isinstance(rotation, bool)
+                    or not isinstance(rotation, (int, float))
+                    or not math.isfinite(rotation)
+                    or abs(rotation) > 3600
+                ):
+                    raise CollageError("INVALID_LAYOUT", "旋转角度不合法")
+        buffer = io.BytesIO()
+        render_structure(draft, options).save(buffer, format="PNG")
+        return {
+            "draft": draft,
+            "review_options": options,
+            "draw_order": expanded_order(draft),
+            "structure_preview": "data:image/png;base64,"
+            + base64.b64encode(buffer.getvalue()).decode("ascii"),
+        }
+
     def browser_state(self) -> dict[str, Any]:
         """Return one coherent review revision including its generated mask."""
         return {
-            "draft": self.draft,
-            "review_options": self.review_options,
+            **self.layout(
+                {"draft": self.draft, "revision": self.review_options["revision"]}
+            ),
             "mask_data_url": "data:image/png;base64,"
             + base64.b64encode(self.mask_png).decode("ascii"),
             "fixed_mask_data_url": "data:image/png;base64,"

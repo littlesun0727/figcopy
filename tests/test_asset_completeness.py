@@ -1,4 +1,4 @@
-"""Check clipping, missing content, OCR mismatch, bounded repair and paid-call caching."""
+"""Check single-generation candidates, raw reuse, local findings and foreground bounds."""
 
 import copy
 
@@ -9,7 +9,6 @@ from collage.core.errors import CollageError
 from collage.core.state import NodeCache
 from collage.providers import GeneratedImage, ImageCapabilities, ProviderAudit
 from collage.template.build.overlays import _provider_overlay
-from collage.template.build.asset_validation import alpha_completeness
 
 OVERLAY = {
     "id": "doodle",
@@ -77,59 +76,6 @@ def _run(tmp_path, provider, overlay=None):
     )
 
 
-def test_raw_clipping_is_detected_before_padding_and_repaired_once(tmp_path):
-    provider = Provider(clipped=1)
-    result, *_ = _run(tmp_path, provider)
-    assert provider.calls == 2 and provider.inspections == 1
-    assert not alpha_completeness(result)["issues"]
-    assert "OVERLAY_EDGE_CLIPPED" in provider.briefs[1]
-    _run(tmp_path, provider)
-    assert provider.calls == 2 and provider.inspections == 1
-
-
-def test_missing_component_without_edge_contact_requires_semantic_repair(tmp_path):
-    provider = Provider(complete=[False, True])
-    _run(tmp_path, provider)
-    assert provider.calls == 2 and provider.inspections == 2
-    assert "OVERLAY_CONTENT_INCOMPLETE" in provider.briefs[1]
-
-
-def test_wrong_text_does_not_pass_on_model_complete_flag(tmp_path):
-    provider = Provider(texts=["hell", "hello"])
-    _run(tmp_path, provider, {**OVERLAY, "text_content": "hello"})
-    assert provider.calls == 2 and provider.inspections == 2
-    assert "OVERLAY_TEXT_MISMATCH" in provider.briefs[1]
-
-
-def test_persistent_missing_edges_stop_after_one_repair(tmp_path):
-    provider = Provider(clipped=10)
-    with pytest.raises(CollageError) as error:
-        _run(tmp_path, provider)
-    assert error.value.code == "OVERLAY_COMPLETENESS_FAILED"
-    with pytest.raises(CollageError):
-        _run(tmp_path, provider)
-    assert provider.calls == 2
-
-
-def test_ambiguous_transport_error_is_not_replayed(tmp_path):
-    provider = Provider(timeout=True)
-    with pytest.raises(CollageError):
-        _run(tmp_path, provider)
-    with pytest.raises(CollageError) as error:
-        _run(tmp_path, provider)
-    assert error.value.code == "OVERLAY_REQUEST_UNCERTAIN"
-    assert provider.calls == 1
-
-
-def test_corrupted_cached_png_cannot_reuse_unrelated_quality_evidence(tmp_path):
-    provider = Provider()
-    original, *_ = _run(tmp_path, provider)
-    Image.new("RGBA", (100, 100), "black").save(tmp_path / "cache/overlay/test-key.png")
-    restored, *_ = _run(tmp_path, provider)
-    assert restored.tobytes() == original.tobytes()
-    assert provider.calls == 1 and provider.inspections == 1
-
-
 class ChromaProvider(Provider):
     """Exercise actual local keying with fixture artwork and mocked semantic verdicts."""
 
@@ -150,70 +96,87 @@ class ChromaProvider(Provider):
         return GeneratedImage(raw, self.audit(), raw_image=raw)
 
 
+def test_clipping_is_advisory_and_does_not_trigger_review_or_retry(tmp_path):
+    provider = Provider(clipped=10)
+    result, *_rest, transform = _run(tmp_path, provider)
+    assert "OVERLAY_EDGE_CLIPPED" in transform["technical"]["issues"]
+    assert result.size == (100, 100)
+    _run(tmp_path, provider)
+    assert provider.calls == 1 and provider.inspections == 0
+
+
+def test_text_is_in_generation_prompt_without_a_second_model_call(tmp_path):
+    provider = Provider(texts=["wrong"])
+    _run(tmp_path, provider, {**OVERLAY, "text_content": "hello"})
+    assert "hello" in provider.briefs[0]
+    assert provider.calls == 1 and provider.inspections == 0
+
+
+def test_ambiguous_transport_error_is_not_replayed(tmp_path):
+    provider = Provider(timeout=True)
+    with pytest.raises(CollageError):
+        _run(tmp_path, provider)
+    with pytest.raises(CollageError) as error:
+        _run(tmp_path, provider)
+    assert error.value.code == "OVERLAY_REQUEST_UNCERTAIN"
+    assert provider.calls == 1
+
+
+def test_corrupt_cache_recovers_from_raw_without_model_calls(tmp_path):
+    provider = Provider()
+    original, *_ = _run(tmp_path, provider)
+    Image.new("RGBA", (100, 100), "black").save(tmp_path / "cache/overlay/test-key.png")
+    restored, *_ = _run(tmp_path, provider)
+    assert restored.tobytes() == original.tobytes()
+    assert provider.calls == 1 and provider.inspections == 0
+
+
 def test_chroma_build_preserves_single_pixel_stroke(tmp_path):
     provider = ChromaProvider()
     result, *_ = _run(tmp_path, provider)
     assert result.getpixel((50, 80)) == (255, 255, 255, 255)
-    assert provider.calls == 1 and provider.inspections == 1
+    assert provider.calls == 1 and provider.inspections == 0
 
 
-def test_processing_upgrade_reuses_raw_but_rechecks_semantics(tmp_path, monkeypatch):
+def test_processing_upgrade_reuses_raw_without_vlm(tmp_path, monkeypatch):
     from collage.core.io import read_json
     from collage.template.build import overlays as overlay_build
 
     provider = ChromaProvider()
     _run(tmp_path, provider)
+    original_record = (tmp_path / "overlay_attempts/test-key/0.json").read_bytes()
     monkeypatch.setattr(overlay_build, "CHROMA_PROCESSING_VERSION", "pyav-test-next")
     _run(tmp_path, provider)
-    assert provider.calls == 1 and provider.inspections == 2
-    record = read_json(tmp_path / "overlay_attempts/test-key/0.json")
+    record = read_json(tmp_path / "overlay_attempts/test-key/0_processing.json")
     assert record["processing_version"] == "pyav-test-next"
-    assert record["inspection_fingerprint"]
-    _run(tmp_path, provider)
-    assert provider.calls == 1 and provider.inspections == 2
+    assert record["semantic_checked"] is False
+    assert (
+        tmp_path / "overlay_attempts/test-key/0.json"
+    ).read_bytes() == original_record
+    assert provider.calls == 1 and provider.inspections == 0
 
 
-def test_processing_upgrade_rechecks_rejected_raw_without_resetting_generation_cap(
-    tmp_path, monkeypatch
-):
-    from collage.template.build import overlays as overlay_build
+@pytest.mark.parametrize("legacy_status", ["rejected", "accepted"])
+def test_legacy_outputs_and_pending_inspection_are_reused(tmp_path, legacy_status):
+    from collage.core.io import atomic_write_json, sha256_file
 
-    provider = ChromaProvider(complete=[False, False, True])
-    with pytest.raises(CollageError) as caught:
-        _run(tmp_path, provider)
-    assert caught.value.code == "OVERLAY_COMPLETENESS_FAILED"
-    assert provider.calls == 2 and provider.inspections == 2
-
-    monkeypatch.setattr(overlay_build, "CHROMA_PROCESSING_VERSION", "pyav-test-next")
-    _run(tmp_path, provider)
-    assert provider.calls == 2 and provider.inspections == 3
-
-
-@pytest.mark.parametrize("technical_failure", [False, True])
-def test_processing_upgrade_keeps_unknown_inspection_blocked(
-    tmp_path, monkeypatch, technical_failure
-):
-    from collage.core.io import atomic_write_json, read_json
-    from collage.template.build import overlays as overlay_build
-
-    provider = ChromaProvider()
-    _run(tmp_path, provider)
-    record_path = tmp_path / "overlay_attempts/test-key/0.json"
-    record = read_json(record_path)
-    record["inspection_status"] = "pending"
-    atomic_write_json(record_path, record)
-    monkeypatch.setattr(overlay_build, "CHROMA_PROCESSING_VERSION", "pyav-test-next")
-
-    if technical_failure:
-        monkeypatch.setattr(
-            overlay_build,
-            "alpha_completeness",
-            lambda image: {"issues": ["OVERLAY_EDGE_CLIPPED"]},
-        )
-    with pytest.raises(CollageError) as caught:
-        _run(tmp_path, provider)
-    assert caught.value.code == "OVERLAY_INSPECTION_UNCERTAIN"
-    assert provider.calls == 1 and provider.inspections == 1
+    root = tmp_path / "overlay_attempts/test-key"
+    root.mkdir(parents=True)
+    provider = Provider(timeout=True)
+    raw = _asset(clipped=True)
+    raw.save(root / "1_raw.png")
+    record = {
+        "status": legacy_status,
+        "inspection_status": "pending",
+        "raw_sha256": sha256_file(root / "1_raw.png"),
+        "audit": provider.audit().as_dict(),
+    }
+    atomic_write_json(root / "1.json", record)
+    before = (root / "1.json").read_bytes()
+    result, *_ = _run(tmp_path, provider)
+    assert result.tobytes() == raw.tobytes()
+    assert (root / "1.json").read_bytes() == before
+    assert provider.calls == 0 and provider.inspections == 0
 
 
 def test_chroma_backend_is_checked_before_generation(tmp_path, monkeypatch):
@@ -228,3 +191,23 @@ def test_chroma_backend_is_checked_before_generation(tmp_path, monkeypatch):
         _run(tmp_path, provider)
     assert caught.value.code == "CHROMA_DEPENDENCY_MISSING"
     assert provider.calls == 0 and provider.inspections == 0
+
+
+def test_content_bounds_exclude_screen_residue_but_keep_faint_punctuation():
+    from collage.template.build.asset_validation import content_box
+
+    raw = Image.new("RGBA", (200, 80), (0, 255, 0, 0))
+    raw.putpixel((0, 0), (50, 150, 50, 100))
+    ImageDraw.Draw(raw).line((30, 20, 140, 20), fill="white", width=1)
+    raw.putpixel((170, 40), (255, 255, 255, 8))
+    mapped = raw.copy()
+    mapped.putpixel((0, 0), (50, 50, 50, 100))  # despilled residue
+    assert content_box(mapped, (0, 255, 0), raw) == (29, 19, 172, 42)
+
+
+def test_content_bounds_keep_dark_foreground_with_screen_hue():
+    from collage.template.build.asset_validation import content_box
+
+    raw = Image.new("RGBA", (100, 60), (0, 0, 255, 0))
+    ImageDraw.Draw(raw).rectangle((20, 20, 80, 40), fill=(20, 30, 40, 255))
+    assert content_box(raw, (0, 0, 255), raw) == (19, 19, 82, 42)

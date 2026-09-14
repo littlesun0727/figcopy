@@ -13,6 +13,7 @@ from ...core.errors import CollageError
 from ...core.io import atomic_write_json, read_json, resolve_input_path, sha256_file
 from ...imaging.operations import load_mask
 from ...schemas.background import background_slot_id
+from ...schemas.shapes import compile_shape
 from ...schemas import (
     draft_has_release_blockers,
     validate_draft,
@@ -128,19 +129,20 @@ def default_overlay_review_fields() -> dict[str, Any]:
 def _reviewed_overlay(
     source: dict[str, Any], override: dict[str, Any]
 ) -> dict[str, Any]:
-    """Build one reviewed overlay, degrading incomplete local shapes safely."""
+    """Compile visual shape fields while retaining the legacy no-shape fallback."""
 
     overlay = {**default_overlay_review_fields(), **source}
     overlay.update(override)
     if overlay.get("action") == "basic_shape" and overlay.get("shape") is None:
-        # DraftSpec intentionally does not contain the executable shape fields.
-        # Unless an advanced override supplies them, provider generation is the
-        # only path that can preserve the reference decoration faithfully.
+        # Older semi-automatic drafts may omit the entire shape and supply it
+        # through an override. Preserve their documented fallback when still absent.
         LOGGER.warning(
             "basic_shape 缺少 shape 参数，改用参考图近似制作 | overlay=%s",
             source["id"],
         )
         overlay["action"] = "reference_generate"
+    elif overlay.get("action") == "basic_shape":
+        overlay["shape"] = compile_shape(overlay["shape"])
     return overlay
 
 
@@ -245,8 +247,8 @@ def confirm_draft(
         )
 
     reviewed = {
-        "version": "collage-build/3" if photo_background else "collage-reviewed/1",
-        "status": "planned" if photo_background else "reviewed",
+        "version": "collage-build/4",
+        "status": "planned",
         "reference": {
             "path": _relative(source_path, output_path),
             "sha256": draft["source"]["sha256"],

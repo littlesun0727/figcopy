@@ -1,0 +1,305 @@
+{
+  "evidence_type": "synthetic_local_probe",
+  "real_model_calls": 0,
+  "python": "3.14.6",
+  "pillow": "12.3.0",
+  "case_count": 22,
+  "cases": [
+    {
+      "case": "rounded_radius_8_5",
+      "schema": {
+        "outcome": "accepted"
+      },
+      "draw": {
+        "outcome": "accepted",
+        "image_size": [
+          18,
+          18
+        ]
+      }
+    },
+    {
+      "case": "rounded_radius_8_0",
+      "schema": {
+        "outcome": "accepted"
+      },
+      "draw": {
+        "outcome": "accepted",
+        "image_size": [
+          18,
+          18
+        ]
+      }
+    },
+    {
+      "case": "rounded_radius_null",
+      "schema": {
+        "outcome": "business_error",
+        "code": "SPEC_VALIDATION_FAILED",
+        "issues": [
+          {
+            "path": "$.overlays[0].shape.radius",
+            "message": "必须是有限数值",
+            "code": "INVALID_TYPE"
+          }
+        ]
+      },
+      "draw": {
+        "outcome": "unexpected_exception",
+        "type": "TypeError"
+      }
+    },
+    {
+      "case": "rectangle_radius_null",
+      "schema": {
+        "outcome": "accepted"
+      },
+      "draw": {
+        "outcome": "accepted",
+        "image_size": [
+          18,
+          18
+        ]
+      }
+    },
+    {
+      "case": "rectangle_unused_dash_gap_null",
+      "schema": {
+        "outcome": "accepted"
+      },
+      "draw": {
+        "outcome": "accepted",
+        "image_size": [
+          18,
+          18
+        ]
+      }
+    },
+    {
+      "case": "rounded_width_2_0",
+      "schema": {
+        "outcome": "accepted"
+      },
+      "draw": {
+        "outcome": "unexpected_exception",
+        "type": "TypeError"
+      }
+    },
+    {
+      "case": "dashed_gap_2_0",
+      "schema": {
+        "outcome": "accepted"
+      },
+      "draw": {
+        "outcome": "unexpected_exception",
+        "type": "TypeError"
+      }
+    },
+    {
+      "case": "invalid_color",
+      "schema": {
+        "outcome": "business_error",
+        "code": "SPEC_VALIDATION_FAILED",
+        "issues": [
+          {
+            "path": "$.overlays[0].shape.outline",
+            "message": "颜色无法解析",
+            "code": "INVALID_COLOR"
+          }
+        ]
+      },
+      "draw": {
+        "outcome": "business_error",
+        "code": "INVALID_COLOR",
+        "issues": []
+      }
+    },
+    {
+      "case": "rectangle_omits_unused_fields",
+      "schema": {
+        "outcome": "accepted"
+      },
+      "draw": {
+        "outcome": "accepted",
+        "image_size": [
+          18,
+          18
+        ]
+      }
+    },
+    {
+      "case": "shape_kind_array",
+      "schema": {
+        "outcome": "business_error",
+        "code": "SPEC_VALIDATION_FAILED",
+        "issues": [
+          {
+            "path": "$.overlays[0].shape.kind",
+            "message": "不支持的图形类型",
+            "code": "INVALID_ENUM"
+          }
+        ]
+      }
+    },
+    {
+      "case": "huge_integer_coordinate",
+      "schema": {
+        "outcome": "business_error",
+        "code": "SPEC_VALIDATION_FAILED",
+        "issues": [
+          {
+            "path": "$.overlays[0].target_rect[0]",
+            "message": "必须是有限数值",
+            "code": "INVALID_TYPE"
+          }
+        ]
+      }
+    },
+    {
+      "case": "subpixel_rect_collapses",
+      "schema": {
+        "outcome": "accepted"
+      },
+      "raster_box": {
+        "outcome": "business_error",
+        "code": "INVALID_RECT",
+        "issues": []
+      }
+    },
+    {
+      "case": "unbounded_target_size_no_allocation_attempted",
+      "schema": {
+        "outcome": "accepted"
+      }
+    },
+    {
+      "case": "basic_shape_without_shape",
+      "schema": {
+        "outcome": "accepted"
+      },
+      "reviewed_action": "reference_generate"
+    },
+    {
+      "case": "no_text_as_empty_string",
+      "schema": {
+        "outcome": "business_error",
+        "code": "SPEC_VALIDATION_FAILED",
+        "issues": [
+          {
+            "path": "$.overlays[0].text_content",
+            "message": "必须是非空字符串",
+            "code": "INVALID_TYPE"
+          }
+        ]
+      }
+    },
+    {
+      "case": "generated_overlay_with_valid_shape",
+      "schema": {
+        "outcome": "business_error",
+        "code": "SPEC_VALIDATION_FAILED",
+        "issues": [
+          {
+            "path": "$.overlays[0].shape",
+            "message": "reference_generate 的 shape 必须为 null",
+            "code": "INVALID_VALUE"
+          }
+        ]
+      },
+      "reviewed_shape_retained": true
+    },
+    {
+      "case": "feather_width_2_5",
+      "reviewed_schema": {
+        "issues": [
+          {
+            "path": "$.slots[0].edge_fade_px",
+            "message": "必须是整数",
+            "code": "INVALID_TYPE"
+          }
+        ]
+      },
+      "mask": {
+        "outcome": "accepted",
+        "image_size": [
+          20,
+          20
+        ]
+      }
+    },
+    {
+      "case": "background_feather_2_5_runtime",
+      "mask": {
+        "outcome": "accepted",
+        "image_size": [
+          20,
+          20
+        ]
+      }
+    },
+    {
+      "case": "background_expand_2_5_runtime",
+      "mask": {
+        "outcome": "unexpected_exception",
+        "type": "ValueError"
+      }
+    },
+    {
+      "case": "cover_scale_under_one",
+      "schema": {
+        "outcome": "accepted"
+      },
+      "fit": {
+        "outcome": "business_error",
+        "code": "INVALID_BINDING_SCALE",
+        "issues": []
+      }
+    },
+    {
+      "case": "generated_shape_analysis_and_confirmation",
+      "pipeline": {
+        "outcome": "business_error",
+        "code": "SPEC_VALIDATION_FAILED",
+        "issues": [
+          {
+            "path": "$.overlays[0].shape",
+            "message": "reference_generate 的 shape 必须为 null",
+            "code": "INVALID_VALUE"
+          }
+        ]
+      }
+    },
+    {
+      "case": "invalid_received_response_retry",
+      "attempts": [
+        {
+          "outcome": "business_error",
+          "code": "SPEC_VALIDATION_FAILED",
+          "issues": [
+            {
+              "path": "$.overlays[0].shape.radius",
+              "message": "必须是有限数值",
+              "code": "INVALID_TYPE"
+            }
+          ]
+        },
+        {
+          "outcome": "business_error",
+          "code": "SPEC_VALIDATION_FAILED",
+          "issues": [
+            {
+              "path": "$.overlays[0].shape.radius",
+              "message": "必须是有限数值",
+              "code": "INVALID_TYPE"
+            }
+          ]
+        }
+      ],
+      "fixture_provider_calls": 2,
+      "persisted_files": [
+        "analysis_policy.json",
+        "reference.png"
+      ]
+    }
+  ]
+}

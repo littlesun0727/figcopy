@@ -186,7 +186,7 @@ def serve_review_ui(
                 )
 
         def do_POST(self) -> None:
-            if self.path not in {"/save", "/revise"}:
+            if self.path not in {"/save", "/revise", "/layout"}:
                 self._send(
                     HTTPStatus.NOT_FOUND, "text/plain; charset=utf-8", b"not found"
                 )
@@ -210,7 +210,9 @@ def serve_review_ui(
                 if length <= 0 or length > MAX_REQUEST_BYTES:
                     raise CollageError("REQUEST_TOO_LARGE", "保存请求为空或超过 64 MiB")
                 payload = json.loads(self.rfile.read(length))
-                if self.path == "/revise":
+                if self.path == "/layout":
+                    result = current_session().layout(payload)
+                elif self.path == "/revise":
                     validate_feedback(current_session().draft, payload)
                     from ..workflows.model import DEFAULT_VISION_PROVIDER
 

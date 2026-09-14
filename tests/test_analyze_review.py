@@ -92,7 +92,7 @@ def test_manual_draft_can_be_confirmed_with_mask(tmp_path: Path) -> None:
         reviewer="tester",
     )
     reviewed = read_json(reviewed_path)
-    assert reviewed["status"] == "reviewed"
+    assert reviewed["status"] == "planned"
     assert reviewed["slots"][0]["fit"] == "cover"
 
 
@@ -157,6 +157,7 @@ def test_inline_ui_decisions_are_applied_to_reviewed_spec(tmp_path: Path) -> Non
             "label": "精确票券",
             "source_rect": [0, 0, 4, 2],
             "target_rect": [0, 0, 4, 2],
+            "attachment": None,
             "action": "reference_generate",
             "generation_brief": "票券",
             "requires_exact_content": True,
@@ -202,6 +203,7 @@ def test_basic_shape_without_shape_override_falls_back_to_reference_generation(
             "label": "虚线框组合",
             "source_rect": [0, 0, 8, 8],
             "target_rect": [0, 0, 8, 8],
+            "attachment": None,
             "action": "basic_shape",
             "generation_brief": "多个白色虚线框",
             "requires_exact_content": False,
@@ -239,6 +241,7 @@ def test_basic_shape_with_shape_override_stays_local(tmp_path: Path) -> None:
             "label": "虚线框",
             "source_rect": [0, 0, 8, 8],
             "target_rect": [0, 0, 8, 8],
+            "attachment": None,
             "action": "basic_shape",
             "generation_brief": "白色虚线框",
             "requires_exact_content": False,

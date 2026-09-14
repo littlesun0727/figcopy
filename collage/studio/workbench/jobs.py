@@ -107,7 +107,7 @@ class JobRegistry:
     def _run(self, job_id: str, operation: Callable[[], Any]) -> None:
         self._update(job_id, state="running")
         try:
-            operation()
+            result = operation()
         except CollageError as exc:
             LOGGER.warning(
                 "工作台任务失败 | job=%s code=%s message=%s",
@@ -136,7 +136,15 @@ class JobRegistry:
                 },
             )
         else:
-            self._update(job_id, state="succeeded", error=None)
+            # Workflow summaries may contain local paths; expose only the new
+            # project destination from the explicit single-overlay operation.
+            destination = (
+                {"project_id": result["project_id"], "url": result["url"]}
+                if self._jobs[job_id]["kind"] == "regenerate_overlay"
+                and isinstance(result, dict)
+                else None
+            )
+            self._update(job_id, state="succeeded", error=None, result=destination)
 
     def _update(self, job_id: str, **changes: Any) -> None:
         with self._lock:
@@ -149,14 +157,17 @@ class JobRegistry:
         if record is None:  # pragma: no cover - guarded by callers
             raise AssertionError("missing job")
         return {
-            key: record[key]
-            for key in (
-                "id",
-                "project_id",
-                "kind",
-                "state",
-                "created_at",
-                "updated_at",
-                "error",
-            )
+            "result": record.get("result"),
+            **{
+                key: record[key]
+                for key in (
+                    "id",
+                    "project_id",
+                    "kind",
+                    "state",
+                    "created_at",
+                    "updated_at",
+                    "error",
+                )
+            },
         }

@@ -49,6 +49,7 @@ def _draft():
                 "label": label,
                 "source_rect": rect,
                 "target_rect": rect,
+                "attachment": None,
                 "action": "basic_shape",
                 "generation_brief": "",
                 "requires_exact_content": False,

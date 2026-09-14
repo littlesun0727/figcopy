@@ -47,7 +47,7 @@ def _slot_package(root: Path, *, mode: str, edge_fade_px: int = 0) -> tuple[Path
     background_path = package / "assets" / "background.png"
     atomic_save_image(Image.new("RGBA", (30, 30), "white"), background_path)
     template = {
-        "version": "collage-template/1",
+        "version": "collage-template/4",
         "status": "needs_review",
         "canvas": {
             "width": 30,
@@ -76,21 +76,13 @@ def _slot_package(root: Path, *, mode: str, edge_fade_px: int = 0) -> tuple[Path
                 "mode": mode,
                 "fit": "cover",
                 "anchor": [0.5, 0.5],
+                "clip_mask_sha256": None,
                 "clip_mask": None,
                 "edge_fade_px": edge_fade_px,
             }
         ],
-        "layers": [
-            {
-                "type": "asset",
-                "asset_id": "bg",
-                "rect": [0, 0, 30, 30],
-                "rotation_deg": 0,
-                "fit": "contain",
-                "anchor": [0.5, 0.5],
-            },
-            {"type": "slot", "slot_id": "image"},
-        ],
+        "overlays": [],
+        "layer_order": [{"type": "background"}, {"type": "slot", "id": "image"}],
         "build": {
             "source_sha256": "0" * 64,
             "created_at": "2026-09-09T00:00:00+00:00",

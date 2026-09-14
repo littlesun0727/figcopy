@@ -26,7 +26,8 @@ from ..validation import validate_package
 from .background import _build_background
 from .common import _utc_now
 from .overlays import _build_overlay
-from .package import _package_slots, _template_layers
+from .asset_validation import overlay_warning
+from .package import _package_slots, _package_overlays
 from .report import _write_inspection_report
 
 LOGGER = logging.getLogger(__name__)
@@ -61,11 +62,11 @@ def build_template(
                 "OUTPUT_EXISTS", "模板构建结果已存在；断点重建请显式使用 --force"
             )
     spec = validate_build_spec(read_json(spec_path))
-    version2 = spec["version"] in {"collage-build/2", "collage-build/3"}
+    has_provenance = "provenance" in spec
     photo_background = background_slot_id(spec)
     pending_status = (
         "needs_validation"
-        if version2 and spec["provenance"]["kind"] != "human"
+        if has_provenance and spec["provenance"]["kind"] != "human"
         else "needs_review"
     )
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -76,6 +77,7 @@ def build_template(
     (work_dir / "previews").mkdir(parents=True, exist_ok=True)
     state = WorkflowState(work_dir / "state.json")
     cache = NodeCache(work_dir / "cache")
+    state.data["last_error"] = None
     state.transition("building")
     LOGGER.info("开始构建模板 | version=%s", spec["version"])
     try:
@@ -144,6 +146,7 @@ def build_template(
                 ],
             )
             assets.append(background_asset)
+        warnings: list[dict] = []
         visible_regions: dict[str, list[int] | None] = {}
         for overlay in spec["overlays"]:
             state.node(
@@ -151,16 +154,30 @@ def build_template(
                 "running",
                 source_rect=overlay["source_rect"],
             )
-            asset, audit, visible_bbox = _build_overlay(
-                overlay,
-                spec,
-                spec_path,
-                crops.get(overlay["id"]),
-                output_dir,
-                work_dir,
-                cache,
-                image_provider,
-            )
+            try:
+                asset, audit, visible_bbox, findings = _build_overlay(
+                    overlay,
+                    spec,
+                    spec_path,
+                    crops.get(overlay["id"]),
+                    output_dir,
+                    work_dir,
+                    cache,
+                    image_provider,
+                )
+            except CollageError as exc:
+                finding = overlay_warning(overlay, exc.code, skipped=True)
+                warnings.append(finding)
+                state.node(
+                    f"overlay:{overlay['id']}",
+                    "skipped",
+                    error={"code": exc.code, "message": finding["message"]},
+                )
+                LOGGER.warning(
+                    "跳过不可用装饰，继续构建 | id=%s code=%s", overlay["id"], exc.code
+                )
+                continue
+            warnings.extend(findings)
             assets.append(asset)
             audits.append(audit.as_dict(node=f"overlay:{overlay['id']}"))
             visible_regions[overlay["id"]] = (
@@ -172,21 +189,18 @@ def build_template(
                 audit=audits[-1],
                 visible_bbox=visible_regions[overlay["id"]],
                 output=asset["path"],
+                warnings=findings,
+                error=None,
             )
         slots = _package_slots(spec, spec_path, output_dir)
         template = {
-            "version": (
-                "collage-template/3"
-                if photo_background
-                else "collage-template/2"
-                if version2
-                else "collage-template/1"
-            ),
+            "version": "collage-template/4",
             "status": pending_status,
             "canvas": spec["canvas"],
             "assets": assets,
             "slots": slots,
-            "layers": _template_layers(spec),
+            "overlays": _package_overlays(spec),
+            "layer_order": spec["layer_order"],
             "build": {
                 "source_sha256": spec["reference"]["sha256"],
                 "created_at": _utc_now(),
@@ -195,8 +209,9 @@ def build_template(
                 or spec.get("audit", {})
                 .get("analysis_provider", {})
                 .get("fixture", False)
-                or (version2 and spec["provenance"]["kind"] == "fixture"),
+                or (has_provenance and spec["provenance"]["kind"] == "fixture"),
                 "providers": audits,
+                "warnings": warnings,
             },
             "review": {
                 "visual_approved": False,
@@ -206,14 +221,14 @@ def build_template(
                 "evidence_sha256": [],
             },
         }
-        if version2:
+        if has_provenance:
             template["provenance"] = spec["provenance"]
         if photo_background:
             template["background"] = {"mode": "slot", "slot_id": photo_background}
         validate_template_spec(template, require_ready=False)
         atomic_write_json(manifest_path, template)
         validate_package(output_dir, require_ready=False)
-        _write_inspection_report(work_dir, output_dir, spec, audits)
+        _write_inspection_report(work_dir, output_dir, spec, audits, warnings)
         state.transition(pending_status)
         LOGGER.info("模板构建完成，等待验收 | status=%s", pending_status)
         return manifest_path

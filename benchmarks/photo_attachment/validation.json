@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-14",
+  "protocols": {
+    "draft": "collage-draft/3",
+    "reviewed": "collage-build/4",
+    "template": "collage-template/4"
+  },
+  "pytest": {
+    "passed": 334,
+    "failed": 0,
+    "skipped": 0,
+    "seconds_reported": 78.82,
+    "browser_passed": 11,
+    "attachment_tests": 13
+  },
+  "static_checks": {
+    "ruff_check": "passed"
+  },
+  "prompt": {
+    "before_characters": 4120,
+    "after_characters": 3211,
+    "reduction_percent": 22.1,
+    "canvas": {
+      "width": 1320,
+      "height": 1767,
+      "coordinate_space": "canvas_px",
+      "rect_format": "xywh"
+    },
+    "product_policy": {
+      "goal": "fixed_layout_customer_content_replacement",
+      "image_modes": [
+        "photo",
+        "photo_feather",
+        "cutout",
+        "unknown"
+      ],
+      "overlay_actions": [
+        "basic_shape",
+        "reference_generate"
+      ],
+      "allow_approximate_fixed_overlays": true,
+      "exact_content_requires_original_asset": true
+    },
+    "measurement": "assembled provider text captured with stub transport; no network, no image tokens"
+  },
+  "model_calls": {
+    "real": 0,
+    "layout_edit": 0,
+    "single_piece_recovery_mock": 1,
+    "feedback_correction_mock": 1
+  },
+  "real_model_trial": {
+    "status": "blocked",
+    "code": "YIBU_CREDENTIAL_MISSING",
+    "reason": "New code process has no credential; the running studio key exists only in its process memory. No model call made."
+  },
+  "artifacts": "Only synthetic test images and placeholder browser screenshots are published in this directory."
+}

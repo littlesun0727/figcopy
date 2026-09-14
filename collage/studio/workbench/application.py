@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from ...core.errors import CollageError
-from ...core.io import atomic_write_json, read_json, resolve_input_path
+from ...core.io import atomic_write_json, read_json, resolve_input_path, sha256_file
 from ...projects import DataPaths, ProjectPaths, ProjectStore
 from ...providers import VisionProvider, load_provider
 from ...schemas import validate_bindings
@@ -144,6 +144,11 @@ class WorkbenchApplication:
         }
         workflow = manifest.get("workflow")
         history = workflow.get("history", []) if isinstance(workflow, dict) else []
+        project = self.store.open(project_id)
+        template_path = project.template / "template.json"
+        template = read_json(template_path) if template_path.is_file() else {}
+        reviewed_path = project.review / "reviewed.json"
+        reviewed = read_json(reviewed_path) if reviewed_path.is_file() else {}
         return {
             "project_id": status["project_id"],
             "name": status["name"],
@@ -156,6 +161,15 @@ class WorkbenchApplication:
             "task": self.jobs.latest(project_id),
             "updated_at": manifest.get("updated_at"),
             "history": history[-20:],
+            "warnings": template.get("build", {}).get("warnings", []),
+            "template_revision": sha256_file(template_path) if template else None,
+            "overlays": [
+                {"id": item["id"], "label": item["label"]}
+                for item in reviewed.get("overlays", [])
+                if item["action"] == "reference_generate"
+            ]
+            if template
+            else [],
         }
 
     def latest_job(self, project_id: str) -> dict[str, Any] | None:
@@ -338,6 +352,17 @@ class WorkbenchApplication:
         from .layout import layer_image
 
         return layer_image(self.store.open(project_id), identifier)
+
+    def edit_layout(self, project_id: str, payload: Any) -> dict:
+        from .layout import apply_layout, layer_items
+
+        project = self.store.open(project_id)
+        template = apply_layout(project, payload)
+        return {
+            "revision": payload["revision"],
+            "canvas": template["canvas"],
+            "items": layer_items(template),
+        }
 
     def preview_layout(self, project_id: str, payload: Any) -> bytes:
         from .layout import preview_layout
@@ -573,6 +598,40 @@ class WorkbenchApplication:
                 open_review=False,
             ),
         )
+
+    def regenerate_overlay(self, project_id: str, payload: Any) -> dict[str, Any]:
+        """Explicitly regenerate one known decoration and save a separate revision."""
+        from .layout import fork_layout, layout_document
+
+        project = self.store.open(project_id)
+        document = layout_document(project)
+        if (
+            not isinstance(payload, dict)
+            or payload.get("revision") != document["revision"]
+        ):
+            raise CollageError("LAYOUT_REVISION_CONFLICT", "模板已更新，请刷新后重做")
+        reviewed = read_json(project.review / "reviewed.json")
+        identifier = payload.get("overlay_id")
+        if not any(
+            item["id"] == identifier and item["action"] == "reference_generate"
+            for item in reviewed["overlays"]
+        ):
+            raise CollageError("LAYOUT_LAYER_NOT_FOUND", "没有可重做的这件装饰")
+        workflow = validate_workflow(
+            self.store.get_manifest(project_id).get("workflow")
+        )
+
+        def operation() -> dict:
+            provider = self.workflow.stages._image_provider(workflow, reviewed)
+            return fork_layout(
+                self.store,
+                project_id,
+                document,
+                overlay_id=identifier,
+                image_provider=provider,
+            )
+
+        return self.jobs.submit(project_id, "regenerate_overlay", operation)
 
     def approve_project(self, project_id: str, payload: Any) -> dict[str, Any]:
         """Enqueue the explicit final human approval gate."""

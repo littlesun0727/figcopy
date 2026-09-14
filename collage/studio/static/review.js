@@ -24,6 +24,9 @@ let overlayDetailsOpen = false;
 let initialOverlayText = {};
 let backgroundSelection = null;
 let fixedBackground = null;
+let drawOrder = [];
+let layoutBusy = false;
+let structureRequest = 0;
 const photoBackgroundId = () => draft?.background?.mode === 'slot' ? draft.background.slot_id : null;
 
 function eligibleBackgroundSlots() {
@@ -62,6 +65,10 @@ function selectBackground(mode, slotId = null) {
     $('#status').textContent = '不能使用照片背景：需先有必填、满版、无旋转、无开洞或羽化的普通照片槽。';
     return;
   }
+  if (mode === 'slot' && draft.overlays.some(item => item.attachment?.slot_id === candidate.id)) {
+    $('#status').textContent = '这张照片还有附属装饰，请先在装饰归属中解除或修改绑定，再设为背景。';
+    renderBackgroundSource(); return;
+  }
   $('#finalConfirmed').checked = false;
   if (!photoBackgroundId()) fixedBackground = structuredClone(draft.background);
   if (mode === 'slot') {
@@ -76,8 +83,9 @@ function selectBackground(mode, slotId = null) {
     backgroundSelection = {mode: 'fixed'};
   }
   // The server derives the schema version and validates this order independently.
-  draft.version = mode === 'slot' ? 'collage-draft/2' : 'collage-draft/1';
+  draft.version = 'collage-draft/3';
   renderItems(); renderLayers(); renderBackgroundSource(); render();
+  refreshStructure();
   $('#status').textContent = '背景来源已修改，请检查并重新勾选整体确认；尚未调用模型。';
 }
 
@@ -159,23 +167,59 @@ function render() {
   }
 }
 
+async function refreshStructure(change = null) {
+  if (layoutBusy) return;
+  const isEdit = Boolean(change), requestId = ++structureRequest;
+  if (isEdit) { layoutBusy = true; busy(true); }
+  try {
+    const response = await fetch(endpoint('/layout'), {
+      method: 'POST',
+      headers: {'content-type': 'application/json', 'X-Figcopy-Token': csrfToken},
+      body: JSON.stringify({draft, revision: reviewOptions.revision,
+        slot_overrides: reviewOptions.slots, overlay_overrides: reviewOptions.overlays,
+        ...(change ? {change} : {})}),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error('[' + result.code + '] ' + result.message);
+    if (requestId !== structureRequest) return;
+    if (isEdit) { draft = result.draft; reviewOptions = result.review_options; }
+    drawOrder = result.draw_order;
+    $('#structurePreview').src = result.structure_preview;
+    $('#structureHint').textContent = '编号色块代表待上传照片；粉色块代表待生成装饰。边框和遮挡按当前布局绘制。';
+    if (isEdit) { renderItems(); renderLayers(); render(); }
+  } catch (error) {
+    if (requestId !== structureRequest) return;
+    $('#structureHint').textContent = '结构预览未更新：' + error.message;
+    $('#status').textContent = error.message;
+  } finally { if (isEdit) { layoutBusy = false; busy(false); } }
+}
+
 function updateRect(kind, id, index, rawValue) {
-  const list = kind === 'slot' ? draft.slots : draft.overlays;
-  const item = list.find(candidate => candidate.id === id);
+  const item = (kind === 'slot' ? draft.slots : draft.overlays).find(candidate => candidate.id === id);
   if (id === photoBackgroundId()) return;
-  const oldSuggestion = kind === 'slot' && item.type === 'image'
-    ? reviewOptions.edge_fade_suggestions[id]
-    : null;
-  item.target_rect[index] = Number(rawValue);
-  if (kind === 'slot' && item.type === 'image') {
-    const nextSuggestion = suggestedFade(item.target_rect);
-    const settings = reviewOptions.slots[id];
-    if (settings.edge_fade_px === oldSuggestion) {
-      settings.edge_fade_px = nextSuggestion;
-    }
-    reviewOptions.edge_fade_suggestions[id] = nextSuggestion;
+  const rect = [...item.target_rect], value = Number(rawValue);
+  if (!Number.isFinite(value)) return;
+  if (index >= 2 && kind === 'slot' && draft.overlays.some(child => child.attachment?.slot_id === id)) {
+    const other = index === 2 ? 3 : 2;
+    rect[other] *= value / rect[index];
   }
-  render();
+  rect[index] = value;
+  $('#finalConfirmed').checked = false;
+  refreshStructure({kind, id, rect});
+}
+
+function attachmentControls(item) {
+  const owners = draft.slots.filter(slot => slot.type === 'image' && slot.id !== photoBackgroundId());
+  return `<label class="stack">装饰归属
+    <select data-owner="${escapeHtml(item.id)}">
+      <option value="">独立装饰</option>
+      ${owners.map(slot => `<option value="${escapeHtml(slot.id)}" ${item.attachment?.slot_id === slot.id ? 'selected' : ''}>${escapeHtml(slot.label)}</option>`).join('')}
+    </select></label>
+    ${item.attachment ? `<label>相对照片
+      <select data-side="${escapeHtml(item.id)}">
+        <option value="above" ${item.attachment.position === 'above' ? 'selected' : ''}>上方</option>
+        <option value="below" ${item.attachment.position === 'below' ? 'selected' : ''}>下方</option>
+      </select></label>` : ''}`;
 }
 
 function imageDecisionControls(item) {
@@ -233,8 +277,9 @@ function textDecisionControls(item) {
 function overlayDecisionControls(item) {
   const settings = reviewOptions.overlays[item.id];
   return (item.action === 'basic_shape'
-    ? '<p class="auto">简单图形由程序绘制，保持独立图层。</p>'
-    : '<p class="auto">装饰将根据参考图生成完整的独立素材，并检查边缘与内容。</p>')
+    ? '<p class="auto">简单图形由程序绘制。</p>'
+    : '<p class="auto">装饰将根据参考图生成完整的独立素材，生成后可结合整图检查。</p>')
+    + attachmentControls(item)
     + `<label class="stack">素材中的完整文字（无文字则留空）
       <input type="text" maxlength="500" value="${escapeHtml(settings.text_content || '')}"
         data-option-kind="overlay" data-item-id="${escapeHtml(item.id)}"
@@ -298,6 +343,8 @@ function renderItems() {
           <summary>高级：调整位置和大小</summary>
           <div class="row">x ${rectInputs[0]} y ${rectInputs[1]}</div>
           <div class="row">宽 ${rectInputs[2]} 高 ${rectInputs[3]}</div>
+          <label>旋转（度）<input type="number" data-rotation-kind="${kind}" data-item-id="${escapeHtml(item.id)}"
+            value="${reviewOptions[kind + 's'][item.id].rotation_deg}" ${item.id === photoBackgroundId() ? 'disabled' : ''}></label>
         </details>
       </div>`;
   }
@@ -339,6 +386,23 @@ function renderItems() {
         Number(element.dataset.rectIndex),
         element.value,
       );
+    };
+  });
+  root.querySelectorAll('[data-owner], [data-side]').forEach(element => {
+    element.onchange = () => {
+      const id = element.dataset.owner || element.dataset.side;
+      const item = draft.overlays.find(item => item.id === id);
+      const owner = element.dataset.owner ? element.value : item.attachment.slot_id;
+      const position = element.dataset.side ? element.value : item.attachment?.position || 'above';
+      $('#finalConfirmed').checked = false;
+      refreshStructure({kind: 'overlay', id, attachment: owner ? {slot_id: owner, position} : null});
+    };
+  });
+  root.querySelectorAll('[data-rotation-kind]').forEach(element => {
+    element.onchange = () => {
+      $('#finalConfirmed').checked = false;
+      refreshStructure({kind: element.dataset.rotationKind, id: element.dataset.itemId,
+        rotation_deg: Number(element.value)});
     };
   });
   root.querySelectorAll('[data-mode]').forEach(element => {
@@ -386,7 +450,8 @@ function renderLayers() {
   const root = $('#layers');
   root.innerHTML = draft.layer_order.map((entry, index) => `
     <div class="row card">
-      <span style="flex:1">${index}. ${escapeHtml(entry.type)}${entry.id ? ': ' + escapeHtml(entry.id) : ''}</span>
+      <span style="flex:1">${index}. ${entry.type === 'slot' ? escapeHtml(draft.slots.find(item => item.id === entry.id)?.label || entry.id) : entry.type === 'background' ? '背景' : escapeHtml(draft.overlays.find(item => item.id === entry.id)?.label || entry.id)}
+      ${entry.type === 'slot' ? draft.overlays.filter(item => item.attachment?.slot_id === entry.id).map(item => ' · ' + escapeHtml(item.label)).join('') : ''}</span>
       <button data-up="${index}">↑</button><button data-down="${index}">↓</button>
     </div>`).join('');
   root.querySelectorAll('[data-up]').forEach(button => {
@@ -408,6 +473,7 @@ function move(index, direction) {
     draft.layer_order[index],
   ];
   renderLayers();
+  refreshStructure();
 }
 
 function point(event) {
@@ -419,10 +485,12 @@ function point(event) {
 }
 
 view.onpointerdown = event => {
+  if (layoutBusy) return;
   const [x, y] = point(event);
   view.setPointerCapture(event.pointerId);
   if (mode === 'box') {
-    const hit = allItems().reverse().find(entry => {
+    const entries = drawOrder.filter(layer => layer.type !== 'background').map(layer => allItems().find(entry => entry.kind === layer.type && entry.item.id === layer.id)).filter(Boolean);
+    const hit = entries.reverse().find(entry => {
       const rect = entry.item.target_rect;
       return x >= rect[0] && x <= rect[0] + rect[2]
         && y >= rect[1] && y <= rect[1] + rect[3];
@@ -435,6 +503,8 @@ view.onpointerdown = event => {
         y,
         originalX: hit.item.target_rect[0],
         originalY: hit.item.target_rect[1],
+        originalRect: [...hit.item.target_rect],
+        kind: hit.kind,
       };
       renderItems();
     }
@@ -460,7 +530,14 @@ view.onpointermove = event => {
 
 view.onpointerup = () => {
   const editedMask = mode !== 'box';
+  const completed = drag;
   drag = null;
+  if (!editedMask && completed?.item) {
+    const rect = [...completed.item.target_rect];
+    completed.item.target_rect = completed.originalRect;
+    $('#finalConfirmed').checked = false;
+    refreshStructure({kind: completed.kind, id: completed.item.id, rect});
+  }
   if (editedMask) {
     updateMaskState();
   }
@@ -561,6 +638,8 @@ async function load() {
     .map(([id, fields]) => [id, fields.text_content]));
   draft = snapshot.draft;
   reviewOptions = snapshot.review_options;
+  drawOrder = snapshot.draw_order;
+  $('#structurePreview').src = snapshot.structure_preview;
   backgroundSelection = null;
   fixedBackground = photoBackgroundId() ? null : structuredClone(draft.background);
 
@@ -617,6 +696,7 @@ async function load() {
 }
 
 $('#save').onclick = async () => {
+  if (layoutBusy) return;
   const errors = preflightErrors();
   if (errors.length) {
     $('#status').textContent = '尚不能保存：\n- ' + errors.join('\n- ');

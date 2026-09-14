@@ -10,6 +10,8 @@ from typing import Any
 from ..core.errors import CollageError, SpecValidationError, ValidationIssue
 from ..core.io import decode_image, read_json, safe_package_path, sha256_file
 from ..imaging.operations import alpha_is_meaningful, parse_color, rect_to_box
+from .layout import compile_layers
+from ..schemas.background import background_slot_id
 from ..schemas import validate_template_spec
 
 LOGGER = logging.getLogger(__name__)
@@ -64,7 +66,7 @@ def validate_package(
     canvas_size = (spec["canvas"]["width"], spec["canvas"]["height"])
     assets_by_id = {asset["id"]: asset for asset in spec["assets"]}
     background_count = sum(asset["role"] == "background" for asset in spec["assets"])
-    expected_backgrounds = 0 if spec["version"] == "collage-template/3" else 1
+    expected_backgrounds = 0 if background_slot_id(spec) is not None else 1
     if background_count != expected_backgrounds:
         issues.append(
             ValidationIssue(
@@ -137,23 +139,12 @@ def validate_package(
                                 "EMPTY_SLOT_MASK",
                             )
                         )
-                    if (
-                        spec["version"] in {"collage-template/2", "collage-template/3"}
-                        and sha256_file(mask_path) != slot["clip_mask_sha256"]
-                    ):
+                    if sha256_file(mask_path) != slot["clip_mask_sha256"]:
                         issues.append(
                             ValidationIssue(
                                 f"$.slots[{index}].clip_mask_sha256",
                                 "窗口 mask 哈希与清单不一致",
                                 "MASK_HASH_MISMATCH",
-                            )
-                        )
-                    if mask.size != (width, height):
-                        issues.append(
-                            ValidationIssue(
-                                f"$.slots[{index}].clip_mask",
-                                "slot clip mask 必须使用槽位局部尺寸",
-                                "MASK_SIZE_MISMATCH",
                             )
                         )
                 except CollageError as exc:
@@ -195,7 +186,8 @@ def validate_package(
                     ValidationIssue(f"$.slots[{index}].color", exc.message, exc.code)
                 )
 
-    first_layer = spec["layers"][0] if spec["layers"] else None
+    layers = compile_layers(spec)
+    first_layer = layers[0] if layers else None
     if first_layer and first_layer.get("type") == "asset":
         first_asset = assets_by_id.get(first_layer.get("asset_id"))
         if first_asset and first_asset["role"] == "background":
@@ -203,7 +195,7 @@ def validate_package(
             if first_layer["rect"] != expected_rect or first_layer["rotation_deg"] != 0:
                 issues.append(
                     ValidationIssue(
-                        "$.layers[0]",
+                        "$.layer_order[0]",
                         "背景层必须无旋转并覆盖完整画布",
                         "INVALID_BACKGROUND_LAYER",
                     )
@@ -230,6 +222,6 @@ def validate_package(
         "模板包校验通过 | assets=%s slots=%s layers=%s",
         len(spec["assets"]),
         len(spec["slots"]),
-        len(spec["layers"]),
+        len(layers),
     )
     return spec

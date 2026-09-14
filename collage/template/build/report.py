@@ -16,10 +16,17 @@ def _write_inspection_report(
     output_dir: Path,
     spec: dict[str, Any],
     audits: list[dict[str, Any]],
+    warnings: list[dict] | None = None,
 ) -> None:
     overlay_rows = "".join(
         f"<li>{html.escape(overlay['id'])}: <a href='previews/overlay_{html.escape(overlay['id'])}_edges.png'>浅/深底边缘预览</a></li>"
         for overlay in spec["overlays"]
+        if (work_dir / "previews" / f"overlay_{overlay['id']}_edges.png").is_file()
+    )
+    warning_rows = "".join(
+        f"<li>{html.escape(item['label'])}：{html.escape(item['message'])}"
+        f"（{html.escape(item['code'])}）</li>"
+        for item in warnings or []
     )
     provider_rows = "".join(
         f"<li>{html.escape(item['node'])}: {html.escape(item['name'])}, fixture={item['fixture']}, cache_hit={item['cache_hit']}</li>"
@@ -59,6 +66,7 @@ def _write_inspection_report(
 <h1>模板制作检查</h1>
 <p>状态：{status_text}</p>
 {background_section}
+<h2>候选提示</h2><p>装饰未进行 VLM 复核，请结合整图确认效果。</p><ul>{warning_rows or "<li>没有本地处理提示</li>"}</ul>
 <h2>Overlay 边缘</h2><ul>{overlay_rows or "<li>无 overlay</li>"}</ul>
 <h2>调用审计</h2><ul>{provider_rows}</ul>
 <p>模板清单：<a href="{html.escape(package_rel)}/template.json">template.json</a></p>

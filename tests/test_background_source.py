@@ -89,7 +89,7 @@ def test_old_full_slot_stays_fixed_and_calls_background(tmp_path):
     session = ReviewSession(path, output, reviewer="fixture")
     session.save(save_payload(session))
     spec = read_json(output)
-    assert spec["version"] == "collage-reviewed/1"
+    assert spec["version"] == "collage-build/4"
     assert spec["layer_order"][0] == {"type": "background"}
     provider = CountingImageProvider()
     build_template(output, tmp_path / "template", image_provider=provider)
@@ -108,12 +108,12 @@ def test_explicit_switch_converts_save_and_feedback_without_changing_evidence(tm
     feedback = validate_feedback(
         session.draft, {**payload, "other_feedback": "保留装饰"}
     )
-    assert feedback["draft"]["version"] == "collage-draft/2"
+    assert feedback["draft"]["version"] == "collage-draft/3"
     assert feedback["draft"]["source"] == session.draft["source"]
     session.save(payload)
     assert path.read_bytes() == original
     reviewed = read_json(session.output_path)
-    assert reviewed["version"] == "collage-build/3"
+    assert reviewed["version"] == "collage-build/4"
     assert reviewed["layer_order"] == raw_photo(decoration=True)["layer_order"]
     assert not (session.output_path.parent / "remove_mask.png").exists()
     decision = read_json(session.output_path.parent / "confirmation.json")[
@@ -195,7 +195,7 @@ def test_photo_back_to_fixed_requires_mask_and_builds_original_branch(tmp_path):
     payload["draft"]["layer_order"].insert(0, {"type": "background"})
     assert (
         validate_draft(edited_review_draft(session.draft, payload))["version"]
-        == "collage-draft/1"
+        == "collage-draft/3"
     )
     without_mask = {**payload, "mask_png": ""}
     with pytest.raises(CollageError, match="mask"):
@@ -214,7 +214,7 @@ def test_selected_source_is_sent_to_vlm_and_recorded(tmp_path):
     revise_draft(path, {**payload, "other_feedback": "保留边框"}, provider=provider)
     request = read_json(path.parent / "review_feedback.json")
     assert request["background_decision"]["after"]["mode"] == "slot"
-    assert read_json(path)["version"] == "collage-draft/2"
+    assert read_json(path)["version"] == "collage-draft/3"
     assert not session.output_path.exists()
 
 
@@ -237,7 +237,7 @@ def test_fork_preserves_confirmed_values_source_and_later_layout(tmp_path, built
         app.workflow.resume("source", open_review=False)
         layout = layout_document(source)
         for item in layout["items"]:
-            if item["editable"]:
+            if item["editable"] and item["id"].startswith("asset:"):
                 item["rect"] = [3, 4, 14, 11]
                 item["rotation_deg"] = 17
         result = fork_layout(app.store, "source", layout)
@@ -367,14 +367,17 @@ def test_photo_background_still_generates_and_reuses_validated_overlay_cache(tmp
     pending_review.save(
         save_payload(pending_review, {"mode": "slot", "slot_id": "cover_photo"})
     )
-    with pytest.raises(CollageError) as caught:
-        build_template(
-            pending_target.review / "reviewed.json",
-            pending_target.template,
-            work_dir=pending_target.workspace,
-            image_provider=provider,
-        )
-    assert caught.value.code == "OVERLAY_REQUEST_UNCERTAIN"
+    build_template(
+        pending_target.review / "reviewed.json",
+        pending_target.template,
+        work_dir=pending_target.workspace,
+        image_provider=provider,
+    )
+    warning = read_json(pending_target.template / "template.json")["build"]["warnings"][
+        0
+    ]
+    assert warning["code"] == "OVERLAY_REQUEST_UNCERTAIN"
+    assert warning["skipped"] is True
     assert provider.calls == 2
     assert (
         read_json(pending_target.reports / "background_revision.json")[
@@ -396,7 +399,7 @@ def test_backend_converts_photo_to_fixed_with_explicit_brief(tmp_path):
             },
         },
     )
-    assert edited["version"] == "collage-draft/1"
+    assert edited["version"] == "collage-draft/3"
     assert edited["layer_order"][0] == {"type": "background"}
     assert current["background"]["mode"] == "slot"
 

@@ -51,6 +51,7 @@ OVERLAY_FIELDS = {
     "review_notes",
     "text_content",
     "shape",
+    "attachment",
 }
 
 
@@ -98,7 +99,7 @@ def _confirmed_draft(project: ProjectPaths, reviewed: dict) -> tuple[dict, dict]
             for key in ("background_brief", "review_notes")
         }
     )
-    draft["version"] = "collage-draft/2" if photo else "collage-draft/1"
+    draft["version"] = "collage-draft/3"
     draft["layer_order"] = copy.deepcopy(reviewed["layer_order"])
     # This is a new manual revision of already accepted content, not a new VLM answer.
     # Original questions and approvals stay in the source evidence directory.
@@ -112,23 +113,15 @@ def _confirmed_draft(project: ProjectPaths, reviewed: dict) -> tuple[dict, dict]
         template = validate_package(project.template, require_ready=False)
         if template["build"]["source_sha256"] != reviewed["reference"]["sha256"]:
             raise CollageError("SOURCE_HASH_MISMATCH", "模板与确认稿不是同一参考图")
-        overlays = {item["id"]: item for item in draft["overlays"]}
-        layers = []
-        for layer in template["layers"]:
-            if layer["type"] == "slot":
-                layers.append({"type": "slot", "id": layer["slot_id"]})
-            elif layer["asset_id"] == "bg" and not photo:
-                layers.append({"type": "background"})
-            elif layer["asset_id"] in overlays:
-                identifier = layer["asset_id"]
-                overlays[identifier]["target_rect"] = list(layer["rect"])
-                options["overlays"][identifier]["rotation_deg"] = layer["rotation_deg"]
-                layers.append({"type": "overlay", "id": identifier})
-            else:
-                raise CollageError(
-                    "INVALID_LAYER_ORDER", "模板包含无法还原到确认稿的图层"
-                )
-        draft["layer_order"] = layers
+        for kind in ("slots", "overlays"):
+            current = {item["id"]: item for item in template[kind]}
+            for item in draft[kind]:
+                layout = current[item["id"]]
+                item["target_rect"] = list(layout["rect"])
+                options[kind][item["id"]]["rotation_deg"] = layout["rotation_deg"]
+                if kind == "overlays":
+                    item["attachment"] = copy.deepcopy(layout["attachment"])
+        draft["layer_order"] = copy.deepcopy(template["layer_order"])
     return validate_draft(draft), options
 
 

@@ -231,6 +231,7 @@ def _full_manual_draft() -> dict:
                 "label": "票券",
                 "source_rect": [40, 0, 40, 20],
                 "target_rect": [40, 0, 40, 20],
+                "attachment": None,
                 "action": "reference_generate",
                 "generation_brief": "测试票券",
                 "requires_exact_content": True,

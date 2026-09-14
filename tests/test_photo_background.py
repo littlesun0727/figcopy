@@ -12,7 +12,7 @@ from collage.core.io import atomic_write_json, read_json
 from collage.providers import ProviderAudit
 from collage.rendering.model import PreparedBinding
 from collage.rendering.service import render_template
-from collage.schemas import validate_build_spec, validate_draft, validate_template_spec
+from collage.schemas import validate_draft
 from collage.studio.review_session import ReviewSession
 from collage.studio.workbench.layout import layer_items
 from collage.template.analysis import analyze_reference
@@ -76,6 +76,7 @@ def raw_photo(*, decoration=False):
                 "label": "边框",
                 "source_rect": [5, 5, 15, 10],
                 "target_rect": [5, 5, 15, 10],
+                "attachment": None,
                 "action": "basic_shape",
                 "generation_brief": "",
                 "requires_exact_content": False,
@@ -124,7 +125,7 @@ def test_photo_background_skips_generation_and_preserves_decoration(
     spec = read_json(reviewed)
     assert WorkflowStages._image_provider({"options": {}}, spec) is None
     template = validate_package(package, require_ready=False)
-    assert template["version"] == "collage-template/3"
+    assert template["version"] == "collage-template/4"
     assert template["status"] == "needs_review"
     assert template["build"]["fixture_used"] is True
     assert len(template["assets"]) == 1
@@ -178,7 +179,7 @@ def test_review_session_needs_no_mask_or_empty_mask_approval(tmp_path):
             "final_confirmed": True,
         }
     )
-    assert read_json(output)["version"] == "collage-build/3"
+    assert read_json(output)["version"] == "collage-build/4"
     assert not (output.parent / "remove_mask.png").exists()
     assert read_json(output.parent / "confirmation.json")["final_confirmed"] is True
 
@@ -225,7 +226,7 @@ def test_build_rejects_background_overrides_that_could_expose_base(tmp_path, cha
 
 def test_versioned_rules_leave_legacy_validation_strict(tmp_path):
     draft = read_json(draft_file(tmp_path))
-    draft["version"] = "collage-draft/1"
+    draft["version"] = "collage-draft/3"
     draft["background"] = {"background_brief": "", "review_notes": ""}
     with pytest.raises(SpecValidationError) as error:
         validate_draft(draft)
@@ -300,7 +301,7 @@ def test_saved_legacy_response_recovers_without_model_or_approval(tmp_path):
     assert raw_path.read_bytes() == saved_raw
     assert (request_path.parent / "before.json").read_bytes() == saved_before
     draft = validate_draft(read_json(path))
-    assert draft["version"] == "collage-draft/2"
+    assert draft["version"] == "collage-draft/3"
     assert draft["questions"] == []
     assert draft["background"] == {
         "mode": "slot",
@@ -365,5 +366,5 @@ def test_model_declared_photo_background_correction_is_accepted(tmp_path):
         },
         provider=provider,
     )
-    assert validate_draft(read_json(path))["version"] == "collage-draft/2"
+    assert validate_draft(read_json(path))["version"] == "collage-draft/3"
     assert provider.calls == 1

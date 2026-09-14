@@ -1,0 +1,218 @@
+{
+  "slots": [
+    {
+      "id": "back",
+      "label": "back",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        20,
+        45,
+        100,
+        100
+      ],
+      "target_rect": [
+        20,
+        45,
+        100,
+        100
+      ],
+      "upload_hint": "照片",
+      "review_notes": ""
+    },
+    {
+      "id": "front",
+      "label": "front",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        75,
+        20,
+        100,
+        90
+      ],
+      "target_rect": [
+        75,
+        20,
+        100,
+        90
+      ],
+      "upload_hint": "照片",
+      "review_notes": ""
+    }
+  ],
+  "overlays": [
+    {
+      "id": "mat",
+      "label": "mat",
+      "source_rect": [
+        16,
+        41,
+        108,
+        108
+      ],
+      "target_rect": [
+        16,
+        41,
+        108,
+        108
+      ],
+      "attachment": {
+        "slot_id": "back",
+        "position": "below"
+      },
+      "action": "basic_shape",
+      "shape": {
+        "kind": "rectangle",
+        "fill": "#222222",
+        "outline": null,
+        "width": 0
+      },
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": ""
+    },
+    {
+      "id": "frame_back",
+      "label": "frame_back",
+      "source_rect": [
+        20,
+        45,
+        100,
+        100
+      ],
+      "target_rect": [
+        20,
+        45,
+        100,
+        100
+      ],
+      "attachment": {
+        "slot_id": "back",
+        "position": "above"
+      },
+      "action": "basic_shape",
+      "shape": {
+        "kind": "dashed_rectangle",
+        "outline": "#FFFFFF",
+        "width": 3,
+        "dash": 8,
+        "gap": 4
+      },
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": ""
+    },
+    {
+      "id": "frame_front",
+      "label": "frame_front",
+      "source_rect": [
+        75,
+        20,
+        100,
+        90
+      ],
+      "target_rect": [
+        75,
+        20,
+        100,
+        90
+      ],
+      "attachment": {
+        "slot_id": "front",
+        "position": "above"
+      },
+      "action": "basic_shape",
+      "shape": {
+        "kind": "dashed_rectangle",
+        "outline": "#FFFFFF",
+        "width": 3,
+        "dash": 8,
+        "gap": 4
+      },
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": ""
+    },
+    {
+      "id": "middle",
+      "label": "middle",
+      "source_rect": [
+        100,
+        80,
+        20,
+        20
+      ],
+      "target_rect": [
+        100,
+        80,
+        20,
+        20
+      ],
+      "attachment": null,
+      "action": "basic_shape",
+      "shape": {
+        "kind": "ellipse",
+        "fill": "#FF00FF",
+        "outline": null,
+        "width": 0
+      },
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": ""
+    },
+    {
+      "id": "top",
+      "label": "top",
+      "source_rect": [
+        140,
+        115,
+        20,
+        20
+      ],
+      "target_rect": [
+        140,
+        115,
+        20,
+        20
+      ],
+      "attachment": null,
+      "action": "basic_shape",
+      "shape": {
+        "kind": "ellipse",
+        "fill": "#00FFFF",
+        "outline": null,
+        "width": 0
+      },
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": ""
+    }
+  ],
+  "background": {
+    "background_brief": "固定底板",
+    "review_notes": ""
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "back"
+    },
+    {
+      "type": "overlay",
+      "id": "middle"
+    },
+    {
+      "type": "slot",
+      "id": "front"
+    },
+    {
+      "type": "overlay",
+      "id": "top"
+    }
+  ],
+  "questions": []
+}

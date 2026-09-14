@@ -7,11 +7,12 @@ from typing import Any
 
 from ..core.errors import SpecValidationError, ValidationIssue
 from .provenance import validate_provenance, validate_sha256
-from .background import validate_slot_background
+from .background import background_slot_id, validate_slot_background
+from .attachments import validate_attachments
+from .draft import _draft_layers
 from .common import (
     FIT_MODES,
     IMAGE_MODES,
-    TEMPLATE_LAYER_TYPES,
     _boolean,
     _canvas,
     _enum,
@@ -29,43 +30,13 @@ from .common import (
 )
 
 
-def _validate_shape(value: Any, path: str, issues: list[ValidationIssue]) -> None:
-    shape = _object(value, path, issues)
-    if shape is None:
-        return
-    _keys(
-        shape,
-        required={"kind", "fill", "outline", "width", "radius", "dash", "gap"},
-        optional=set(),
-        path=path,
-        issues=issues,
-    )
-    kind = shape.get("kind")
-    _enum(
-        kind,
-        {"rectangle", "rounded_rectangle", "ellipse", "dashed_rectangle"},
-        f"{path}.kind",
-        issues,
-    )
-    for key in ("fill", "outline"):
-        if shape.get(key) is not None:
-            _string(shape.get(key), f"{path}.{key}", issues)
-    _integer(shape.get("width"), f"{path}.width", issues, minimum=0, maximum=1024)
-    _integer(shape.get("radius"), f"{path}.radius", issues, minimum=0, maximum=8192)
-    _integer(shape.get("dash"), f"{path}.dash", issues, minimum=1, maximum=8192)
-    _integer(shape.get("gap"), f"{path}.gap", issues, minimum=0, maximum=8192)
-
-
-def _template_slot(
-    slot_value: Any, path: str, issues: list[ValidationIssue], *, version2: bool = False
-) -> None:
+def _template_slot(slot_value: Any, path: str, issues: list[ValidationIssue]) -> None:
     slot = _object(slot_value, path, issues)
     if slot is None:
         return
     common = {"id", "type", "label", "required", "upload_hint", "rect", "rotation_deg"}
     image_fields = {"mode", "fit", "anchor", "clip_mask", "edge_fade_px"}
-    if version2:
-        image_fields.add("clip_mask_sha256")
+    image_fields.add("clip_mask_sha256")
     text_fields = {
         "default_text",
         "font_path",
@@ -80,7 +51,9 @@ def _template_slot(
     required = common | (
         image_fields
         if slot_type == "image"
-        else text_fields if slot_type == "text" else set()
+        else text_fields
+        if slot_type == "text"
+        else set()
     )
     _keys(slot, required=required, optional=set(), path=path, issues=issues)
     _identifier(slot.get("id"), f"{path}.id", issues)
@@ -102,11 +75,10 @@ def _template_slot(
         _pair(slot.get("anchor"), f"{path}.anchor", issues, minimum=0, maximum=1)
         if slot.get("clip_mask") is not None:
             _string(slot.get("clip_mask"), f"{path}.clip_mask", issues)
-            if version2:
-                validate_sha256(
-                    slot.get("clip_mask_sha256"), f"{path}.clip_mask_sha256", issues
-                )
-        elif version2 and slot.get("clip_mask_sha256") is not None:
+            validate_sha256(
+                slot.get("clip_mask_sha256"), f"{path}.clip_mask_sha256", issues
+            )
+        elif slot.get("clip_mask_sha256") is not None:
             _issue(issues, f"{path}.clip_mask_sha256", "无 clip mask 时哈希必须为 null")
         _integer(
             slot.get("edge_fade_px"),
@@ -156,8 +128,8 @@ def validate_template_spec(value: Any, *, require_ready: bool = True) -> dict[st
     spec = _object(value, "$", issues)
     if spec is None:
         raise SpecValidationError(issues)
-    slot_background = spec.get("version") == "collage-template/3"
-    version2 = spec.get("version") in {"collage-template/2", "collage-template/3"}
+    slot_background = background_slot_id(spec) is not None
+    has_provenance = "provenance" in spec
     _keys(
         spec,
         required={
@@ -166,24 +138,26 @@ def validate_template_spec(value: Any, *, require_ready: bool = True) -> dict[st
             "canvas",
             "assets",
             "slots",
-            "layers",
+            "overlays",
+            "layer_order",
             "build",
             "review",
-            *({"provenance"} if version2 else set()),
+            *({"provenance"} if has_provenance else set()),
             *({"background"} if slot_background else set()),
         },
         optional=set(),
         path="$",
         issues=issues,
     )
-    if spec.get("version") not in {
-        "collage-template/1",
-        "collage-template/2",
-        "collage-template/3",
-    }:
-        _issue(issues, "$.version", "不支持的模板格式版本")
+    if spec.get("version") != "collage-template/4":
+        _issue(
+            issues,
+            "$.version",
+            "需要 collage-template/4，请新建项目",
+            "UNSUPPORTED_SPEC_VERSION",
+        )
     allowed_status = {"ready"} if require_ready else {"needs_review", "ready"}
-    if version2:
+    if has_provenance:
         validate_provenance(spec.get("provenance"), "$.provenance", issues)
         if not require_ready:
             allowed_status.add("needs_validation")
@@ -223,133 +197,79 @@ def validate_template_spec(value: Any, *, require_ready: bool = True) -> dict[st
     slots = _list(spec.get("slots"), "$.slots", issues)
     if slots is not None:
         for index, slot in enumerate(slots):
-            _template_slot(slot, f"$.slots[{index}]", issues, version2=version2)
+            _template_slot(slot, f"$.slots[{index}]", issues)
     asset_ids = _unique_ids(assets, "$.assets", issues)
     slot_ids = _unique_ids(slots, "$.slots", issues)
     for collision in sorted(asset_ids & slot_ids):
         _issue(issues, "$", f"asset 与 slot 的 ID 冲突：{collision}", "DUPLICATE_ID")
 
-    layers = _list(spec.get("layers"), "$.layers", issues)
-    references: list[tuple[str, str]] = []
-    if layers is not None:
-        for index, raw_layer in enumerate(layers):
-            path = f"$.layers[{index}]"
-            layer = _object(raw_layer, path, issues)
-            if layer is None:
-                continue
-            layer_type = layer.get("type")
-            if layer_type == "asset":
-                _keys(
-                    layer,
-                    required={
-                        "type",
-                        "asset_id",
-                        "rect",
-                        "rotation_deg",
-                        "fit",
-                        "anchor",
-                    },
-                    optional=set(),
-                    path=path,
-                    issues=issues,
-                )
-                _identifier(layer.get("asset_id"), f"{path}.asset_id", issues)
-                if isinstance(layer.get("asset_id"), str):
-                    references.append(("asset", layer["asset_id"]))
-                _rect(layer.get("rect"), f"{path}.rect", issues)
-                _number(
-                    layer.get("rotation_deg"),
-                    f"{path}.rotation_deg",
-                    issues,
-                    minimum=-3600,
-                    maximum=3600,
-                )
-                _enum(layer.get("fit"), FIT_MODES, f"{path}.fit", issues)
-                _pair(
-                    layer.get("anchor"), f"{path}.anchor", issues, minimum=0, maximum=1
-                )
-            elif layer_type == "slot":
-                _keys(
-                    layer,
-                    required={"type", "slot_id"},
-                    optional=set(),
-                    path=path,
-                    issues=issues,
-                )
-                _identifier(layer.get("slot_id"), f"{path}.slot_id", issues)
-                if isinstance(layer.get("slot_id"), str):
-                    references.append(("slot", layer["slot_id"]))
-            else:
-                _enum(layer_type, TEMPLATE_LAYER_TYPES, f"{path}.type", issues)
-        if slot_background:
-            background_slot = validate_slot_background(
-                spec.get("background"), spec.get("slots"), canvas, issues, template=True
-            )
-            if not layers or layers[0] != {"type": "slot", "slot_id": background_slot}:
-                _issue(
-                    issues,
-                    "$.layers[0]",
-                    "第一层必须引用指定的背景照片槽",
-                    "INVALID_LAYER_ORDER",
-                )
-            if any(
-                isinstance(asset, Mapping) and asset.get("role") == "background"
-                for asset in assets or []
-            ):
-                _issue(
-                    issues,
-                    "$.assets",
-                    "照片槽提供背景时不能包含固定背景素材",
-                    "INVALID_BACKGROUND_COUNT",
-                )
-        elif not layers:
-            _issue(issues, "$.layers", "至少需要一个背景层")
-        elif isinstance(layers[0], Mapping):
-            first_id = layers[0].get("asset_id")
-            first_asset = next(
-                (
-                    item
-                    for item in assets or []
-                    if isinstance(item, Mapping) and item.get("id") == first_id
-                ),
-                None,
-            )
-            if (
-                layers[0].get("type") != "asset"
-                or not first_asset
-                or first_asset.get("role") != "background"
-            ):
-                _issue(
-                    issues,
-                    "$.layers[0]",
-                    "第一层必须引用 background asset",
-                    "INVALID_LAYER_ORDER",
-                )
-    expected = {
-        *(("asset", name) for name in asset_ids),
-        *(("slot", name) for name in slot_ids),
+    overlays = _list(spec.get("overlays"), "$.overlays", issues)
+    for index, raw_overlay in enumerate(overlays or []):
+        path = f"$.overlays[{index}]"
+        overlay = _object(raw_overlay, path, issues)
+        if overlay is None:
+            continue
+        _keys(
+            overlay,
+            required={"id", "attachment", "rect", "rotation_deg", "fit", "anchor"},
+            optional=set(),
+            path=path,
+            issues=issues,
+        )
+        _identifier(overlay.get("id"), f"{path}.id", issues)
+        _rect(overlay.get("rect"), f"{path}.rect", issues)
+        _number(
+            overlay.get("rotation_deg"),
+            f"{path}.rotation_deg",
+            issues,
+            minimum=-3600,
+            maximum=3600,
+        )
+        _enum(overlay.get("fit"), FIT_MODES, f"{path}.fit", issues)
+        _pair(overlay.get("anchor"), f"{path}.anchor", issues, minimum=0, maximum=1)
+    overlay_ids = _unique_ids(overlays, "$.overlays", issues)
+    for identifier in sorted(overlay_ids & slot_ids):
+        _issue(
+            issues, "$.overlays", f"照片与装饰 ID 冲突：{identifier}", "DUPLICATE_ID"
+        )
+    background_slot = (
+        validate_slot_background(
+            spec.get("background"), slots, canvas, issues, template=True
+        )
+        if slot_background
+        else None
+    )
+    independent = validate_attachments(overlays, slots, background_slot, issues)
+    _draft_layers(
+        spec.get("layer_order"),
+        "$.layer_order",
+        issues,
+        slot_ids,
+        independent,
+        background_slot,
+    )
+    backgrounds = {
+        asset["id"]
+        for asset in assets or []
+        if isinstance(asset, Mapping)
+        and isinstance(asset.get("id"), str)
+        and asset.get("role") == "background"
     }
-    actual = set(references)
-    if len(references) != len(actual):
+    if len(backgrounds) != (0 if slot_background else 1):
         _issue(
             issues,
-            "$.layers",
-            "每个 asset/slot 只能出现一次",
-            "DUPLICATE_LAYER_REFERENCE",
+            "$.assets",
+            "背景素材数量与背景来源不一致",
+            "INVALID_BACKGROUND_COUNT",
         )
-    for missing in sorted(expected - actual):
+    if backgrounds & overlay_ids:
+        _issue(issues, "$.overlays", "背景素材不能作为装饰引用", "INVALID_LAYER_ORDER")
+    for identifier in sorted(asset_ids - backgrounds - overlay_ids):
         _issue(
             issues,
-            "$.layers",
-            f"缺少图层引用：{missing[0]}:{missing[1]}",
+            "$.assets",
+            f"素材缺少布局定义：{identifier}",
             "MISSING_LAYER_REFERENCE",
-        )
-    for dangling in sorted(actual - expected):
-        _issue(
-            issues,
-            "$.layers",
-            f"悬空图层引用：{dangling[0]}:{dangling[1]}",
-            "DANGLING_LAYER_REFERENCE",
         )
 
     build = _object(spec.get("build"), "$.build", issues)
@@ -363,7 +283,7 @@ def validate_template_spec(value: Any, *, require_ready: bool = True) -> dict[st
                 "fixture_used",
                 "providers",
             },
-            optional=set(),
+            optional={"warnings"},
             path="$.build",
             issues=issues,
         )
@@ -371,6 +291,14 @@ def validate_template_spec(value: Any, *, require_ready: bool = True) -> dict[st
         _string(build.get("created_at"), "$.build.created_at", issues)
         _string(build.get("tool_version"), "$.build.tool_version", issues)
         _boolean(build.get("fixture_used"), "$.build.fixture_used", issues)
+        warnings = _list(build.get("warnings", []), "$.build.warnings", issues)
+        for index, warning in enumerate(warnings or []):
+            path = f"$.build.warnings[{index}]"
+            item = _object(warning, path, issues)
+            if item is not None:
+                for key in ("overlay_id", "label", "code", "message"):
+                    _string(item.get(key), f"{path}.{key}", issues)
+                _boolean(item.get("skipped"), f"{path}.skipped", issues)
         providers = _list(build.get("providers"), "$.build.providers", issues)
         if providers is not None:
             for index, provider in enumerate(providers):

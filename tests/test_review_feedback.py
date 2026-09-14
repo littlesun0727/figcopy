@@ -177,6 +177,7 @@ def _text_session(tmp_path):
             "label": "手写文字",
             "source_rect": [5, 5, 40, 20],
             "target_rect": [5, 5, 40, 20],
+            "attachment": None,
             "action": "reference_generate",
             "generation_brief": "保留完整 hello",
             "requires_exact_content": False,

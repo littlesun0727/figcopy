@@ -107,7 +107,7 @@ def test_missing_or_duplicate_layer_reference_is_rejected(
 ) -> None:
     package = asset_package_factory(tmp_path)
     spec = read_json(package / "template.json")
-    spec["layers"][-1] = spec["layers"][-2]
+    spec["layer_order"][-1] = spec["layer_order"][-2]
     with pytest.raises(SpecValidationError) as caught:
         validate_template_spec(spec, require_ready=False)
     codes = {issue.code for issue in caught.value.issues}

@@ -9,9 +9,10 @@ import time
 from typing import Any
 
 from ...core.errors import CollageError
+from ...schemas.draft_prompt import DRAFT_PROMPT
 from ..base import ProviderAudit
 from .client import _request_id, _YibuAuditClient
-from .constants import _DRAFT_CONTRACT, _DRAFT_REQUIRED_FIELDS
+from .constants import _DRAFT_REQUIRED_FIELDS
 from .settings import YibuSettings
 
 LOGGER = logging.getLogger(__name__)
@@ -107,10 +108,11 @@ class YibuVisionProvider:
     ) -> tuple[dict[str, Any], ProviderAudit]:
         started = time.monotonic()
         encoded = base64.b64encode(reference_bytes).decode("ascii")
+        if DRAFT_PROMPT not in prompt:
+            prompt = DRAFT_PROMPT + "\n\n" + prompt
         instruction = (
             f"{prompt}\n\n画布：{json.dumps(canvas, ensure_ascii=False)}\n"
             f"产品策略：{json.dumps(product_policy, ensure_ascii=False)}\n\n"
-            f"{_DRAFT_CONTRACT}"
         )
         payload = {
             "model": self.requested_model,

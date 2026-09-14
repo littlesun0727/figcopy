@@ -291,6 +291,13 @@ def create_workbench_server(
                     self._not_found()
                     return
                 project_id, rest = routed
+                if rest == ["layout", "preview"]:
+                    self._send(
+                        HTTPStatus.OK,
+                        "image/png",
+                        app.preview_layout(project_id, app.layout(project_id)),
+                    )
+                    return
                 if rest == ["review", "recoveries"]:
                     self._json(
                         HTTPStatus.OK, {"recoveries": app.review_recoveries(project_id)}
@@ -393,6 +400,11 @@ def create_workbench_server(
                     self._not_found()
                     return
                 project_id, rest = routed
+                if rest == ["layout", "edit"]:
+                    self._json(
+                        HTTPStatus.OK, app.edit_layout(project_id, self._read_json())
+                    )
+                    return
                 if rest == ["layout", "save"]:
                     self._json(
                         HTTPStatus.OK, app.save_layout(project_id, self._read_json())
@@ -411,6 +423,12 @@ def create_workbench_server(
                         app.preview_layout(project_id, self._read_json()),
                     )
                     return
+                if rest == ["overlays", "regenerate"]:
+                    self._json(
+                        HTTPStatus.ACCEPTED,
+                        {"task": app.regenerate_overlay(project_id, self._read_json())},
+                    )
+                    return
                 if rest == ["review", "recover"]:
                     self._json(
                         HTTPStatus.ACCEPTED,
@@ -421,6 +439,12 @@ def create_workbench_server(
                     self._json(
                         HTTPStatus.ACCEPTED,
                         {"task": app.revise_review(project_id, self._read_json())},
+                    )
+                    return
+                if rest == ["review", "layout"]:
+                    self._json(
+                        HTTPStatus.OK,
+                        app.review_session(project_id).layout(self._read_json()),
                     )
                     return
                 if rest == ["review", "save"]:

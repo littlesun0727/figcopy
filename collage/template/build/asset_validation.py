@@ -1,32 +1,28 @@
-"""Check untrimmed generated artwork and keep bounded repair evidence."""
+"""Describe local overlay issues and find placement bounds without model review."""
 
 from __future__ import annotations
 
-import unicodedata
 import hashlib
 from typing import Any
 
-from PIL import Image
+from PIL import Image, ImageChops
 
-from ...core.errors import CollageError
 from ...imaging.operations import alpha_is_meaningful
 
 
 def asset_fingerprint(image: Image.Image) -> str:
-    """Bind cached quality evidence to dimensions and actual decoded RGBA pixels."""
+    """Bind cached processing to dimensions and decoded RGBA pixels."""
     rgba = image.convert("RGBA")
     return hashlib.sha256(str(rgba.size).encode("ascii") + rgba.tobytes()).hexdigest()
 
 
 def alpha_completeness(image: Image.Image) -> dict[str, Any]:
-    """Detect empty, opaque and boundary-clipped assets before padding or trimming."""
+    """Report simple alpha findings; edge contact is advisory, not a clipping verdict."""
     rgba = image.convert("RGBA")
     alpha = rgba.getchannel("A")
-    # Ignore tiny interpolation noise, but count faint handwriting as visible.
-    visible = alpha.point(lambda value: 255 if value >= 16 else 0)
-    box = visible.getbbox()
-    issues: list[str] = []
-    if box is None:
+    box = alpha.point(lambda value: 255 if value >= 16 else 0).getbbox()
+    issues = []
+    if alpha.getbbox() is None:
         issues.append("EMPTY_OVERLAY")
     elif not alpha_is_meaningful(rgba):
         issues.append("OPAQUE_OVERLAY")
@@ -46,55 +42,66 @@ def alpha_completeness(image: Image.Image) -> dict[str, Any]:
     }
 
 
-def normalized_text(value: str) -> str:
-    """Ignore layout whitespace; preserve every character and punctuation mark."""
-    return "".join(unicodedata.normalize("NFC", value).split())
-
-
-def semantic_completeness(
-    provider, crop: Image.Image, candidate: Image.Image, overlay: dict[str, Any]
-) -> dict[str, Any]:
-    """Require explicit semantic evidence from real providers; fixture evidence is labeled."""
-    inspector = getattr(provider, "inspect_overlay", None)
-    if not callable(inspector):
-        if provider.capabilities.fixture:
-            return {"status": "fixture_only", "issues": [], "fixture": True}
-        raise CollageError(
-            "OVERLAY_INSPECTION_UNAVAILABLE", "当前图片 provider 未配置素材完整性检查"
-        )
-    result, audit = inspector(
-        crop,
-        candidate,
-        brief=overlay["generation_brief"],
-        text_content=overlay.get("text_content"),
+def content_box(
+    image: Image.Image,
+    key: tuple[int, int, int] | None = None,
+    original: Image.Image | None = None,
+) -> tuple[int, int, int, int] | None:
+    """Find all foreground parts, keeping punctuation and disconnected fine strokes."""
+    visible = (
+        image.convert("RGBA").getchannel("A").point(lambda value: 255 if value else 0)
     )
-    required = {"complete", "matches_reference", "unwanted_content", "uncertain"}
-    if not isinstance(result, dict) or any(
-        type(result.get(key)) is not bool for key in required
-    ):
-        raise CollageError("OVERLAY_INSPECTION_INVALID", "素材检查缺少明确的完整性结论")
-    if not isinstance(result.get("observed_text"), str) or not isinstance(
-        result.get("issues"), list
-    ):
-        raise CollageError("OVERLAY_INSPECTION_INVALID", "素材检查缺少文字或问题记录")
-    issues = []
-    if result["complete"] is not True:
-        issues.append("OVERLAY_CONTENT_INCOMPLETE")
-    if not result["matches_reference"] or result["unwanted_content"]:
-        issues.append("OVERLAY_CONTENT_MISMATCH")
-    if result["uncertain"]:
-        issues.append("OVERLAY_CONTENT_UNCERTAIN")
-    expected = overlay.get("text_content")
-    if not expected and normalized_text(result["observed_text"]):
-        issues.append("OVERLAY_UNCONFIRMED_TEXT")
-    if expected and normalized_text(result["observed_text"]) != normalized_text(
-        expected
-    ):
-        issues.append("OVERLAY_TEXT_MISMATCH")
+    if key is not None:
+        # Despill changes green pixels to gray. Use pre-despill color only to
+        # exclude screen residue from placement bounds, never to erode the artwork.
+        hue, saturation, _ = (
+            (original if original is not None else image).convert("HSV").split()
+        )
+        key_hue = Image.new("RGB", (1, 1), key).convert("HSV").getpixel((0, 0))[0]
+        screen = ImageChops.multiply(
+            hue.point(
+                lambda value: (
+                    255
+                    if min(abs(value - key_hue), 256 - abs(value - key_hue)) <= 24
+                    else 0
+                )
+            ),
+            saturation.point(lambda value: 255 if value >= 32 else 0),
+        )
+        rgb = (original if original is not None else image).convert("RGB")
+        red, green, blue = rgb.split()
+        chroma = ImageChops.subtract(
+            ImageChops.lighter(ImageChops.lighter(red, green), blue),
+            ImageChops.darker(ImageChops.darker(red, green), blue),
+        )
+        # Dark, low-chroma strokes can share the screen hue without being screen.
+        screen = ImageChops.multiply(
+            screen, chroma.point(lambda value: 255 if value >= 64 else 0)
+        )
+        visible = ImageChops.multiply(visible, ImageChops.invert(screen))
+    box = visible.getbbox()
+    if box is None:
+        return None
+    # One source pixel keeps soft antialiasing at the crop boundary.
+    return (
+        max(0, box[0] - 1),
+        max(0, box[1] - 1),
+        min(image.width, box[2] + 1),
+        min(image.height, box[3] + 1),
+    )
+
+
+def overlay_warning(overlay: dict, code: str, *, skipped: bool = False) -> dict:
+    """Keep portable, concise findings separate from provider exception payloads."""
+    message = {
+        "OVERLAY_EDGE_CLIPPED": "边缘存在可见像素，请结合整图检查",
+        "OPAQUE_OVERLAY": "素材底色可能未去净，请结合整图检查",
+        "EMPTY_OVERLAY": "素材没有可见内容，已跳过",
+    }.get(code, "该件制作未完成，已跳过" if skipped else "请检查该件素材")
     return {
-        "status": "failed" if issues else "passed",
-        "issues": issues,
-        "result": result,
-        "audit": audit.as_dict(),
-        "fixture": audit.fixture,
+        "overlay_id": overlay["id"],
+        "label": overlay.get("label", overlay["id"]),
+        "code": code,
+        "message": message,
+        "skipped": skipped,
     }

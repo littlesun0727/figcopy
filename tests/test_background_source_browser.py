@@ -153,7 +153,7 @@ def test_background_choice_in_browser(tmp_path, monkeypatch, mode):
         browser.until("!location.pathname.endsWith('/review')")
         reviewed = read_json(project.review / "reviewed.json")
         assert reviewed["version"] == (
-            "collage-reviewed/1" if mode == "to_fixed" else "collage-build/3"
+            "collage-build/4" if mode == "to_fixed" else "collage-build/4"
         )
         assert (project.review / "remove_mask.png").exists() == (mode == "to_fixed")
         if original:

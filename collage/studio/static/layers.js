@@ -61,14 +61,16 @@ function render() {
 function controls() {
   const item = chosen();
   $('#controls').disabled = busy || !item?.editable;
-  $('#selection').textContent = item ? item.label + (item.editable ? '' : '（位置已锁定）') : '请选择装饰';
+  $('#selection').textContent = item ? item.label + (item.editable ? '' : '（位置已锁定）') : '请选择照片或装饰';
+  $('#keepAspect').disabled = busy || Boolean(item?.grouped);
+  if (item?.grouped) $('#keepAspect').checked = true;
   if (item) {
     ['x','y','width','height'].forEach((key, i) => { $('#' + key).value = item.rect[i]; });
     $('#rotation').value = item.rotation_deg;
   }
   $('#layers').innerHTML = [...documentState.items].reverse().map(item =>
     '<button class="card ' + (item.id === selected ? 'selected' : '') + '" data-id="' + escapeHtml(item.id) + '">'
-      + escapeHtml(item.label) + (item.background ? ' · 背景' : item.editable ? ' · 独立装饰' : ' · 照片/文字槽') + '</button>'
+      + escapeHtml(item.label) + (item.background ? ' · 背景' : item.attachment ? ' · 附属于 ' + escapeHtml(item.attachment.slot_id) : item.id.startsWith('slot:') ? ' · 照片/文字单元' : ' · 独立装饰') + (item.missing ? ' · 缺少素材' : '') + '</button>'
   ).join('');
   $('#layers').querySelectorAll('button').forEach(button => {
     button.disabled = busy;
@@ -76,34 +78,46 @@ function controls() {
   });
 }
 
-function change() {
-  dirty = true;
-  controls();
-  render();
+async function edit(change = null, rootOrder = null) {
+  if (busy) return;
+  setBusy(true);
+  try {
+    documentState = await (await request('/edit', {...payload(),
+      ...(change ? {change} : {}), ...(rootOrder ? {root_order: rootOrder} : {})})).json();
+    dirty = true;
+    controls(); render();
+    $('#status').textContent = '布局已更新；保存会创建新版本。';
+  } catch (error) { $('#status').textContent = error.message; }
+  finally { setBusy(false); }
 }
 
 ['x','y','width','height'].forEach((key, index) => {
   $('#' + key).onchange = event => {
     const item = chosen(), value = Number(event.target.value);
     if (!item?.editable || !Number.isFinite(value) || (index > 1 && value < 1)) return;
-    if (index > 1 && $('#keepAspect').checked) {
+    const rect = [...item.rect];
+    if (index > 1 && ($('#keepAspect').checked || item.grouped)) {
       const other = index === 2 ? 3 : 2;
-      item.rect[other] = Math.max(1, Math.round(item.rect[other] * value / item.rect[index]));
+      rect[other] = rect[other] * value / rect[index];
     }
-    item.rect[index] = value;
-    change();
+    rect[index] = value;
+    edit({id:item.id, rect, rotation_deg:item.rotation_deg});
   };
 });
 $('#rotation').onchange = event => {
-  const value = Number(event.target.value);
-  if (chosen()?.editable && Number.isFinite(value)) { chosen().rotation_deg = value; change(); }
+  const value = Number(event.target.value), item = chosen();
+  if (item?.editable && Number.isFinite(value)) {
+    edit({id:item.id, rect:item.rect, rotation_deg:value});
+  }
 };
 function reorder(delta) {
-  const index = documentState.items.findIndex(item => item.id === selected);
-  const next = index + delta;
-  if (index <= 0 || next <= 0 || next >= documentState.items.length) return;
-  [documentState.items[index], documentState.items[next]] = [documentState.items[next], documentState.items[index]];
-  change();
+  const item = chosen();
+  const rootId = item.attachment ? 'slot:' + item.attachment.slot_id : item.id;
+  const roots = documentState.items.filter(item => !item.attachment).map(item => item.id);
+  const index = roots.indexOf(rootId), next = index + delta;
+  if (index <= 0 || next <= 0 || next >= roots.length) return;
+  [roots[index], roots[next]] = [roots[next], roots[index]];
+  edit(null, roots);
 }
 $('#up').onclick = () => reorder(1);
 $('#down').onclick = () => reorder(-1);
@@ -136,7 +150,12 @@ canvas.onpointermove = event => {
   item.rect[1] = Math.round(dragging.rect[1]+y-dragging.y);
   dirty = true; render();
 };
-canvas.onpointerup = canvas.onpointercancel = () => { dragging = null; if (documentState) controls(); };
+canvas.onpointerup = canvas.onpointercancel = () => {
+  if (!dragging) return;
+  const item = chosen(), rect = [...item.rect], original = dragging.rect;
+  dragging = null; item.rect = original;
+  edit({id:item.id, rect, rotation_deg:item.rotation_deg});
+};
 
 function setBusy(value) {
   busy = value;
@@ -177,6 +196,6 @@ async function load() {
   }));
   selected = documentState.items.find(item => item.editable)?.id;
   controls(); render();
-  $('#status').textContent = '每件装饰都可单独调整。修改位置不会调用生成模型。';
+  $('#status').textContent = '照片与附属物一起移动和叠放，独立装饰可单独调整。';
 }
 load().catch(error => { $('#status').textContent = '载入失败：' + error.message; });

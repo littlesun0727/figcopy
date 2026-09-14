@@ -7,6 +7,7 @@ const state = {
   renderSignature: null,
   providerStatus: null,
   providerFormDirty: false,
+  followTaskId: null,
   returnToCreateAfterProvider: false,
 };
 
@@ -54,6 +55,7 @@ const JOB_LABELS = {
   build: '正在根据确认结果制作模板',
   render: '正在导入客户素材并生成预览',
   retry: '正在继续工作流',
+  regenerate_overlay: '正在重做一件装饰并保存新版本',
   approve: '正在记录批准并发布模板',
 };
 
@@ -271,7 +273,9 @@ async function loadBindingForm(status) {
     }).join('');
     $('#actionPanel').innerHTML = `
       ${actionHeader('CUSTOMER INPUT', '放入这次要合成的素材', '每个槽位都按名称对应，不需要手改 Bindings JSON。缩放和偏移只影响当前预览。')}
-      <p><a class="button quiet" href="/projects/${encodeURIComponent(projectId)}/layers">调整独立装饰图层</a></p>
+      <p>布局预览：未上传照片的位置使用编号占位，上传后再生成实际结果。</p>
+      ${preview(`/api/projects/${encodeURIComponent(projectId)}/layout/preview`, '候选布局预览')}
+      <p><a class="button quiet" href="/projects/${encodeURIComponent(projectId)}/layers">调整照片与装饰布局</a></p>
       <form id="bindingsForm">
         <div class="slot-list">${cards}</div>
         <details class="advanced-settings"><summary>抠图高级设置</summary>
@@ -330,7 +334,7 @@ function renderApproval(status, complete = false) {
   $('#actionPanel').innerHTML = `
     ${actionHeader(complete ? 'PUBLISHED' : 'HUMAN GATE 2 / 2', complete ? '模板已发布' : '检查最终合成效果', complete ? '本次模板已经通过人工验收，可以继续复用本地 Renderer。' : '重点检查旧素材残留、边缘接缝、层序、文字和主体遮挡。批准操作会写入审核记录。')}
     ${preview(result?.url, complete ? '已发布模板预览' : '待批准结果预览')}
-    <p><a class="button quiet" href="/projects/${encodeURIComponent(status.project_id)}/layers">调整独立装饰图层 · 保存新版本</a></p>
+    <p><a class="button quiet" href="/projects/${encodeURIComponent(status.project_id)}/layers">调整照片与装饰布局 · 保存新版本</a></p>
     ${complete ? `
       <div class="action-row"><a class="button primary" href="${escapeHtml(result?.url)}?download=1">下载结果 PNG</a></div>
     ` : `
@@ -432,6 +436,38 @@ function renderCreateFailure(status) {
   $('#retryCreate').onclick = openCreateDialog;
 }
 
+function renderOverlayActions(status) {
+  const warnings = status.warnings || [];
+  const overlays = status.overlays || [];
+  const busy = activeJob(status.task);
+  $('#overlayActions').hidden = !warnings.length && !overlays.length;
+  $('#overlayActions').innerHTML = `
+    ${warnings.length ? `<p><strong>候选提示</strong></p><ul>${warnings.map(item =>
+      `<li>${escapeHtml(item.label)}：${escapeHtml(item.message)}</li>`).join('')}</ul>` : ''}
+    ${overlays.length ? `<div class="action-row">
+      <label>重做一件装饰 <select id="overlayChoice" ${busy ? 'disabled' : ''}>${overlays.map(item =>
+        `<option value="${escapeHtml(item.id)}">${escapeHtml(item.label)}</option>`).join('')}</select></label>
+      <button id="regenerateOverlay" class="button quiet" ${busy ? 'disabled' : ''}>生成一次并保存新版本</button>
+    </div>` : ''}`;
+  if (!overlays.length) return;
+  $('#regenerateOverlay').onclick = async () => {
+    const button = $('#regenerateOverlay');
+    button.disabled = true;
+    try {
+      const response = await api(`/api/projects/${encodeURIComponent(status.project_id)}/overlays/regenerate`, {
+        method: 'POST',
+        body: {overlay_id: $('#overlayChoice').value, revision: status.template_revision},
+      });
+      state.followTaskId = response.task.id;
+      toast('正在重做选中的装饰，其余素材沿用');
+      await refreshCurrent(true);
+    } catch (error) {
+      toast(describeError(error));
+      button.disabled = false;
+    }
+  };
+}
+
 function renderProject(status) {
   state.currentStatus = status;
   $('#welcomeView').hidden = true;
@@ -441,6 +477,7 @@ function renderProject(status) {
   $('#stageBadge').textContent = STAGE_LABELS[status.stage] || status.stage;
   renderSteps(status);
   renderArtifacts(status);
+  renderOverlayActions(status);
   const backgroundRevision = $('#backgroundRevision');
   backgroundRevision.hidden = !status.artifacts?.reviewed?.exists;
   $('#backgroundRevisionHint').hidden = backgroundRevision.hidden;
@@ -512,6 +549,11 @@ async function refreshCurrent(force = false) {
   }
   try {
     const status = await api(`/api/projects/${encodeURIComponent(state.currentId)}`);
+    if (status.task?.id === state.followTaskId && status.task.state === 'succeeded' && status.task.result?.url) {
+      state.followTaskId = null;
+      window.location.assign(status.task.result.url);
+      return;
+    }
     const signature = JSON.stringify([
       status.stage,
       status.updated_at,

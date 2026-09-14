@@ -16,6 +16,8 @@ import pytest
 from PIL import Image
 
 from collage.core.errors import CollageError
+from collage.schemas.shapes import SHAPE_PROMPT
+from collage.template.analysis import ANALYSIS_PROMPT
 from collage.providers.yibu import (
     YibuImageProvider,
     YibuSettings,
@@ -278,7 +280,8 @@ def test_vision_provider_defaults_to_high_reasoning_from_env(
     assert request["payload"]["max_tokens"] == 16384
 
 
-def test_vision_provider_uses_audited_chat_endpoint() -> None:
+@pytest.mark.parametrize("prompt", ["分析参考图", ANALYSIS_PROMPT])
+def test_vision_provider_uses_audited_chat_endpoint(prompt: str) -> None:
     with _audit_stub() as (server, base_url):
         provider = YibuVisionProvider(_settings(base_url))
         draft, audit = provider.analyze(
@@ -286,7 +289,7 @@ def test_vision_provider_uses_audited_chat_endpoint() -> None:
             media_type="image/png",
             canvas={"width": 20, "height": 30},
             product_policy={"goal": "test"},
-            prompt="分析参考图",
+            prompt=prompt,
         )
     records = server.records  # type: ignore[attr-defined]
     assert len(records) == 1
@@ -296,6 +299,8 @@ def test_vision_provider_uses_audited_chat_endpoint() -> None:
     assert request["payload"]["model"] == DEFAULT_VLM_MODEL
     image_url = request["payload"]["messages"][0]["content"][1]["image_url"]["url"]
     assert image_url.startswith("data:image/png;base64,")
+    instruction = request["payload"]["messages"][0]["content"][0]["text"]
+    assert instruction.count(SHAPE_PROMPT) == 1
     assert draft["layer_order"] == [{"type": "background"}]
     assert audit.actual_model == "claude-opus-4-8"
     assert audit.request_id == "chat-response-id"

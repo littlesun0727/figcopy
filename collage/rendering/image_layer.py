@@ -8,8 +8,8 @@ from typing import Any
 from PIL import Image
 
 from ..core.errors import CollageError
-from ..core.io import safe_package_path
-from ..imaging.operations import edge_fade_mask, load_mask, multiply_alpha, rect_to_box
+from ..core.io import decode_image, safe_package_path
+from ..imaging.operations import edge_fade_mask, multiply_alpha, rect_to_box
 from .layout import _fit_to_rect, _rotate_and_place
 from .model import PreparedBinding
 
@@ -41,13 +41,10 @@ def _render_image_slot(
     )
     masks: list[Image.Image] = []
     if slot["clip_mask"] is not None:
-        masks.append(
-            load_mask(
-                safe_package_path(root, slot["clip_mask"]),
-                local_size,
-                name=f"{slot['id']} clip_mask",
-            )
-        )
+        # A slot-local mask follows the photo's resize. Its original bytes/hash
+        # stay fixed; sampling here keeps previews and saved revisions identical.
+        mask = decode_image(safe_package_path(root, slot["clip_mask"]), mode="L")
+        masks.append(mask.resize(local_size, Image.Resampling.LANCZOS))
     if slot["mode"] == "photo_feather":
         masks.append(edge_fade_mask(local_size, slot["edge_fade_px"]))
     if masks:

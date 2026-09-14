@@ -1,0 +1,106 @@
+{
+  "evidence_type": "synthetic_fixture",
+  "real_model_calls": 0,
+  "tests": 312,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "pytest_reported_seconds": 52.94,
+  "new_shape_tests": 35,
+  "browser_tests": 7,
+  "checks": {
+    "ruff": "passed",
+    "git_diff_check": "passed"
+  },
+  "initial_run": {
+    "passed": 310,
+    "failed": 2,
+    "cause": "temporary paths reached Windows 260-character limit; full suite passed with shorter basetemp"
+  },
+  "images": [
+    {
+      "kind": "rectangle",
+      "compiled_shape": {
+        "kind": "rectangle",
+        "outline": "#FFFFFF",
+        "width": 3,
+        "fill": null,
+        "radius": 0,
+        "dash": 1,
+        "gap": 0
+      },
+      "status": "needs_review",
+      "render": {
+        "path": "rectangle-render.png",
+        "sha256": "84866ca1c76b7db455b6f9f6f12d9be180197fb39afb17f5a1d9525822c7e565"
+      },
+      "overlay": {
+        "path": "rectangle-overlay.png",
+        "sha256": "99ce84cc32580b6ff9ef6d55a611905f5325052792871f7229e249a7565da704"
+      }
+    },
+    {
+      "kind": "ellipse",
+      "compiled_shape": {
+        "kind": "ellipse",
+        "fill": "#FFFFFF",
+        "outline": null,
+        "width": 0,
+        "radius": 0,
+        "dash": 1,
+        "gap": 0
+      },
+      "status": "needs_review",
+      "render": {
+        "path": "ellipse-render.png",
+        "sha256": "5b0c1efc3308a45f81171aba2c15409fea4a7136e67ca1df79a31289bc249991"
+      },
+      "overlay": {
+        "path": "ellipse-overlay.png",
+        "sha256": "f9e969eb8e880f41cdf7fadddc68775ec2deac3bcc3ddb138bd47bc4c90bc800"
+      }
+    },
+    {
+      "kind": "rounded_rectangle",
+      "compiled_shape": {
+        "kind": "rounded_rectangle",
+        "outline": "#FFFFFF",
+        "width": 3,
+        "radius": 8.5,
+        "fill": null,
+        "dash": 1,
+        "gap": 0
+      },
+      "status": "needs_review",
+      "render": {
+        "path": "rounded_rectangle-render.png",
+        "sha256": "ac6d96f90914a816b9788443125b6330944801e09aa09ba2bb482ba0ec6d06bf"
+      },
+      "overlay": {
+        "path": "rounded_rectangle-overlay.png",
+        "sha256": "c848ed3333ee398d6b0eda3b84b32d5195d168c478c3231a3aac6b7a0ee54eb5"
+      }
+    },
+    {
+      "kind": "dashed_rectangle",
+      "compiled_shape": {
+        "kind": "dashed_rectangle",
+        "outline": "#FFFFFF",
+        "width": 3,
+        "dash": 12,
+        "gap": 8,
+        "fill": null,
+        "radius": 0
+      },
+      "status": "needs_review",
+      "render": {
+        "path": "dashed_rectangle-render.png",
+        "sha256": "97b544d995754377bcbb9282db27b3e29225b3d326579f7273a2725a4194c92a"
+      },
+      "overlay": {
+        "path": "dashed_rectangle-overlay.png",
+        "sha256": "e02fa719d11f4e1625f0a543583c47188e371439217fc20fc9944455d3c650d8"
+      }
+    }
+  ]
+}

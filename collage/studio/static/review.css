@@ -40,3 +40,7 @@ code{overflow-wrap:anywhere}
 fieldset { border:1px solid #d6dfe8; margin:12px 0; padding:12px; }
 input[type=number] { max-width:110px; }
 canvas { touch-action:none; }
+
+.review-stage { display:block; }
+.review-stage section { margin-bottom:20px; }
+#structurePreview { max-width:100%; max-height:70vh; }

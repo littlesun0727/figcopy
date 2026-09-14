@@ -26,8 +26,9 @@ from .common import (
     _unique_ids,
 )
 from .draft import _draft_layers
-from .background import validate_slot_background
-from .template import _validate_shape
+from .background import background_slot_id, validate_slot_background
+from .attachments import validate_attachments
+from .shapes import validate_shape
 from .provenance import validate_provenance
 
 
@@ -67,7 +68,9 @@ def _reviewed_slot(
     required = common_required | (
         image_fields
         if slot_type == "image"
-        else text_fields if slot_type == "text" else set()
+        else text_fields
+        if slot_type == "text"
+        else set()
     )
     _keys(slot, required=required, optional=set(), path=path, issues=issues)
     _identifier(slot.get("id"), f"{path}.id", issues)
@@ -146,14 +149,14 @@ def _reviewed_slot(
 
 
 def validate_build_spec(value: Any) -> dict[str, Any]:
-    """复用制作校验，区分旧人工确认稿与 v2 执行规格。"""
+    """校验统一制作规格及其人工或自动来源。"""
 
     issues: list[ValidationIssue] = []
     spec = _object(value, "$", issues)
     if spec is None:
         raise SpecValidationError(issues)
-    slot_background = spec.get("version") == "collage-build/3"
-    planned = spec.get("version") in {"collage-build/2", "collage-build/3"}
+    slot_background = background_slot_id(spec) is not None
+    planned = "provenance" in spec
     provenance = spec.get("provenance")
     human = not planned or (
         isinstance(provenance, dict) and provenance.get("kind") == "human"
@@ -176,13 +179,14 @@ def validate_build_spec(value: Any) -> dict[str, Any]:
         path="$",
         issues=issues,
     )
-    if spec.get("version") not in {
-        "collage-reviewed/1",
-        "collage-build/2",
-        "collage-build/3",
-    }:
-        _issue(issues, "$.version", "不支持的制作规格版本")
-    expected_status = "planned" if planned else "reviewed"
+    if spec.get("version") != "collage-build/4":
+        _issue(
+            issues,
+            "$.version",
+            "需要 collage-build/4，请新建项目",
+            "UNSUPPORTED_SPEC_VERSION",
+        )
+    expected_status = "planned"
     if spec.get("status") != expected_status:
         _issue(issues, "$.status", f"制作规格状态必须是 {expected_status}")
     if planned:
@@ -219,6 +223,7 @@ def validate_build_spec(value: Any) -> dict[str, Any]:
                     "source_rect",
                     "target_rect",
                     "action",
+                    "attachment",
                     "generation_brief",
                     "requires_exact_content",
                     "review_notes",
@@ -309,7 +314,9 @@ def validate_build_spec(value: Any) -> dict[str, Any]:
                 maximum=441,
             )
             if action == "basic_shape":
-                _validate_shape(overlay.get("shape"), f"{path}.shape", issues)
+                validate_shape(
+                    overlay.get("shape"), f"{path}.shape", issues, executable=True
+                )
             elif overlay.get("shape") is not None:
                 _issue(
                     issues, f"{path}.shape", "reference_generate 的 shape 必须为 null"
@@ -362,7 +369,7 @@ def validate_build_spec(value: Any) -> dict[str, Any]:
         "$.layer_order",
         issues,
         slot_ids,
-        overlay_ids,
+        validate_attachments(overlays, slots, background_slot, issues),
         background_slot,
     )
 
@@ -443,12 +450,10 @@ def validate_build_spec(value: Any) -> dict[str, Any]:
 
 
 def validate_reviewed_spec(value: Any) -> dict[str, Any]:
-    """旧人工确认入口保持原有语义，不接受自动执行规格。"""
+    """人工确认入口不接受自动执行规格。"""
 
     spec = validate_build_spec(value)
-    if spec["version"] != "collage-reviewed/1" and not (
-        spec["version"] == "collage-build/3" and spec["provenance"]["kind"] == "human"
-    ):
+    if spec.get("provenance", {}).get("kind", "human") != "human":
         raise SpecValidationError(
             [ValidationIssue("$.version", "人工确认入口只接受人工确认的制作规格")]
         )

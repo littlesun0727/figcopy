@@ -89,9 +89,7 @@ def test_transparent_cli_input_does_not_read_birefnet_configuration(
     image = Image.new("RGBA", (6, 6), (0, 0, 0, 0))
     ImageDraw.Draw(image).rectangle((2, 2, 3, 3), fill=(255, 0, 0, 255))
     image.save(source)
-    monkeypatch.setenv(
-        "COLLAGE_BIREFNET_MODEL_PATH", str(tmp_path / "missing-model")
-    )
+    monkeypatch.setenv("COLLAGE_BIREFNET_MODEL_PATH", str(tmp_path / "missing-model"))
     args = cli._parser().parse_args(
         ["cutout", "--input", str(source), "--out", str(output)]
     )

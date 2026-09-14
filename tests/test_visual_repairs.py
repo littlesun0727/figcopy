@@ -135,6 +135,7 @@ def test_cutout_fits_visible_subject_and_preserves_requested_offset(
         "mode": "cutout",
         "fit": "contain",
         "anchor": [0.5, 0.5],
+        "clip_mask_sha256": None,
         "clip_mask": None,
         "rotation_deg": 0,
         "edge_fade_px": 0,

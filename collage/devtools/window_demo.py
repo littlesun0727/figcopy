@@ -76,6 +76,7 @@ def create_window_demo(output_dir: Path, *, run_probe: bool = True) -> Path:
             "label": "opaque and translucent tape",
             "source_rect": [0, 0, *size],
             "target_rect": [0, 0, *size],
+            "attachment": None,
             "action": "preserve",
             "generation_brief": "",
             "requires_exact_content": True,
@@ -95,6 +96,7 @@ def create_window_demo(output_dir: Path, *, run_probe: bool = True) -> Path:
             "label": "programmatic dashed frame",
             "source_rect": [24, 40, 156, 120],
             "target_rect": [24, 40, 156, 120],
+            "attachment": None,
             "action": "basic_shape",
             "generation_brief": "",
             "requires_exact_content": False,
@@ -116,7 +118,7 @@ def create_window_demo(output_dir: Path, *, run_probe: bool = True) -> Path:
         }
     )
     spec = {
-        "version": "collage-build/2",
+        "version": "collage-build/4",
         "status": "planned",
         "provenance": {
             "kind": "fixture",

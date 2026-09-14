@@ -41,9 +41,7 @@ def edited_review_draft(current: dict[str, Any], payload: dict[str, Any]) -> dic
         raise CollageError("INVALID_BACKGROUND_SLOT", "背景来源选择无效")
     # Validate the submitted order first: conversion must not swallow duplicate,
     # missing or injected layers. Both pre-conversion and UI-converted drafts work.
-    edited["version"] = (
-        "collage-draft/2" if background_slot_id(edited) else "collage-draft/1"
-    )
+    edited["version"] = "collage-draft/3"
     validate_draft(edited)
     if background_source(edited) != selection:
         if selection["mode"] == "slot":
@@ -71,9 +69,7 @@ def edited_review_draft(current: dict[str, Any], payload: dict[str, Any]) -> dic
                 )
             edited["background"] = copy.deepcopy(fixed)
             edited["layer_order"] = [{"type": "background"}, *edited["layer_order"]]
-    edited["version"] = (
-        "collage-draft/2" if selection["mode"] == "slot" else "collage-draft/1"
-    )
+    edited["version"] = "collage-draft/3"
     validate_draft(edited)
     if (
         background_slot_id(current)

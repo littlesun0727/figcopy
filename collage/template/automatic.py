@@ -222,6 +222,7 @@ def compile_template(
                     "label": item["label"] + "边框",
                     "source_rect": evidence["frame_rect"],
                     "target_rect": evidence["frame_rect"],
+                    "attachment": {"slot_id": item["id"], "position": "above"},
                     "action": "basic_shape",
                     "generation_brief": "",
                     "requires_exact_content": False,
@@ -246,7 +247,6 @@ def compile_template(
                     },
                 }
             )
-            slot_layers[item["id"]].append({"type": "overlay", "id": frame_id})
             approximations.append(
                 {
                     "id": frame_id,
@@ -273,6 +273,7 @@ def compile_template(
                 "label": item["label"],
                 "source_rect": rect,
                 "target_rect": rect,
+                "attachment": None,
                 "action": "reference_generate",
                 "generation_brief": item.get("generation_brief")
                 or (
@@ -325,7 +326,7 @@ def compile_template(
     if (root / "requests/structure_resolution.json").exists():
         decision_paths.append(root / "requests/structure_resolution.json")
     spec = {
-        "version": "collage-build/2",
+        "version": "collage-build/4",
         "status": "planned",
         "provenance": {
             "kind": "diagnostic" if diagnostic_only else "automatic",

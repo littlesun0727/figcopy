@@ -71,7 +71,7 @@ def asset_package_factory():
             },
         }
         template = {
-            "version": "collage-template/1",
+            "version": "collage-template/4",
             "status": "needs_review",
             "canvas": {
                 "width": 20,
@@ -81,16 +81,21 @@ def asset_package_factory():
             },
             "assets": assets,
             "slots": [],
-            "layers": [
+            "overlays": [
                 {
-                    "type": "asset",
-                    "asset_id": "bg",
-                    "rect": [0, 0, 20, 20],
-                    "rotation_deg": 0,
-                    "fit": "contain",
-                    "anchor": [0.5, 0.5],
-                },
-                *(layer_by_id[name] for name in order),
+                    "id": name,
+                    "attachment": None,
+                    **{
+                        key: value
+                        for key, value in layer_by_id[name].items()
+                        if key not in {"type", "asset_id"}
+                    },
+                }
+                for name in order
+            ],
+            "layer_order": [
+                {"type": "background"},
+                *({"type": "overlay", "id": name} for name in order),
             ],
             "build": {
                 "source_sha256": "0" * 64,
@@ -128,8 +133,8 @@ def make_reviewed_spec(root: Path, *, candidate: bool = True) -> Path:
     atomic_save_image(mask, mask_path)
     atomic_save_image(Image.new("RGB", reference.size, "#88AACC"), candidate_path)
     spec = {
-        "version": "collage-reviewed/1",
-        "status": "reviewed",
+        "version": "collage-build/4",
+        "status": "planned",
         "reference": {"path": "reference.png", "sha256": sha256_file(reference_path)},
         "canvas": {
             "width": 24,
