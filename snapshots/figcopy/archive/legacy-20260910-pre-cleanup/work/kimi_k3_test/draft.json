@@ -1,0 +1,262 @@
+{
+  "version": "collage-draft/1",
+  "status": "draft",
+  "source": {
+    "path": "reference.png",
+    "sha256": "df132ac1c91c929f8cd88b8bf3bc026d8c14edc1e3960338f0489afcc05a60c9",
+    "width": 1320,
+    "height": 1767
+  },
+  "canvas": {
+    "width": 1320,
+    "height": 1767,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "prompt_version": "collage-draft/1",
+  "provider": {
+    "name": "yibu-audit-vlm",
+    "requested_model": "kimi-k3",
+    "actual_model": "kimi-k3",
+    "request_id": "chatcmpl-36a370c791bf613c6f9ca2b2",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 73047
+  },
+  "created_at": "2026-09-10T03:32:20+00:00",
+  "slots": [
+    {
+      "id": "slot_bg_photo",
+      "label": "底层街景大图",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "target_rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "upload_hint": "上传一张竖版街景/夕阳照片，建议氛围偏暖暗调",
+      "review_notes": "整幅铺满画布的底层照片，属客户可替换内容；注意右下角人群与店铺元素会随照片整体替换"
+    },
+    {
+      "id": "slot_photo_top_left",
+      "label": "左上小图",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        70,
+        205,
+        350,
+        270
+      ],
+      "target_rect": [
+        70,
+        205,
+        350,
+        270
+      ],
+      "upload_hint": "上传一张横版街景/夕阳照片",
+      "review_notes": "带白色虚线描边的矩形照片，直角、无圆角确认中"
+    },
+    {
+      "id": "slot_photo_top_right",
+      "label": "右上竖版大图",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        595,
+        90,
+        615,
+        810
+      ],
+      "target_rect": [
+        595,
+        90,
+        615,
+        810
+      ],
+      "upload_hint": "上传一张竖版街景/夕阳照片",
+      "review_notes": "带白色虚线描边的竖版照片，与左上照片边框样式一致"
+    },
+    {
+      "id": "slot_photo_bottom_left",
+      "label": "左下横版大图",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        90,
+        860,
+        590,
+        750
+      ],
+      "target_rect": [
+        90,
+        860,
+        590,
+        750
+      ],
+      "upload_hint": "上传一张横版城市/夕阳照片",
+      "review_notes": "带白色虚线描边，右下边缘与右上照片边框有交叠，需注意图层顺序"
+    },
+    {
+      "id": "slot_text_quote",
+      "label": "左上英文手写文案",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        65,
+        85,
+        480,
+        90
+      ],
+      "target_rect": [
+        65,
+        85,
+        480,
+        90
+      ],
+      "upload_hint": "输入两行英文短句，参考手写花体字风格",
+      "review_notes": "原文近似为 \"Sunset sells tenderness, and the world is full of romance.\"，字体为细手写连笔，需复核字距与换行"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "overlay_dashed_frames",
+      "label": "三张照片白色虚线描边组",
+      "source_rect": [
+        55,
+        75,
+        1170,
+        1560
+      ],
+      "target_rect": [
+        55,
+        75,
+        1170,
+        1560
+      ],
+      "action": "basic_shape",
+      "generation_brief": "按三张照片外轮廓绘制加粗白色圆头虚线描边，虚线段为胶囊形，三个框为一组固定装饰，不随单张照片独立编辑",
+      "requires_exact_content": false,
+      "review_notes": "虚线间隔与胶囊端点需复核；右上框与左下框在中部有交叠"
+    },
+    {
+      "id": "overlay_paperclip",
+      "label": "顶部手绘回形针",
+      "source_rect": [
+        855,
+        15,
+        130,
+        135
+      ],
+      "target_rect": [
+        855,
+        15,
+        130,
+        135
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手绘线条回形针涂鸦，压在右上照片虚线框顶边之上",
+      "requires_exact_content": false,
+      "review_notes": "倾斜角度与遮挡虚线框的位置需复核"
+    },
+    {
+      "id": "overlay_sparkle_burst",
+      "label": "中部手绘闪光装饰",
+      "source_rect": [
+        85,
+        595,
+        350,
+        260
+      ],
+      "target_rect": [
+        85,
+        595,
+        350,
+        260
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手绘涂鸦：放射状长条、星形闪光与小点线组合的装饰图案，位于左上照片下方空白区",
+      "requires_exact_content": false,
+      "review_notes": "涂鸦元素数量与排布为近似参考，需复核整体大小"
+    },
+    {
+      "id": "overlay_handwritten_cike",
+      "label": "右下角手写\"此刻\"",
+      "source_rect": [
+        1080,
+        1615,
+        210,
+        130
+      ],
+      "target_rect": [
+        1080,
+        1615,
+        210,
+        130
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手写空心描边风格中文\"此刻\"二字，略带抖动线条与装饰小点",
+      "requires_exact_content": false,
+      "review_notes": "文字内容为\"此刻\"，若客户需自定义文案需改为文字槽位，待确认"
+    }
+  ],
+  "background": {
+    "background_brief": "底层为整幅客户街景照片（已列为 slot_bg_photo），清版时无需额外纯色底，仅保证无照片区域不留杂质",
+    "review_notes": "背景即客户照片本身，无独立纸纹/报纸材质；若模板需要兜底底色建议深灰，待确认"
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "slot_bg_photo"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_top_left"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_top_right"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_bottom_left"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_dashed_frames"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_paperclip"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_sparkle_burst"
+    },
+    {
+      "type": "slot",
+      "id": "slot_text_quote"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_handwritten_cike"
+    }
+  ],
+  "questions": [
+    "底层整幅街景照片是否需要客户替换？当前按可替换槽位处理，若为固定素材请告知。",
+    "右下角手写\"此刻\"是固定装饰还是客户可编辑文案？",
+    "左上英文手写文案是否需要保留原句作为默认值？字体是否有指定授权字体？",
+    "三条虚线描边是否需要随照片尺寸联动缩放，还是固定不动？"
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "status": "needs_review",
+  "nodes": {
+    "overlay_crops": {
+      "status": "complete",
+      "count": 7
+    },
+    "background": {
+      "status": "complete",
+      "input_sha256": "314ca6dd0548a5bf8861584140fcb27c71707cca5420746878acee02a91c8c2b",
+      "audit": {
+        "node": "background",
+        "name": "imported-background",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "outputs": [
+        "background_candidate.png",
+        "background.png",
+        "remove_mask.png",
+        "blend_mask.png"
+      ]
+    },
+    "overlay:overlay_hearts_top": {
+      "status": "complete",
+      "source_rect": [
+        440,
+        0,
+        470,
+        260
+      ],
+      "audit": {
+        "node": "overlay:overlay_hearts_top",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        0,
+        0,
+        325,
+        113
+      ],
+      "output": "assets/overlay_overlay_hearts_top.png"
+    },
+    "overlay:overlay_ticket": {
+      "status": "complete",
+      "source_rect": [
+        620,
+        270,
+        420,
+        250
+      ],
+      "audit": {
+        "node": "overlay:overlay_ticket",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        0,
+        0,
+        218,
+        112
+      ],
+      "output": "assets/overlay_overlay_ticket.png"
+    },
+    "overlay:overlay_coffee": {
+      "status": "complete",
+      "source_rect": [
+        860,
+        100,
+        400,
+        300
+      ],
+      "audit": {
+        "node": "overlay:overlay_coffee",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        0,
+        0,
+        227,
+        187
+      ],
+      "output": "assets/overlay_overlay_coffee.png"
+    },
+    "overlay:overlay_together": {
+      "status": "complete",
+      "source_rect": [
+        50,
+        800,
+        490,
+        180
+      ],
+      "audit": {
+        "node": "overlay:overlay_together",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        0,
+        0,
+        226,
+        74
+      ],
+      "output": "assets/overlay_overlay_together.png"
+    },
+    "overlay:overlay_rabbit_star": {
+      "status": "complete",
+      "source_rect": [
+        960,
+        960,
+        330,
+        450
+      ],
+      "audit": {
+        "node": "overlay:overlay_rabbit_star",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        0,
+        0,
+        292,
+        379
+      ],
+      "output": "assets/overlay_overlay_rabbit_star.png"
+    },
+    "overlay:overlay_snacks_cat": {
+      "status": "complete",
+      "source_rect": [
+        40,
+        1630,
+        540,
+        676
+      ],
+      "audit": {
+        "node": "overlay:overlay_snacks_cat",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        0,
+        0,
+        419,
+        517
+      ],
+      "output": "assets/overlay_overlay_snacks_cat.png"
+    },
+    "overlay:overlay_hello_artist": {
+      "status": "complete",
+      "source_rect": [
+        580,
+        1960,
+        510,
+        260
+      ],
+      "audit": {
+        "node": "overlay:overlay_hello_artist",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        0,
+        0,
+        314,
+        173
+      ],
+      "output": "assets/overlay_overlay_hello_artist.png"
+    }
+  },
+  "last_error": null
+}

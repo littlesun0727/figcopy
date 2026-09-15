@@ -1,0 +1,13 @@
+﻿{
+    "version":  "figcopy-legacy-archive/1",
+    "source_root":  "D:\\codes\\figcopy",
+    "archived_at":  "2026-09-10T20:04:23.2779670+08:00",
+    "manifest_rebuilt_at":  "2026-09-10T20:05:08.3433441+08:00",
+    "directories":  [
+                        "work",
+                        "templates",
+                        "artifacts"
+                    ],
+    "file_count":  175,
+    "total_bytes":  81413277
+}

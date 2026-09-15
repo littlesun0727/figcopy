@@ -1,0 +1,262 @@
+{
+  "version": "collage-draft/1",
+  "status": "draft",
+  "source": {
+    "path": "reference.png",
+    "sha256": "df132ac1c91c929f8cd88b8bf3bc026d8c14edc1e3960338f0489afcc05a60c9",
+    "width": 1320,
+    "height": 1767
+  },
+  "canvas": {
+    "width": 1320,
+    "height": 1767,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "prompt_version": "collage-draft/1",
+  "provider": {
+    "name": "yibu-audit-vlm",
+    "requested_model": "claude-opus-4-8",
+    "actual_model": "claude-opus-4-8",
+    "request_id": "msg_144361723cdd4ae393db721caec13c0d",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 54266
+  },
+  "created_at": "2026-09-10T03:12:54+00:00",
+  "slots": [
+    {
+      "id": "text_title",
+      "label": "标题手写文字",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        66,
+        95,
+        500,
+        75
+      ],
+      "target_rect": [
+        66,
+        95,
+        500,
+        75
+      ],
+      "upload_hint": "输入一句英文/中文短句，手写花体，浅白色，左对齐两行",
+      "review_notes": "源图可读为 'Sunset sells tenderness, and the world is full of romance.'，字体为手写斜体，颜色偏白。可整体替换为客户文案。"
+    },
+    {
+      "id": "photo_top_left",
+      "label": "左上小照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        59,
+        210,
+        361,
+        278
+      ],
+      "target_rect": [
+        59,
+        210,
+        361,
+        278
+      ],
+      "upload_hint": "上传横向风景/街景照片，会裁切为小方框",
+      "review_notes": "带白色虚线边框的街景照，作为常规矩形照片槽位，边框归入装饰组。"
+    },
+    {
+      "id": "photo_top_right",
+      "label": "右上大照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        596,
+        98,
+        659,
+        782
+      ],
+      "target_rect": [
+        596,
+        98,
+        659,
+        782
+      ],
+      "upload_hint": "上传竖向照片，占据右上主视觉区",
+      "review_notes": "夜景城市街景竖图，略带旋转，边框为独立装饰。旋转角度需确认。"
+    },
+    {
+      "id": "photo_bottom_left",
+      "label": "左下照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        93,
+        884,
+        579,
+        740
+      ],
+      "target_rect": [
+        93,
+        884,
+        579,
+        740
+      ],
+      "upload_hint": "上传竖向风景/城市照片",
+      "review_notes": "黄昏城市天际线照片，带白色虚线边框，普通矩形照片槽位。"
+    },
+    {
+      "id": "photo_bottom_right",
+      "label": "右下照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        667,
+        932,
+        652,
+        819
+      ],
+      "target_rect": [
+        667,
+        932,
+        652,
+        819
+      ],
+      "upload_hint": "上传竖向人物/街拍照片",
+      "review_notes": "街头人群与人物背影照片。虽含人物，但为整体街拍场景，判定为 photo 而非 cutout；如客户需人物抠图请确认。"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "overlay_dashed_frames",
+      "label": "白色虚线边框组",
+      "source_rect": [
+        59,
+        45,
+        1260,
+        1706
+      ],
+      "target_rect": [
+        59,
+        45,
+        1260,
+        1706
+      ],
+      "action": "basic_shape",
+      "generation_brief": "为每张照片生成白色手绘感虚线矩形边框，贴合各照片外沿，线条粗细一致，随照片位置成组装饰。",
+      "requires_exact_content": false,
+      "review_notes": "四个虚线框为纯装饰，不跨客户内容，合并为一组。具体贴边随各照片 target_rect 微调。"
+    },
+    {
+      "id": "overlay_paperclip",
+      "label": "回形针涂鸦",
+      "source_rect": [
+        861,
+        45,
+        88,
+        113
+      ],
+      "target_rect": [
+        861,
+        45,
+        88,
+        113
+      ],
+      "action": "basic_shape",
+      "generation_brief": "白色手绘线条回形针图案，压在右上照片顶部作点缀。",
+      "requires_exact_content": false,
+      "review_notes": "固定装饰，手绘白线回形针。"
+    },
+    {
+      "id": "overlay_sparkle",
+      "label": "手绘闪光涂鸦",
+      "source_rect": [
+        88,
+        624,
+        346,
+        203
+      ],
+      "target_rect": [
+        88,
+        624,
+        346,
+        203
+      ],
+      "action": "basic_shape",
+      "generation_brief": "白色手绘放射状闪光/碎片涂鸦，含星点，作为左中空白区装饰。",
+      "requires_exact_content": false,
+      "review_notes": "纯装饰涂鸦，位置在左侧中部空白背景上。"
+    },
+    {
+      "id": "overlay_signature",
+      "label": "右下手写签名/水印",
+      "source_rect": [
+        1053,
+        1631,
+        228,
+        128
+      ],
+      "target_rect": [
+        1053,
+        1631,
+        228,
+        128
+      ],
+      "action": "reference_generate",
+      "generation_brief": "右下角白色手写风格文字水印，作为署名装饰。",
+      "requires_exact_content": true,
+      "review_notes": "疑似中文手写签名/专辑名，字迹难以准确辨认，标记为需精确内容，不做近似生成，需客户确认原文。"
+    }
+  ],
+  "background": {
+    "background_brief": "灰蓝到暖灰的柔和渐变纸纹背景，带轻微云雾质感，去除所有照片、边框和涂鸦后保留整片底纹。",
+    "review_notes": "背景为整体渐变纸纹，作为整体保留不逐片拆解。"
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "photo_top_left"
+    },
+    {
+      "type": "slot",
+      "id": "photo_top_right"
+    },
+    {
+      "type": "slot",
+      "id": "photo_bottom_left"
+    },
+    {
+      "type": "slot",
+      "id": "photo_bottom_right"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_dashed_frames"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_paperclip"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_sparkle"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_signature"
+    },
+    {
+      "type": "slot",
+      "id": "text_title"
+    }
+  ],
+  "questions": [
+    "右上照片是否有旋转角度，需要保留倾斜吗？",
+    "右下照片中的人物是否需要抠图（cutout），还是保持整张街拍照片？",
+    "右下角手写签名/水印的准确文字内容是什么，是否需要保留或替换？",
+    "标题文字是否需要替换为客户文案，字体是否固定为手写花体？"
+  ]
+}

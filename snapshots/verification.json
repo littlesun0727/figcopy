@@ -1,0 +1,59 @@
+{
+  "code_commit": "76115873abb270f9226463efd5ec544e65f0b9ed",
+  "tests": {
+    "command": "python -B -X utf8 -m pytest -q --basetemp=D:\\codes\\.ft\\all",
+    "passed": 448,
+    "failed": 0,
+    "elapsed_seconds": 160.92,
+    "environment_note": "Initial long temporary directory caused one Windows 261-character path failure; full suite passed with a short test root."
+  },
+  "ruff": "passed",
+  "source_snapshot_byte_comparison": "passed",
+  "credential_scan": {
+    "known_credential_matches": 0,
+    "credential_filename_candidates": 0,
+    "pattern_findings": "Two existing dummy-key literals in provider settings tests; no source/data credential candidates."
+  },
+  "frontend": {
+    "projects": [
+      {
+        "project": "kimi-k3-cutout",
+        "stage": "not_initialized",
+        "frontend_image_variants": 14,
+        "artifacts_equal": true
+      },
+      {
+        "project": "m1-demo",
+        "stage": "not_initialized",
+        "frontend_image_variants": 6,
+        "artifacts_equal": true
+      },
+      {
+        "project": "project-20260911-091515",
+        "stage": "complete",
+        "frontend_image_variants": 21,
+        "artifacts_equal": true
+      },
+      {
+        "project": "project-20260911-113502",
+        "stage": "failed",
+        "frontend_image_variants": 8,
+        "artifacts_equal": true
+      },
+      {
+        "project": "test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78",
+        "stage": "complete",
+        "frontend_image_variants": 13,
+        "artifacts_equal": true
+      },
+      {
+        "project": "test2",
+        "stage": "awaiting_bindings",
+        "frontend_image_variants": 55,
+        "artifacts_equal": true
+      }
+    ],
+    "frontend_parity": true,
+    "network_calls": 0
+  }
+}

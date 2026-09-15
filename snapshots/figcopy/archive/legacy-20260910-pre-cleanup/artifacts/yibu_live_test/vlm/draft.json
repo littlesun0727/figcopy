@@ -1,0 +1,238 @@
+{
+  "version": "collage-draft/1",
+  "status": "draft",
+  "source": {
+    "path": "reference.png",
+    "sha256": "3c72b1ce0781cff7011dc99c40ce76cd37880fd50a31f417ffa8cc2a3a59b7c3",
+    "width": 1320,
+    "height": 1767
+  },
+  "canvas": {
+    "width": 1320,
+    "height": 1767,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "prompt_version": "collage-draft/1",
+  "provider": {
+    "name": "yibu-audit-vlm",
+    "requested_model": "claude-opus-4-8",
+    "actual_model": "claude-opus-4-8",
+    "request_id": "msg_01ExAHzW3tqUUcuDT4Gz7Dxl",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 40150
+  },
+  "created_at": "2026-09-10T02:23:36+00:00",
+  "slots": [
+    {
+      "id": "photo_01",
+      "label": "左上小照片（街道棕榈树逆光）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        64,
+        209,
+        366,
+        275
+      ],
+      "target_rect": [
+        64,
+        209,
+        366,
+        275
+      ],
+      "upload_hint": "上传横构图街景照片，白色虚线边框为固定装饰",
+      "review_notes": "白色虚线描边为模板装饰，非照片本体；边框内为客户照片区"
+    },
+    {
+      "id": "photo_02",
+      "label": "右上竖照片（黄昏街景剪影）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        604,
+        84,
+        613,
+        833
+      ],
+      "target_rect": [
+        604,
+        84,
+        613,
+        833
+      ],
+      "upload_hint": "上传竖构图照片，虚线边框为固定装饰",
+      "review_notes": "右侧超出边框的招牌属于底图区域，需与背景确认边界"
+    },
+    {
+      "id": "photo_03",
+      "label": "左下竖照片（隔窗城市黄昏）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        90,
+        887,
+        596,
+        748
+      ],
+      "target_rect": [
+        90,
+        887,
+        596,
+        748
+      ],
+      "upload_hint": "上传竖构图照片，虚线边框为固定装饰",
+      "review_notes": "边缘略倾斜，target_rect 取正矩形近似，需人工核对旋转角度"
+    },
+    {
+      "id": "photo_04",
+      "label": "右下竖照片（街头人群与气球）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        686,
+        913,
+        634,
+        854
+      ],
+      "target_rect": [
+        686,
+        913,
+        634,
+        854
+      ],
+      "upload_hint": "上传竖构图人物街景照片，虚线边框为固定装饰",
+      "review_notes": "含人物、车牌、招牌文字等，属照片内内容不单独抠图；边界超出画布底部需确认"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "overlay_title",
+      "label": "手写英文标题",
+      "source_rect": [
+        70,
+        95,
+        470,
+        80
+      ],
+      "target_rect": [
+        70,
+        95,
+        470,
+        80
+      ],
+      "action": "reference_generate",
+      "generation_brief": "手写体英文双行标题，浅色斜体，参考原排版位置",
+      "requires_exact_content": true,
+      "review_notes": "原文疑为 'Sunset sells tenderness, and the world is full of romance.'，属精确文字内容，需按原资产确认后再排版"
+    },
+    {
+      "id": "overlay_clip",
+      "label": "回形针涂鸦装饰",
+      "source_rect": [
+        855,
+        20,
+        130,
+        130
+      ],
+      "target_rect": [
+        855,
+        20,
+        130,
+        130
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手绘回形针/别针涂鸦，位于右上照片顶部",
+      "requires_exact_content": false,
+      "review_notes": "纯装饰涂鸦，可近似生成"
+    },
+    {
+      "id": "overlay_sparkle",
+      "label": "闪光/放射线涂鸦装饰",
+      "source_rect": [
+        95,
+        615,
+        340,
+        235
+      ],
+      "target_rect": [
+        95,
+        615,
+        340,
+        235
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手绘放射状光芒与星点涂鸦组，成组固定装饰",
+      "requires_exact_content": false,
+      "review_notes": "多笔画装饰不独立编辑，成组处理"
+    },
+    {
+      "id": "overlay_stamp",
+      "label": "右下手写印章文字",
+      "source_rect": [
+        1085,
+        1615,
+        235,
+        130
+      ],
+      "target_rect": [
+        1085,
+        1615,
+        235,
+        130
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手写体署名/日期涂鸦，位于右下角",
+      "requires_exact_content": true,
+      "review_notes": "字迹难辨，疑似署名或日期，属精确内容，需原资产确认，不编造"
+    }
+  ],
+  "background": {
+    "background_brief": "灰色雾感渐变底纹，含云雾/纸纹质感，四张照片与涂鸦置于其上",
+    "review_notes": "背景为整体渐变纹理，不逐片拆解；照片边框虚线属各槽位装饰另计"
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "photo_01"
+    },
+    {
+      "type": "slot",
+      "id": "photo_02"
+    },
+    {
+      "type": "slot",
+      "id": "photo_03"
+    },
+    {
+      "type": "slot",
+      "id": "photo_04"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_title"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_clip"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_sparkle"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_stamp"
+    }
+  ],
+  "questions": [
+    "四张照片的白色虚线边框是否作为每个槽位的固定装饰保留，还是需要单独成 overlay？",
+    "右上与右下照片右侧/底部超出画布或边框的部分（招牌、人物）应归属背景还是裁切到照片槽位内？",
+    "左下照片略有倾斜，target_rect 是否需要保留旋转角度还是拉正为正矩形？",
+    "标题英文与右下手写署名的确切文字需以原始资产为准，请确认原文以避免近似生成。"
+  ]
+}

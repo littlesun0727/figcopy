@@ -1,0 +1,12 @@
+<!doctype html>
+<!-- 本文件汇总模板制作产物，供人工视觉验收。 -->
+<meta charset="utf-8"><title>Collage build inspection</title>
+<style>body{font:16px/1.5 system-ui;max-width:900px;margin:32px auto}img{max-width:44%;border:1px solid #aaa;margin:8px}</style>
+<h1>模板制作检查</h1>
+<p>状态：needs_review。必须用新客户素材生成预览后，再执行 approve。</p>
+<h2>背景保护</h2>
+<img src="remove_mask.png" alt="remove mask"><img src="blend_mask.png" alt="blend mask">
+<img src="background_candidate.png" alt="background candidate"><img src="background.png" alt="protected background">
+<h2>Overlay 边缘</h2><ul><li>overlay_hearts_top: <a href='previews/overlay_overlay_hearts_top_edges.png'>浅/深底边缘预览</a></li><li>overlay_ticket: <a href='previews/overlay_overlay_ticket_edges.png'>浅/深底边缘预览</a></li><li>overlay_coffee: <a href='previews/overlay_overlay_coffee_edges.png'>浅/深底边缘预览</a></li><li>overlay_together: <a href='previews/overlay_overlay_together_edges.png'>浅/深底边缘预览</a></li><li>overlay_rabbit_star: <a href='previews/overlay_overlay_rabbit_star_edges.png'>浅/深底边缘预览</a></li><li>overlay_snacks_cat: <a href='previews/overlay_overlay_snacks_cat_edges.png'>浅/深底边缘预览</a></li><li>overlay_hello_artist: <a href='previews/overlay_overlay_hello_artist_edges.png'>浅/深底边缘预览</a></li></ul>
+<h2>调用审计</h2><ul><li>background: yibu-audit-seedream-image, fixture=False, cache_hit=False</li><li>overlay:overlay_hearts_top: yibu-audit-seedream-image, fixture=False, cache_hit=False</li><li>overlay:overlay_ticket: yibu-audit-seedream-image, fixture=False, cache_hit=False</li><li>overlay:overlay_coffee: yibu-audit-seedream-image, fixture=False, cache_hit=False</li><li>overlay:overlay_together: yibu-audit-seedream-image, fixture=False, cache_hit=False</li><li>overlay:overlay_rabbit_star: yibu-audit-seedream-image, fixture=False, cache_hit=False</li><li>overlay:overlay_snacks_cat: yibu-audit-seedream-image, fixture=False, cache_hit=False</li><li>overlay:overlay_hello_artist: yibu-audit-seedream-image, fixture=False, cache_hit=False</li></ul>
+<p>模板清单：<a href="../template/template.json">template.json</a></p>

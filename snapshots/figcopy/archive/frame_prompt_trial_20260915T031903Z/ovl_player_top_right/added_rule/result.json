@@ -1,0 +1,55 @@
+{
+  "id": "ovl_player_top_right",
+  "variant": "added_rule",
+  "status": "complete",
+  "reference_sha256": "1b31286417d96fd268139aa3f13f024c9b998b7d5b4054aff30d555744641647",
+  "chroma_key": [
+    0,
+    255,
+    0
+  ],
+  "asset": {
+    "id": "ovl_player_top_right",
+    "path": "assets/overlay_ovl_player_top_right.png",
+    "role": "overlay",
+    "requires_alpha": true,
+    "sha256": "aae126765ee5c7e928da4edbbedc5693c986749ad5310c79f23e4eee946ff03d"
+  },
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "021789442538038e5dadbf20cfd2299792795a4ebfc3b4d292c4d",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 37236
+  },
+  "content_box": [
+    100,
+    122,
+    3912,
+    879
+  ],
+  "warnings": [
+    {
+      "overlay_id": "ovl_player_top_right",
+      "label": "右上音乐播放器条",
+      "code": "OVERLAY_EDGE_CLIPPED",
+      "message": "边缘存在可见像素，请结合整图检查",
+      "skipped": false
+    }
+  ],
+  "asset_size": [
+    3812,
+    757
+  ],
+  "center_alpha": 255,
+  "central_region_xyxy": [
+    1334,
+    265,
+    2478,
+    492
+  ],
+  "central_transparent_fraction": 0.0,
+  "central_opaque_fraction": 1.0
+}

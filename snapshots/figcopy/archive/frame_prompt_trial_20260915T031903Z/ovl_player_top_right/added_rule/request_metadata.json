@@ -1,0 +1,21 @@
+{
+  "variant": "added_rule",
+  "model": "doubao-seedream-5-0-260128",
+  "image_size": "2K",
+  "target_size": [
+    532,
+    140
+  ],
+  "output_fill": [
+    0,
+    255,
+    0,
+    255
+  ],
+  "operation": "make-overlay",
+  "prompt_sha256": "f2a993e0c5b7da52e59bac7d2d09553e2fa8fe5a78b029370e40cdb2ec4a2c28",
+  "only_prompt_rule_added": true,
+  "reference_pixels_sha256": "1170ae2a974b3480fbde77b7dd4322bd064a939f5ed995b5480b60cf74ffcb65",
+  "vlm_calls": 0,
+  "seed_control": null
+}

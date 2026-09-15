@@ -1,0 +1,399 @@
+{
+  "version": "collage-template/1",
+  "status": "needs_review",
+  "canvas": {
+    "width": 1290,
+    "height": 2306,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "assets": [
+    {
+      "id": "bg",
+      "path": "assets/background.png",
+      "role": "background",
+      "requires_alpha": false,
+      "sha256": "c0587d52f46b1b11660dd882f2b437c47cf447c3f3ba98d8d9bdd9a5c0638968"
+    },
+    {
+      "id": "overlay_hearts_top",
+      "path": "assets/overlay_overlay_hearts_top.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "f298a9d42f02791fe71862c5d63bb938fd8c985a228ffefd0452ea5e550a611f"
+    },
+    {
+      "id": "overlay_ticket",
+      "path": "assets/overlay_overlay_ticket.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "ad2a99cd7556902618f7ee29c6af65bcb049e3fe090a91e2b68d9a278c0ed7a9"
+    },
+    {
+      "id": "overlay_coffee",
+      "path": "assets/overlay_overlay_coffee.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "45a120102364a1ab5fef7d14588e9c50ef813828f7d27fe936bfa00785d4c07c"
+    },
+    {
+      "id": "overlay_together",
+      "path": "assets/overlay_overlay_together.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "66f51d9d40f8e79ca9f85b0ea619419490271a260008ce687fcb844461e2383e"
+    },
+    {
+      "id": "overlay_rabbit_star",
+      "path": "assets/overlay_overlay_rabbit_star.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "7a72a35e4eb7e3c2927e3aed061ce9b1ce23d8c66ce613f7134f0b5b50f20681"
+    },
+    {
+      "id": "overlay_snacks_cat",
+      "path": "assets/overlay_overlay_snacks_cat.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "321cecbd4f956acd8e282d5ee13f749a78fffd824c4e32acf36a9735c2efcef8"
+    },
+    {
+      "id": "overlay_hello_artist",
+      "path": "assets/overlay_overlay_hello_artist.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "cf3fff4b67fb7c4f65804cb74739daa5c330cba4c564a576a572e135252d9609"
+    }
+  ],
+  "slots": [
+    {
+      "id": "slot_photo_left_top",
+      "type": "image",
+      "label": "左上人物照片",
+      "required": true,
+      "upload_hint": "上传竖构图人物半身照，人物居中、头部偏上，系统自动做白色羽化融入背景",
+      "rect": [
+        0,
+        80,
+        710,
+        990
+      ],
+      "rotation_deg": 0,
+      "mode": "photo_feather",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 85
+    },
+    {
+      "id": "slot_photo_right_top",
+      "type": "image",
+      "label": "右上人物特写照片",
+      "required": true,
+      "upload_hint": "上传脸部特写或半身照，人物偏右构图，手指贴脸姿势效果最佳",
+      "rect": [
+        700,
+        430,
+        590,
+        780
+      ],
+      "rotation_deg": 0,
+      "mode": "photo_feather",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 71
+    },
+    {
+      "id": "slot_photo_left_mid",
+      "type": "image",
+      "label": "左中人物室内照片",
+      "required": true,
+      "upload_hint": "上传室内半身照，人物居中偏右，四周将被羽化裁切",
+      "rect": [
+        90,
+        960,
+        620,
+        930
+      ],
+      "rotation_deg": 0,
+      "mode": "photo_feather",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 74
+    },
+    {
+      "id": "slot_photo_right_bottom",
+      "type": "image",
+      "label": "右下人物大特写照片",
+      "required": true,
+      "upload_hint": "上传肩部以上人物特写，竖构图，人物偏右下，延伸至画布底边",
+      "rect": [
+        470,
+        1130,
+        820,
+        1176
+      ],
+      "rotation_deg": 0,
+      "mode": "photo_feather",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 98
+    }
+  ],
+  "layers": [
+    {
+      "type": "asset",
+      "asset_id": "bg",
+      "rect": [
+        0,
+        0,
+        1290,
+        2306
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_photo_left_mid"
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_photo_left_top"
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_photo_right_top"
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_photo_right_bottom"
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_together",
+      "rect": [
+        50,
+        800,
+        490,
+        180
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_hearts_top",
+      "rect": [
+        440,
+        0,
+        470,
+        260
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_ticket",
+      "rect": [
+        620,
+        270,
+        420,
+        250
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_coffee",
+      "rect": [
+        860,
+        100,
+        400,
+        300
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_rabbit_star",
+      "rect": [
+        960,
+        960,
+        330,
+        450
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_snacks_cat",
+      "rect": [
+        40,
+        1630,
+        540,
+        676
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_hello_artist",
+      "rect": [
+        580,
+        1960,
+        510,
+        260
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "build": {
+    "source_sha256": "314ca6dd0548a5bf8861584140fcb27c71707cca5420746878acee02a91c8c2b",
+    "created_at": "2026-09-11T06:48:40+00:00",
+    "tool_version": "0.1.0",
+    "fixture_used": false,
+    "providers": [
+      {
+        "node": "background",
+        "name": "imported-background",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:overlay_hearts_top",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:overlay_ticket",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:overlay_coffee",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:overlay_together",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:overlay_rabbit_star",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:overlay_snacks_cat",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:overlay_hello_artist",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      }
+    ]
+  },
+  "review": {
+    "visual_approved": false,
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": "",
+    "evidence_sha256": []
+  }
+}

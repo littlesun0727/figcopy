@@ -1,0 +1,170 @@
+[
+  {
+    "id": "ovl_frame_top_left",
+    "variant": "baseline",
+    "status": "complete",
+    "center_alpha": 255,
+    "central_transparent_fraction": 0.0,
+    "central_opaque_fraction": 1.0,
+    "asset_size": [
+      1695,
+      1897
+    ],
+    "audit": {
+      "name": "yibu-audit-seedream-image",
+      "requested_model": "doubao-seedream-5-0-260128",
+      "actual_model": "doubao-seedream-5-0-260128",
+      "request_id": "0217894423458239888986ffb34c69cf48a5af66589c30c5e50af",
+      "fixture": false,
+      "cache_hit": false,
+      "elapsed_ms": 53181
+    }
+  },
+  {
+    "id": "ovl_frame_top_left",
+    "variant": "added_rule",
+    "status": "complete",
+    "center_alpha": 0,
+    "central_transparent_fraction": 1.0,
+    "central_opaque_fraction": 0.0,
+    "asset_size": [
+      1472,
+      1791
+    ],
+    "audit": {
+      "name": "yibu-audit-seedream-image",
+      "requested_model": "doubao-seedream-5-0-260128",
+      "actual_model": "doubao-seedream-5-0-260128",
+      "request_id": "0217894423462419888986ffb34c69cf48a5af66589c30c443aec",
+      "fixture": false,
+      "cache_hit": false,
+      "elapsed_ms": 45242
+    }
+  },
+  {
+    "id": "ovl_frame_bottom_right",
+    "variant": "baseline",
+    "status": "complete",
+    "center_alpha": 255,
+    "central_transparent_fraction": 0.0,
+    "central_opaque_fraction": 1.0,
+    "asset_size": [
+      1539,
+      2044
+    ],
+    "audit": {
+      "name": "yibu-audit-seedream-image",
+      "requested_model": "doubao-seedream-5-0-260128",
+      "actual_model": "doubao-seedream-5-0-260128",
+      "request_id": "021789442404768b3148bc0f12eba71a521be8450222824929ab7",
+      "fixture": false,
+      "cache_hit": false,
+      "elapsed_ms": 47176
+    }
+  },
+  {
+    "id": "ovl_frame_bottom_right",
+    "variant": "added_rule",
+    "status": "complete",
+    "center_alpha": 0,
+    "central_transparent_fraction": 1.0,
+    "central_opaque_fraction": 0.0,
+    "asset_size": [
+      1533,
+      2036
+    ],
+    "audit": {
+      "name": "yibu-audit-seedream-image",
+      "requested_model": "doubao-seedream-5-0-260128",
+      "actual_model": "doubao-seedream-5-0-260128",
+      "request_id": "021789442409945a04a47ac73179d3e64c063d7b69771fcfc3ce6",
+      "fixture": false,
+      "cache_hit": false,
+      "elapsed_ms": 48326
+    }
+  },
+  {
+    "id": "ovl_star_cluster_center",
+    "variant": "baseline",
+    "status": "complete",
+    "center_alpha": 0,
+    "central_transparent_fraction": 0.532314,
+    "central_opaque_fraction": 0.458173,
+    "asset_size": [
+      1147,
+      1148
+    ],
+    "audit": {
+      "name": "yibu-audit-seedream-image",
+      "requested_model": "doubao-seedream-5-0-260128",
+      "actual_model": "doubao-seedream-5-0-260128",
+      "request_id": "0217894424622465ffee7bd9f8ed62699b3e2c08b3f2375fb64c7",
+      "fixture": false,
+      "cache_hit": false,
+      "elapsed_ms": 53216
+    }
+  },
+  {
+    "id": "ovl_star_cluster_center",
+    "variant": "added_rule",
+    "status": "complete",
+    "center_alpha": 255,
+    "central_transparent_fraction": 0.423923,
+    "central_opaque_fraction": 0.568407,
+    "asset_size": [
+      1260,
+      1289
+    ],
+    "audit": {
+      "name": "yibu-audit-seedream-image",
+      "requested_model": "doubao-seedream-5-0-260128",
+      "actual_model": "doubao-seedream-5-0-260128",
+      "request_id": "0217894424722430451d664a5d5fd238884dd8fb7ca7e60dcda8c",
+      "fixture": false,
+      "cache_hit": false,
+      "elapsed_ms": 55147
+    }
+  },
+  {
+    "id": "ovl_player_top_right",
+    "variant": "baseline",
+    "status": "complete",
+    "center_alpha": 255,
+    "central_transparent_fraction": 0.0,
+    "central_opaque_fraction": 1.0,
+    "asset_size": [
+      3680,
+      712
+    ],
+    "audit": {
+      "name": "yibu-audit-seedream-image",
+      "requested_model": "doubao-seedream-5-0-260128",
+      "actual_model": "doubao-seedream-5-0-260128",
+      "request_id": "021789442524938114488fbfaf31238bc59a8d8e7bd2490bbe58e",
+      "fixture": false,
+      "cache_hit": false,
+      "elapsed_ms": 68177
+    }
+  },
+  {
+    "id": "ovl_player_top_right",
+    "variant": "added_rule",
+    "status": "complete",
+    "center_alpha": 255,
+    "central_transparent_fraction": 0.0,
+    "central_opaque_fraction": 1.0,
+    "asset_size": [
+      3812,
+      757
+    ],
+    "audit": {
+      "name": "yibu-audit-seedream-image",
+      "requested_model": "doubao-seedream-5-0-260128",
+      "actual_model": "doubao-seedream-5-0-260128",
+      "request_id": "021789442538038e5dadbf20cfd2299792795a4ebfc3b4d292c4d",
+      "fixture": false,
+      "cache_hit": false,
+      "elapsed_ms": 37236
+    }
+  }
+]

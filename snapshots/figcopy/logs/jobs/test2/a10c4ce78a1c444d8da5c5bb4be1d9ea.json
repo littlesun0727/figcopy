@@ -1,0 +1,125 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T01:53:23.252512+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=a10c4ce78a1c444d8da5c5bb4be1d9ea kind=create"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T01:53:23.258633+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=reference"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-15T01:53:23.501361+00:00",
+      "level": "INFO",
+      "logger": "collage.core.diagnostics",
+      "message": "开始分析尝试 | attempt=260915015323-3691719c1416"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-15T01:53:23.513468+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=reference.png"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-15T01:53:23.748524+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片已保存 | file=reference.png size=1080x1435"
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-15T01:53:23.768605+00:00",
+      "level": "INFO",
+      "logger": "collage.template.analysis",
+      "message": "调用 VLM 生成候选草稿 | provider=yibu-audit-vlm model=kimi-k3"
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-15T01:53:23.788345+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.chat",
+      "message": "准备 VLM 请求 | model=kimi-k3 max_tokens=16384 reasoning_effort=high"
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-15T01:53:23.796238+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "yibu 审计代理健康检查通过 | endpoint=<service-url>"
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-15T01:53:23.836536+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=analyze-reference model=kimi-k3 path=<path>"
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-15T01:54:59.529247+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.chat",
+      "message": "收到 VLM 回答 | model=kimi-k3 characters=7813 finish_reason=stop"
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-15T01:54:59.625486+00:00",
+      "level": "INFO",
+      "logger": "collage.template.analysis",
+      "message": "校验模型候选草稿"
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-15T01:54:59.742103+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=reference.png"
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-15T01:55:00.060444+00:00",
+      "level": "INFO",
+      "logger": "collage.template.analysis",
+      "message": "候选草稿已生成 | file=draft.json"
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-15T01:55:00.080429+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test2 stage=awaiting_review"
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-15T01:55:00.094086+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test2 stage=awaiting_review"
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-15T01:55:00.108505+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务完成 | job=a10c4ce78a1c444d8da5c5bb4be1d9ea"
+    }
+  ],
+  "last_seq": 16,
+  "id": "a10c4ce78a1c444d8da5c5bb4be1d9ea",
+  "project_id": "test2",
+  "kind": "create",
+  "state": "succeeded",
+  "created_at": "2026-09-15T01:53:23.241787+00:00",
+  "updated_at": "2026-09-15T01:55:00.111638+00:00",
+  "error": null,
+  "result": null
+}

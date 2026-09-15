@@ -1,0 +1,63 @@
+{
+  "version": "collage-template/1",
+  "status": "needs_review",
+  "canvas": {
+    "width": 384,
+    "height": 256,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "assets": [
+    {
+      "id": "bg",
+      "path": "assets/background.png",
+      "role": "background",
+      "requires_alpha": false,
+      "sha256": "0dc9931c1018b06802aa2c0a0e2be8d2154d3b7f3c13b90f2006a385fb5d8408"
+    }
+  ],
+  "slots": [],
+  "layers": [
+    {
+      "type": "asset",
+      "asset_id": "bg",
+      "rect": [
+        0,
+        0,
+        384,
+        256
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "build": {
+    "source_sha256": "18a320825a96b565a290afe7a628cffa9d9f27699c58bafce5307be4b707c8fb",
+    "created_at": "2026-09-10T02:46:39+00:00",
+    "tool_version": "0.1.0",
+    "fixture_used": false,
+    "providers": [
+      {
+        "node": "background",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image-preview",
+        "request_id": "-RmiapLKFoaGz7IPoJjBkAE",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 22094
+      }
+    ]
+  },
+  "review": {
+    "visual_approved": false,
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": "",
+    "evidence_sha256": []
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T03:37:22.388188+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=2f36c0a4e45d48c08c0bd83b0459968e kind=regenerate_overlay"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T03:37:22.394749+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.layout",
+      "message": "开始在当前项目重做装饰 | project=test2 id=ovl_frame_bottom_right"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-15T03:37:25.234598+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_frame_bottom_right provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-15T03:37:25.324800+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "yibu 审计代理健康检查通过 | endpoint=<service-url>"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-15T03:37:25.337251+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-15T03:38:15.187312+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-15T03:38:17.455768+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=1728x2208"
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-15T03:38:17.584855+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=178.07"
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-15T03:38:25.563180+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.bindings",
+      "message": "准备客户素材 | slots=4"
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-15T03:38:25.568845+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=003_image.png"
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-15T03:38:25.634996+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=004_image.png"
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-15T03:38:25.697349+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=001_image.png"
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-15T03:38:25.765635+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=002_image.png"
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-15T03:38:26.692445+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.service",
+      "message": "开始本地合成 | layers=17"
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-15T03:38:28.677424+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.service",
+      "message": "本地合成完成"
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-15T03:38:28.989514+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.service",
+      "message": "PNG 已导出 | output=<path>"
+    },
+    {
+      "seq": 17,
+      "at": "2026-09-15T03:38:28.998697+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test2 stage=awaiting_approval"
+    },
+    {
+      "seq": 18,
+      "at": "2026-09-15T03:38:29.003000+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.layout",
+      "message": "当前项目装饰已替换 | project=test2 id=ovl_frame_bottom_right"
+    },
+    {
+      "seq": 19,
+      "at": "2026-09-15T03:38:29.007326+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务完成 | job=2f36c0a4e45d48c08c0bd83b0459968e"
+    }
+  ],
+  "last_seq": 19,
+  "id": "2f36c0a4e45d48c08c0bd83b0459968e",
+  "project_id": "test2",
+  "kind": "regenerate_overlay",
+  "state": "succeeded",
+  "created_at": "2026-09-15T03:37:22.375878+00:00",
+  "updated_at": "2026-09-15T03:38:29.008843+00:00",
+  "error": null,
+  "result": {
+    "project_id": "test2",
+    "url": "<path>"
+  }
+}

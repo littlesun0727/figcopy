@@ -1,0 +1,327 @@
+{
+  "version": "collage-reviewed/1",
+  "status": "reviewed",
+  "reference": {
+    "path": "../analysis/reference.png",
+    "sha256": "df132ac1c91c929f8cd88b8bf3bc026d8c14edc1e3960338f0489afcc05a60c9"
+  },
+  "canvas": {
+    "width": 1320,
+    "height": 1767,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "slots": [
+    {
+      "id": "slot_bg_photo",
+      "label": "背景街道黄昏照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "target_rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "upload_hint": "上传竖版街景/黄昏照片，铺满整个画布作为底色",
+      "review_notes": "整幅画布的底图照片，含路面、电动车、人群与晚霞；建议客户图保持暖色黄昏氛围以匹配模板",
+      "required": true,
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "slot_photo_topleft",
+      "label": "左上小照片（棕榈街道）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        66,
+        208,
+        345,
+        262
+      ],
+      "target_rect": [
+        66,
+        208,
+        345,
+        262
+      ],
+      "upload_hint": "上传横版小照片，替换左上虚线框内画面",
+      "review_notes": "照片带白色虚线边框，边框为固定装饰不属于照片内容",
+      "required": true,
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "slot_photo_topright",
+      "label": "右上竖版照片（雨后落日街道）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        590,
+        95,
+        610,
+        805
+      ],
+      "target_rect": [
+        590,
+        95,
+        610,
+        805
+      ],
+      "upload_hint": "上传竖版照片，替换右上虚线框内画面",
+      "review_notes": "照片右上角覆盖回形针涂鸦装饰，客户图上传后回形针保持在顶层",
+      "required": true,
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "slot_photo_bottomleft",
+      "label": "左下倾斜照片（城市黄昏）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        62,
+        850,
+        622,
+        762
+      ],
+      "target_rect": [
+        62,
+        850,
+        622,
+        762
+      ],
+      "upload_hint": "上传横版照片，替换左下倾斜虚线框内画面",
+      "review_notes": "照片整体逆时针倾斜约8-10度，target_rect为包围盒，实际渲染需带旋转；建议客户图主体居中避免被倾斜裁切",
+      "required": true,
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "slot_text_quote",
+      "label": "左上英文花体文案",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        62,
+        82,
+        490,
+        95
+      ],
+      "target_rect": [
+        62,
+        82,
+        490,
+        95
+      ],
+      "upload_hint": "可编辑为任意两行英文/拼音文案，建议保持手写花体字风格",
+      "review_notes": "原文为 'Sunset sells tenderness, and the world is full of romance.'，白色斜体手写字，客户可替换内容",
+      "required": true,
+      "rotation_deg": 0,
+      "default_text": null,
+      "font_path": null,
+      "font_size": 52,
+      "fallback_approved": true,
+      "color": "#000000",
+      "align": "left",
+      "max_lines": 3,
+      "line_spacing": 4
+    }
+  ],
+  "overlays": [
+    {
+      "id": "overlay_dashed_frames",
+      "label": "三张照片的白色虚线相框组合",
+      "source_rect": [
+        55,
+        75,
+        1160,
+        1560
+      ],
+      "target_rect": [
+        55,
+        75,
+        1160,
+        1560
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色圆角虚线描边矩形三个：左上小框、右上大竖框（含右侧竖排虚线延伸）、左下随照片倾斜约8-10度的虚线框；虚线为胶囊状短划线",
+      "requires_exact_content": false,
+      "review_notes": "三个虚线框跨照片但不随客户图变化，合并为一组固定装饰；左下框需与照片同步旋转，制作时注意绑定关系",
+      "rotation_deg": 0,
+      "prepared_asset": null,
+      "background_mode": "alpha",
+      "chroma_key": null,
+      "chroma_tolerance": 40,
+      "shape": null
+    },
+    {
+      "id": "overlay_paperclip",
+      "label": "顶部回形针涂鸦",
+      "source_rect": [
+        840,
+        18,
+        130,
+        135
+      ],
+      "target_rect": [
+        840,
+        18,
+        130,
+        135
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手绘线条回形针涂鸦，斜向置于右上照片顶边与虚线框交界处",
+      "requires_exact_content": false,
+      "review_notes": "手绘风格白色线稿，压在右上照片与虚线框之上",
+      "rotation_deg": 0,
+      "prepared_asset": null,
+      "background_mode": "alpha",
+      "chroma_key": null,
+      "chroma_tolerance": 40,
+      "shape": null
+    },
+    {
+      "id": "overlay_sparkle_lines",
+      "label": "左侧放射状线条星星涂鸦",
+      "source_rect": [
+        95,
+        585,
+        350,
+        235
+      ],
+      "target_rect": [
+        95,
+        585,
+        350,
+        235
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手绘涂鸦组合：两根感叹号状长条、四角星、短线、小圆点，呈放射状排列，填充线条带斜线纹理",
+      "requires_exact_content": false,
+      "review_notes": "位于左中部背景照片上，作为固定氛围装饰",
+      "rotation_deg": 0,
+      "prepared_asset": null,
+      "background_mode": "alpha",
+      "chroma_key": null,
+      "chroma_tolerance": 40,
+      "shape": null
+    },
+    {
+      "id": "overlay_graffiti_text",
+      "label": "右下涂鸦字'此时此刻'",
+      "source_rect": [
+        1080,
+        1585,
+        225,
+        175
+      ],
+      "target_rect": [
+        1080,
+        1585,
+        225,
+        175
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手绘涂鸦风格中文艺术字'此时此刻'，竖向错落排列，带描边空心笔触",
+      "requires_exact_content": false,
+      "review_notes": "固定模板标语，非客户可编辑文字；字形需按原图风格复刻，建议保留原素材而非重新生成",
+      "rotation_deg": 0,
+      "prepared_asset": null,
+      "background_mode": "alpha",
+      "chroma_key": null,
+      "chroma_tolerance": 40,
+      "shape": null
+    }
+  ],
+  "background": {
+    "background_brief": "整版底层由客户上传的背景照片铺满，无需独立纯色底；清版时保留四张相框位与装饰涂鸦的空白占位即可",
+    "review_notes": "本模板背景即为可替换照片槽位（slot_bg_photo），若客户不上传则默认保留灰调黄昏街景",
+    "remove_mask": "remove_mask.png",
+    "allowed_mask": null,
+    "candidate_path": null,
+    "expand_px": 0,
+    "feather_px": 0
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "slot_bg_photo"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_bottomleft"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_topleft"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_topright"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_dashed_frames"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_sparkle_lines"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_paperclip"
+    },
+    {
+      "type": "slot",
+      "id": "slot_text_quote"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_graffiti_text"
+    }
+  ],
+  "review": {
+    "reviewer": "wang jing",
+    "reviewed_at": "2026-09-11T04:10:54+00:00",
+    "notes": "确认页自动处理记录：\n- 未指定字体文件，已批准使用本地通用字体：slot_text_quote\n- 缺少精确透明素材，已改为近似制作：overlay_graffiti_text\n- basic_shape 缺少可执行参数，已改为参考图近似制作：overlay_dashed_frames\n- 4 个 Draft 待确认问题按当前设置处理，未要求逐题填写。",
+    "questions_resolved": true
+  },
+  "audit": {
+    "source_draft_sha256": "1f2dab539e499992a25f6c2430d1b1620f39ef905d6bb2c10b965235464a2280"
+  }
+}

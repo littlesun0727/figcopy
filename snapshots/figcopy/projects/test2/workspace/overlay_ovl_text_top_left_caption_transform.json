@@ -1,0 +1,45 @@
+{
+  "kind": "identity",
+  "source_size": [
+    406,
+    106
+  ],
+  "target_size": [
+    406,
+    106
+  ],
+  "scale": [
+    1.0,
+    1.0
+  ],
+  "offset": [
+    0.0,
+    0.0
+  ],
+  "content_size": [
+    406,
+    106
+  ],
+  "content_box": [
+    3,
+    2,
+    3861,
+    1088
+  ],
+  "technical": {
+    "bbox": [
+      0,
+      0,
+      4160,
+      1088
+    ],
+    "size": [
+      4160,
+      1088
+    ],
+    "required_clearance_px": 16,
+    "issues": [
+      "OVERLAY_EDGE_CLIPPED"
+    ]
+  }
+}

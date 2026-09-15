@@ -1,0 +1,252 @@
+{
+  "source_project": "test1-overlay-171f213208-overlay-b412e-overlay-170d269013",
+  "source_revision": "ef2b9e8f18aeef0eae2477918d1f9da53c2ae4c75059e73d837499059ba27e3f",
+  "revision": "a759fd35850ca1b2d7b79a00136268602dcf0ca27d7ff733cb24782187f07908",
+  "fixed_assets_regenerated": true,
+  "regenerated_overlay": "ov_moment",
+  "items": [
+    {
+      "id": "slot:slot_background",
+      "label": "满版黄昏街景背景（可替换客户照片）",
+      "rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": false,
+      "attachment": null,
+      "missing": false,
+      "grouped": false,
+      "background": true
+    },
+    {
+      "id": "asset:ov_starburst",
+      "label": "ov_starburst",
+      "rect": [
+        95,
+        600,
+        320,
+        250
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "attachment": null,
+      "missing": false,
+      "grouped": false,
+      "background": false
+    },
+    {
+      "id": "asset:ov_hand_english",
+      "label": "ov_hand_english",
+      "rect": [
+        65,
+        90,
+        460,
+        80
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "attachment": null,
+      "missing": false,
+      "grouped": false,
+      "background": false
+    },
+    {
+      "id": "asset:ov_moment",
+      "label": "ov_moment",
+      "rect": [
+        1090,
+        1600,
+        200,
+        140
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "attachment": null,
+      "missing": false,
+      "grouped": false,
+      "background": false
+    },
+    {
+      "id": "slot:slot_photo_2",
+      "label": "右上大照片（黄昏商场街景剪影）",
+      "rect": [
+        585,
+        82,
+        615,
+        818
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "attachment": null,
+      "missing": false,
+      "grouped": true,
+      "background": false
+    },
+    {
+      "id": "asset:ov_border_2",
+      "label": "ov_border_2",
+      "rect": [
+        579,
+        76,
+        627,
+        830
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "attachment": {
+        "slot_id": "slot_photo_2",
+        "position": "above"
+      },
+      "missing": false,
+      "grouped": false,
+      "background": false
+    },
+    {
+      "id": "asset:ov_paperclip",
+      "label": "ov_paperclip",
+      "rect": [
+        855,
+        20,
+        100,
+        120
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "attachment": {
+        "slot_id": "slot_photo_2",
+        "position": "above"
+      },
+      "missing": false,
+      "grouped": false,
+      "background": false
+    },
+    {
+      "id": "slot:slot_photo_3",
+      "label": "左中竖照片（车窗视角城市黄昏）",
+      "rect": [
+        95,
+        848,
+        570,
+        772
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "attachment": null,
+      "missing": false,
+      "grouped": true,
+      "background": false
+    },
+    {
+      "id": "asset:ov_border_3",
+      "label": "ov_border_3",
+      "rect": [
+        89,
+        842,
+        582,
+        784
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "attachment": {
+        "slot_id": "slot_photo_3",
+        "position": "above"
+      },
+      "missing": false,
+      "grouped": false,
+      "background": false
+    },
+    {
+      "id": "slot:slot_photo_1",
+      "label": "左上小照片（棕榈树夕阳街景）",
+      "rect": [
+        68,
+        205,
+        342,
+        260
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "attachment": null,
+      "missing": false,
+      "grouped": true,
+      "background": false
+    },
+    {
+      "id": "asset:ov_border_1",
+      "label": "ov_border_1",
+      "rect": [
+        62,
+        199,
+        354,
+        272
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "editable": true,
+      "attachment": {
+        "slot_id": "slot_photo_1",
+        "position": "above"
+      },
+      "missing": false,
+      "grouped": false,
+      "background": false
+    }
+  ]
+}

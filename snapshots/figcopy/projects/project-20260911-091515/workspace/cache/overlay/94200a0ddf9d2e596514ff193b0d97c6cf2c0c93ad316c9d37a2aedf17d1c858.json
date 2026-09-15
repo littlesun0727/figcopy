@@ -1,0 +1,58 @@
+{
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "021789107462710ab536ac757ac87e581a3dec385332717816786",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 33109
+  },
+  "background_mode": "chroma_key",
+  "chroma_key": [
+    255,
+    255,
+    0
+  ],
+  "transform": {
+    "kind": "identity",
+    "source_size": [
+      510,
+      260
+    ],
+    "target_size": [
+      510,
+      260
+    ],
+    "scale": [
+      1.0,
+      1.0
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      510,
+      260
+    ],
+    "provider_output": {
+      "kind": "center_crop_uniform_resize",
+      "source_size": [
+        2048,
+        2048
+      ],
+      "crop_box": [
+        0,
+        502,
+        2048,
+        1546
+      ],
+      "target_size": [
+        510,
+        260
+      ]
+    }
+  },
+  "normalized": true
+}

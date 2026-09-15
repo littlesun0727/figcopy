@@ -1,0 +1,19 @@
+{
+  "request_id": "chatcmpl-df7e9a7a-208c-9307-87f7-197ab727f595",
+  "model": "qwen3.8-max",
+  "finish_reason": "stop",
+  "usage": {
+    "completion_tokens": 10033,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7812,
+      "text_tokens": 2220
+    },
+    "prompt_tokens": 5987,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "image_tokens": 2257,
+      "text_tokens": 3730
+    },
+    "total_tokens": 16020
+  }
+}

@@ -1,0 +1,11 @@
+# Preserve snapshot bytes; store image/video content in Git LFS.
+snapshots/figcopy/** -text
+snapshots/figcopy/**/*.png filter=lfs diff=lfs merge=lfs -text
+snapshots/figcopy/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+snapshots/figcopy/**/*.jpeg filter=lfs diff=lfs merge=lfs -text
+snapshots/figcopy/**/*.gif filter=lfs diff=lfs merge=lfs -text
+snapshots/figcopy/**/*.webp filter=lfs diff=lfs merge=lfs -text
+snapshots/figcopy/**/*.mp4 filter=lfs diff=lfs merge=lfs -text
+snapshots/figcopy/**/*.mov filter=lfs diff=lfs merge=lfs -text
+snapshots/figcopy/**/*.svg filter=lfs diff=lfs merge=lfs -text
+snapshots/figcopy/**/*.zip filter=lfs diff=lfs merge=lfs -text

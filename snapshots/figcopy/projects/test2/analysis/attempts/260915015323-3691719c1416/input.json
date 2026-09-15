@@ -1,0 +1,9 @@
+{
+  "canvas": {
+    "width": 1080,
+    "height": 1435,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "source_sha256": "60f65b4db7ccc1398c1c20a0a3c83d9e5da392a65774a7f524b72535b059d35b"
+}

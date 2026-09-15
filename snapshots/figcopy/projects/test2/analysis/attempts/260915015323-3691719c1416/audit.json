@@ -1,0 +1,9 @@
+{
+  "name": "yibu-audit-vlm",
+  "requested_model": "kimi-k3",
+  "actual_model": "kimi-k3",
+  "request_id": "chatcmpl-caf5fa79a463b123f33bee8c",
+  "fixture": false,
+  "cache_hit": false,
+  "elapsed_ms": 95750
+}

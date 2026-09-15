@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "右下角两枚红色唇印贴纸，一深一浅，唇纹清晰，边缘略不规则，带光泽与轻阴影，压在右下浅色相框底部区域前景。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "0217894388761521023f1f6cf081335b7e69d5fdf9a936883b1f8",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 32890
+  },
+  "raw_sha256": "51fbc3473d0639cc10d17cf3ee93f30ad40eb452bb0ef9e3c995d69b0795a3d3",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      2624,
+      1664
+    ],
+    "target_size": [
+      246,
+      156
+    ],
+    "scale": [
+      0.09375,
+      0.09375
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      246,
+      156
+    ]
+  }
+}

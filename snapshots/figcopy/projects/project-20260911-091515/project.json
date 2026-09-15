@@ -1,0 +1,298 @@
+{
+  "version": "figcopy-project/1",
+  "id": "project-20260911-091515",
+  "name": "人像拼贴",
+  "status": "ready",
+  "created_at": "2026-09-11T01:15:58.964828+00:00",
+  "updated_at": "2026-09-11T07:14:30.006599+00:00",
+  "workflow": {
+    "version": "figcopy-workflow/1",
+    "stage": "complete",
+    "resume_stage": null,
+    "started_at": "2026-09-11T01:15:58.962199+00:00",
+    "stage_updated_at": "2026-09-11T07:14:30.005034+00:00",
+    "options": {
+      "reviewer": "wang jing",
+      "vision_provider": "collage.providers.yibu:YibuVisionProvider",
+      "image_provider": "collage.providers.yibu:YibuImageProvider",
+      "cutout_provider": "collage.providers.birefnet:BiRefNetLiteMattingProvider",
+      "fixture_provider": false,
+      "allow_cloud_upload": false,
+      "review_port": 8765
+    },
+    "artifacts": {
+      "reference": "inputs/reference.png",
+      "manual_draft": "inputs/manual_draft.json",
+      "product_policy": "inputs/product_policy.json",
+      "background_candidate": "inputs/background_candidate.png",
+      "initial_mask": "inputs/initial_remove_mask.png",
+      "allowed_mask": "inputs/allowed_mask.png",
+      "draft": "analysis/draft.json",
+      "draft_preview": "analysis/draft_preview.png",
+      "reviewed": "review/reviewed.json",
+      "remove_mask": "review/remove_mask.png",
+      "template_manifest": "template/template.json",
+      "inspection_report": "workspace/inspection.html",
+      "upload_guide": "reports/upload_guide.html",
+      "bindings_example": "renders/bindings.example.json",
+      "bindings": "renders/bindings.json",
+      "render": "renders/result.png",
+      "render_audit": "renders/result.png.render.json"
+    },
+    "wait": null,
+    "last_error": null,
+    "history": [
+      {
+        "stage": "analyzing",
+        "at": "2026-09-11T01:15:58.962199+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T01:16:00.133908+00:00",
+        "code": "YIBU_CREDENTIAL_MISSING"
+      },
+      {
+        "stage": "analyzing",
+        "at": "2026-09-11T01:56:06.709760+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T01:56:09.332068+00:00",
+        "code": "YIBU_AUDIT_PROXY_UNAVAILABLE"
+      },
+      {
+        "stage": "analyzing",
+        "at": "2026-09-11T01:56:24.731217+00:00"
+      },
+      {
+        "stage": "awaiting_review",
+        "at": "2026-09-11T02:00:27.901198+00:00"
+      },
+      {
+        "stage": "reviewed",
+        "at": "2026-09-11T02:15:27.386634+00:00"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T02:15:27.397593+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T02:15:38.662786+00:00",
+        "code": "TEMPORARY_NETWORK_ERROR"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T02:21:07.447867+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T02:21:17.981268+00:00",
+        "code": "TEMPORARY_NETWORK_ERROR"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T02:23:51.729269+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T02:23:51.761525+00:00",
+        "code": "WORKFLOW_FAILED"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T02:24:28.286264+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T02:24:44.744869+00:00",
+        "code": "TEMPORARY_NETWORK_ERROR"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T02:43:26.005156+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T02:43:56.123990+00:00",
+        "code": "TEMPORARY_NETWORK_ERROR"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T02:56:54.217996+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T02:57:03.253504+00:00",
+        "code": "TEMPORARY_NETWORK_ERROR"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:05:35.511117+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T03:05:45.419572+00:00",
+        "code": "TEMPORARY_NETWORK_ERROR"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:18:38.573691+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T03:21:39.566136+00:00",
+        "code": "PROVIDER_REQUEST_FAILED"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:22:24.753344+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T03:25:23.626823+00:00",
+        "code": "PROVIDER_REQUEST_FAILED"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:30:22.666676+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T03:33:36.007513+00:00",
+        "code": "PROVIDER_REQUEST_FAILED"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:34:32.474057+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T03:34:32.501782+00:00",
+        "code": "YIBU_CREDENTIAL_MISSING"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:34:44.367103+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T03:37:18.249024+00:00",
+        "code": "OPAQUE_OVERLAY"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:47:06.855308+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T03:47:17.812068+00:00",
+        "code": "TEMPORARY_NETWORK_ERROR"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:47:36.938152+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T03:47:46.847920+00:00",
+        "code": "TEMPORARY_NETWORK_ERROR"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:49:57.528180+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T03:50:34.006951+00:00",
+        "code": "PROVIDER_RETRY_BUDGET_EXHAUSTED"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:55:09.475363+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T03:55:09.515877+00:00",
+        "code": "YIBU_IMAGE_MODEL_UNSUPPORTED"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:55:15.666610+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T03:55:15.704876+00:00",
+        "code": "YIBU_IMAGE_MODEL_UNSUPPORTED"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T03:55:18.014296+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T03:55:18.047728+00:00",
+        "code": "YIBU_IMAGE_MODEL_UNSUPPORTED"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T04:02:13.551827+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T04:04:51.761787+00:00",
+        "code": "OPAQUE_OVERLAY"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T06:02:08.253455+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T06:02:08.289727+00:00",
+        "code": "YIBU_CREDENTIAL_MISSING"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T06:02:16.288365+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T06:12:22.028982+00:00",
+        "code": "PROVIDER_RETRY_BUDGET_EXHAUSTED"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T06:12:56.914999+00:00"
+      },
+      {
+        "stage": "awaiting_bindings",
+        "at": "2026-09-11T06:18:16.769471+00:00"
+      },
+      {
+        "stage": "rendering",
+        "at": "2026-09-11T06:22:06.576576+00:00"
+      },
+      {
+        "stage": "awaiting_approval",
+        "at": "2026-09-11T06:22:08.177500+00:00"
+      },
+      {
+        "stage": "awaiting_bindings",
+        "at": "2026-09-11T06:23:20.545417+00:00"
+      },
+      {
+        "stage": "rendering",
+        "at": "2026-09-11T06:24:31.929508+00:00"
+      },
+      {
+        "stage": "awaiting_approval",
+        "at": "2026-09-11T06:24:33.488777+00:00"
+      },
+      {
+        "stage": "complete",
+        "at": "2026-09-11T07:14:30.005034+00:00"
+      }
+    ]
+  }
+}

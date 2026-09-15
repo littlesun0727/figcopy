@@ -1,0 +1,37 @@
+{
+  "version": "collage-reviewed/1",
+  "status": "reviewed",
+  "reference": {
+    "path": "inputs/reference.png",
+    "sha256": "18a320825a96b565a290afe7a628cffa9d9f27699c58bafce5307be4b707c8fb"
+  },
+  "canvas": {
+    "width": 384,
+    "height": 256,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "slots": [],
+  "overlays": [],
+  "background": {
+    "background_brief": "Replace the red panel with a wholly original hand-painted turquoise paper inlay containing three asymmetrical golden circles and subtle grain. Make the motif novel rather than copying any known artwork.",
+    "review_notes": "Synthetic image-model connectivity check.",
+    "remove_mask": "inputs/remove_mask.png",
+    "allowed_mask": null,
+    "candidate_path": null,
+    "expand_px": 0,
+    "feather_px": 0
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    }
+  ],
+  "review": {
+    "reviewer": "automated Yibu smoke test",
+    "reviewed_at": "2026-09-10T00:00:00+08:00",
+    "notes": "No API credential is stored in this artifact.",
+    "questions_resolved": true
+  },
+  "audit": {}
+}

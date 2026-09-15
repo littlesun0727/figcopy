@@ -1,0 +1,125 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T01:11:34.113971+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=a530749612d2412984e4442803c6a2a1 kind=retry"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T01:11:34.123232+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1 stage=analyzing"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-15T01:11:34.148725+00:00",
+      "level": "INFO",
+      "logger": "collage.core.diagnostics",
+      "message": "开始分析尝试 | attempt=260915011134-5d668598ac81"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-15T01:11:34.162093+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=reference.png"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-15T01:11:34.517064+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片已保存 | file=reference.png size=1320x1767"
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-15T01:11:34.537782+00:00",
+      "level": "INFO",
+      "logger": "collage.template.analysis",
+      "message": "调用 VLM 生成候选草稿 | provider=yibu-audit-vlm model=qwen3.8-max"
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-15T01:11:34.555140+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.chat",
+      "message": "准备 VLM 请求 | model=qwen3.8-max max_tokens=16384 reasoning_effort=high"
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-15T01:11:34.562530+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "yibu 审计代理健康检查通过 | endpoint=<service-url>"
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-15T01:11:34.599470+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=analyze-reference model=qwen3.8-max path=<path>"
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-15T01:15:12.155641+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.chat",
+      "message": "收到 VLM 回答 | model=qwen3.8-max characters=6097 finish_reason=stop"
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-15T01:15:12.235168+00:00",
+      "level": "INFO",
+      "logger": "collage.template.analysis",
+      "message": "校验模型候选草稿"
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-15T01:15:12.340868+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=reference.png"
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-15T01:15:12.749544+00:00",
+      "level": "INFO",
+      "logger": "collage.template.analysis",
+      "message": "候选草稿已生成 | file=draft.json"
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-15T01:15:12.768476+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1 stage=awaiting_review"
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-15T01:15:12.785208+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1 stage=awaiting_review"
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-15T01:15:12.797596+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务完成 | job=a530749612d2412984e4442803c6a2a1"
+    }
+  ],
+  "last_seq": 16,
+  "id": "a530749612d2412984e4442803c6a2a1",
+  "project_id": "test1",
+  "kind": "retry",
+  "state": "succeeded",
+  "created_at": "2026-09-15T01:11:34.101372+00:00",
+  "updated_at": "2026-09-15T01:15:12.802192+00:00",
+  "error": null,
+  "result": null
+}

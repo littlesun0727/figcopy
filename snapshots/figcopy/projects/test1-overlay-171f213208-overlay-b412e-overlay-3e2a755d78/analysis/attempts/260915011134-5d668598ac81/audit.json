@@ -1,0 +1,9 @@
+{
+  "name": "yibu-audit-vlm",
+  "requested_model": "qwen3.8-max",
+  "actual_model": "qwen3.8-max",
+  "request_id": "chatcmpl-272d6b45-fe5d-9529-83c2-421062943837",
+  "fixture": false,
+  "cache_hit": false,
+  "elapsed_ms": 217609
+}

@@ -1,0 +1,531 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T02:01:01.474865+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=3c220e9ac6514c80b4df3aaa41e60a43 kind=build"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T02:01:01.502334+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test2 stage=reviewed"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-15T02:01:01.516391+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test2 stage=building"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-15T02:01:01.524119+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.service",
+      "message": "开始构建模板 | version=collage-build/4"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-15T02:01:02.028517+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.service",
+      "message": "原图 overlay crop 已保存 | count=12"
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-15T02:01:02.049583+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.background",
+      "message": "背景合成方式 | mode=protected"
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-15T02:01:02.073913+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.background",
+      "message": "调用图片 provider 制作背景 | provider=yibu-audit-seedream-image model=doubao-seedream-5-0-260128"
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-15T02:01:02.357444+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "yibu 审计代理健康检查通过 | endpoint=<service-url>"
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-15T02:01:02.401257+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=edit-background model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-15T02:01:51.910623+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-15T02:01:54.027545+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_frame_top_left provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-15T02:01:54.108452+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-15T02:02:52.724221+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-15T02:02:54.368766+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=1888x2112"
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-15T02:02:54.459208+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=149.58"
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-15T02:02:57.806056+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_text_top_left_caption provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 17,
+      "at": "2026-09-15T02:02:57.819154+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 18,
+      "at": "2026-09-15T02:03:48.363707+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 19,
+      "at": "2026-09-15T02:03:50.294389+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=4160x1088"
+    },
+    {
+      "seq": 20,
+      "at": "2026-09-15T02:03:50.387133+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=134.95"
+    },
+    {
+      "seq": 21,
+      "at": "2026-09-15T02:03:54.733994+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_frame_top_right provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 22,
+      "at": "2026-09-15T02:03:54.816198+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 23,
+      "at": "2026-09-15T02:04:48.126239+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 24,
+      "at": "2026-09-15T02:04:50.230773+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=1824x2144"
+    },
+    {
+      "seq": 25,
+      "at": "2026-09-15T02:04:50.322546+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=147.73"
+    },
+    {
+      "seq": 26,
+      "at": "2026-09-15T02:04:54.299515+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_frame_bottom_left provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 27,
+      "at": "2026-09-15T02:04:54.378377+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 28,
+      "at": "2026-09-15T02:06:05.910305+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 29,
+      "at": "2026-09-15T02:06:07.708875+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=1760x2240"
+    },
+    {
+      "seq": 30,
+      "at": "2026-09-15T02:06:07.773363+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=122.16"
+    },
+    {
+      "seq": 31,
+      "at": "2026-09-15T02:06:11.888558+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_text_bottom_left_face provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 32,
+      "at": "2026-09-15T02:06:11.894886+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 33,
+      "at": "2026-09-15T02:06:58.727661+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 34,
+      "at": "2026-09-15T02:07:02.291718+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=3392x1216"
+    },
+    {
+      "seq": 35,
+      "at": "2026-09-15T02:07:02.380497+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=131.00"
+    },
+    {
+      "seq": 36,
+      "at": "2026-09-15T02:07:05.807508+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_frame_bottom_right provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 37,
+      "at": "2026-09-15T02:07:05.894783+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 38,
+      "at": "2026-09-15T02:07:49.875831+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 39,
+      "at": "2026-09-15T02:07:51.535611+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=1728x2208"
+    },
+    {
+      "seq": 40,
+      "at": "2026-09-15T02:07:51.621704+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=137.34"
+    },
+    {
+      "seq": 41,
+      "at": "2026-09-15T02:07:55.221509+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_paw_top_left provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 42,
+      "at": "2026-09-15T02:07:55.233459+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 43,
+      "at": "2026-09-15T02:17:59.482343+00:00",
+      "level": "WARNING",
+      "logger": "collage.template.build.service",
+      "message": "跳过不可用装饰，继续构建 | id=ovl_paw_top_left code=TEMPORARY_NETWORK_ERROR"
+    },
+    {
+      "seq": 44,
+      "at": "2026-09-15T02:17:59.501996+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_player_top_right provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 45,
+      "at": "2026-09-15T02:17:59.518814+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 46,
+      "at": "2026-09-15T02:18:38.858946+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 47,
+      "at": "2026-09-15T02:18:40.617379+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=4128x1088"
+    },
+    {
+      "seq": 48,
+      "at": "2026-09-15T02:18:40.729862+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=154.31"
+    },
+    {
+      "seq": 49,
+      "at": "2026-09-15T02:18:44.126345+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_star_cluster_center provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 50,
+      "at": "2026-09-15T02:18:44.162692+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 51,
+      "at": "2026-09-15T02:19:29.802949+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 52,
+      "at": "2026-09-15T02:19:31.596385+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=2048x1856"
+    },
+    {
+      "seq": 53,
+      "at": "2026-09-15T02:19:31.671334+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=128.56"
+    },
+    {
+      "seq": 54,
+      "at": "2026-09-15T02:19:34.958192+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_bubbles_right provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 55,
+      "at": "2026-09-15T02:19:34.973010+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 56,
+      "at": "2026-09-15T02:20:24.334420+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 57,
+      "at": "2026-09-15T02:20:27.745496+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=1984x1952"
+    },
+    {
+      "seq": 58,
+      "at": "2026-09-15T02:20:27.821534+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=131.79"
+    },
+    {
+      "seq": 59,
+      "at": "2026-09-15T02:20:31.311020+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_yes_bubble_bottom provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 60,
+      "at": "2026-09-15T02:20:31.318162+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 61,
+      "at": "2026-09-15T02:21:09.322859+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 62,
+      "at": "2026-09-15T02:21:11.219616+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=3712x1152"
+    },
+    {
+      "seq": 63,
+      "at": "2026-09-15T02:21:11.323993+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=149.01"
+    },
+    {
+      "seq": 64,
+      "at": "2026-09-15T02:21:14.999559+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ovl_lips_bottom_right provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 65,
+      "at": "2026-09-15T02:21:15.014992+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 66,
+      "at": "2026-09-15T02:21:46.958293+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 67,
+      "at": "2026-09-15T02:21:48.858742+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=2624x1664"
+    },
+    {
+      "seq": 68,
+      "at": "2026-09-15T02:21:48.946143+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=140.77"
+    },
+    {
+      "seq": 69,
+      "at": "2026-09-15T02:21:53.363783+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.service",
+      "message": "模板构建完成，等待验收 | status=needs_review"
+    },
+    {
+      "seq": 70,
+      "at": "2026-09-15T02:21:54.167243+00:00",
+      "level": "INFO",
+      "logger": "collage.template.guide",
+      "message": "上传指南已生成 | html=<path>"
+    },
+    {
+      "seq": 71,
+      "at": "2026-09-15T02:21:54.184303+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test2 stage=awaiting_bindings"
+    },
+    {
+      "seq": 72,
+      "at": "2026-09-15T02:21:54.975618+00:00",
+      "level": "INFO",
+      "logger": "collage.template.guide",
+      "message": "上传指南已生成 | html=<path>"
+    },
+    {
+      "seq": 73,
+      "at": "2026-09-15T02:21:55.773077+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test2 stage=awaiting_bindings"
+    },
+    {
+      "seq": 74,
+      "at": "2026-09-15T02:21:55.787580+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务完成 | job=3c220e9ac6514c80b4df3aaa41e60a43"
+    }
+  ],
+  "last_seq": 74,
+  "id": "3c220e9ac6514c80b4df3aaa41e60a43",
+  "project_id": "test2",
+  "kind": "build",
+  "state": "succeeded",
+  "created_at": "2026-09-15T02:01:01.463130+00:00",
+  "updated_at": "2026-09-15T02:21:55.791630+00:00",
+  "error": null,
+  "result": null
+}

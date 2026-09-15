@@ -1,0 +1,439 @@
+{
+  "status": "needs_review",
+  "nodes": {
+    "overlay_crops": {
+      "status": "complete",
+      "count": 12
+    },
+    "background": {
+      "status": "complete",
+      "input_sha256": "60f65b4db7ccc1398c1c20a0a3c83d9e5da392a65774a7f524b72535b059d35b",
+      "audit": {
+        "node": "background",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789437666111946cfb140b96a874358f5d78c70e71146137a1",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 50781
+      },
+      "outputs": [
+        "background_candidate.png",
+        "background.png",
+        "remove_mask.png",
+        "blend_mask.png"
+      ]
+    },
+    "overlay:ovl_frame_top_left": {
+      "status": "complete",
+      "source_rect": [
+        62,
+        36,
+        456,
+        551
+      ],
+      "audit": {
+        "node": "overlay:ovl_frame_top_left",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789437714752ef85bd0387fb7be6c83a2089a55d2b2e104368",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 59578
+      },
+      "visible_bbox": [
+        202,
+        168,
+        1682,
+        1901
+      ],
+      "output": "assets/overlay_ovl_frame_top_left.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_frame_top_left",
+          "label": "左上白色拍立得边框",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    },
+    "overlay:ovl_text_top_left_caption": {
+      "status": "complete",
+      "source_rect": [
+        104,
+        492,
+        382,
+        82
+      ],
+      "audit": {
+        "node": "overlay:ovl_text_top_left_caption",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789437779037ed9c07a18069cfb59ad66daf7e7bd92127fd7f",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 51578
+      },
+      "visible_bbox": [
+        3,
+        2,
+        3861,
+        1088
+      ],
+      "output": "assets/overlay_ovl_text_top_left_caption.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_text_top_left_caption",
+          "label": "左上日文手写 caption",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    },
+    "overlay:ovl_frame_top_right": {
+      "status": "complete",
+      "source_rect": [
+        563,
+        126,
+        456,
+        553
+      ],
+      "audit": {
+        "node": "overlay:ovl_frame_top_right",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789437837028ed9c07a18069cfb59ad66daf7e7bd9218bfef9",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 54532
+      },
+      "visible_bbox": [
+        172,
+        197,
+        1656,
+        1942
+      ],
+      "output": "assets/overlay_ovl_frame_top_right.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_frame_top_right",
+          "label": "右上红色蝴蝶结相框",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    },
+    "overlay:ovl_frame_bottom_left": {
+      "status": "complete",
+      "source_rect": [
+        62,
+        695,
+        465,
+        620
+      ],
+      "audit": {
+        "node": "overlay:ovl_frame_bottom_left",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "0217894378971972d60f60bba313662d1f7bb8a224af9f4bb5b55",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 72562
+      },
+      "visible_bbox": [
+        119,
+        203,
+        1645,
+        2084
+      ],
+      "output": "assets/overlay_ovl_frame_bottom_left.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_frame_bottom_left",
+          "label": "左下黑色胶片相框",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    },
+    "overlay:ovl_text_bottom_left_face": {
+      "status": "complete",
+      "source_rect": [
+        188,
+        1235,
+        205,
+        62
+      ],
+      "audit": {
+        "node": "overlay:ovl_text_bottom_left_face",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789437973231637105f9e0c7bada5e282be23591e67a634432",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 49593
+      },
+      "visible_bbox": [
+        666,
+        294,
+        2747,
+        972
+      ],
+      "output": "assets/overlay_ovl_text_bottom_left_face.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_text_bottom_left_face",
+          "label": "左下黑框底部表情",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    },
+    "overlay:ovl_frame_bottom_right": {
+      "status": "complete",
+      "source_rect": [
+        569,
+        763,
+        449,
+        635
+      ],
+      "audit": {
+        "node": "overlay:ovl_frame_bottom_right",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "0217894380280753ea4fa82759f0cae4f2ffa723d4f9dd671fe4c",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 44984
+      },
+      "visible_bbox": [
+        3,
+        2,
+        1518,
+        2018
+      ],
+      "output": "assets/overlay_ovl_frame_bottom_right.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_frame_bottom_right",
+          "label": "右下浅色相框",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    },
+    "overlay:ovl_paw_top_left": {
+      "status": "skipped",
+      "source_rect": [
+        14,
+        24,
+        178,
+        132
+      ],
+      "error": {
+        "code": "TEMPORARY_NETWORK_ERROR",
+        "message": "该件制作未完成，已跳过"
+      }
+    },
+    "overlay:ovl_player_top_right": {
+      "status": "complete",
+      "source_rect": [
+        560,
+        20,
+        500,
+        108
+      ],
+      "audit": {
+        "node": "overlay:ovl_player_top_right",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789438680265340e160c71121bcc773a2f9b8185f6569f57ec",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 40359
+      },
+      "visible_bbox": [
+        117,
+        174,
+        3754,
+        876
+      ],
+      "output": "assets/overlay_ovl_player_top_right.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_player_top_right",
+          "label": "右上音乐播放器条",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    },
+    "overlay:ovl_star_cluster_center": {
+      "status": "complete",
+      "source_rect": [
+        348,
+        515,
+        330,
+        290
+      ],
+      "audit": {
+        "node": "overlay:ovl_star_cluster_center",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789438728453265c448ee6909a398288d07ae906a66bd0c823",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 46656
+      },
+      "visible_bbox": [
+        300,
+        450,
+        1585,
+        1575
+      ],
+      "output": "assets/overlay_ovl_star_cluster_center.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_star_cluster_center",
+          "label": "中央粉色流星与星芒",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    },
+    "overlay:ovl_bubbles_right": {
+      "status": "complete",
+      "source_rect": [
+        790,
+        650,
+        185,
+        180
+      ],
+      "audit": {
+        "node": "overlay:ovl_bubbles_right",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "0217894387779927d96eb03402f8d23bede142cc170f12145e1e3",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 51984
+      },
+      "visible_bbox": [
+        252,
+        357,
+        1693,
+        1662
+      ],
+      "output": "assets/overlay_ovl_bubbles_right.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_bubbles_right",
+          "label": "右侧冰块泡泡",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    },
+    "overlay:ovl_yes_bubble_bottom": {
+      "status": "complete",
+      "source_rect": [
+        185,
+        1327,
+        240,
+        62
+      ],
+      "audit": {
+        "node": "overlay:ovl_yes_bubble_bottom",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "0217894388338561023f1f6cf081335b7e69d5fdf9a93687ddd94",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 38937
+      },
+      "visible_bbox": [
+        1210,
+        433,
+        2469,
+        833
+      ],
+      "output": "assets/overlay_ovl_yes_bubble_bottom.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_yes_bubble_bottom",
+          "label": "底部 Yes 气泡文字",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    },
+    "overlay:ovl_lips_bottom_right": {
+      "status": "complete",
+      "source_rect": [
+        797,
+        1268,
+        210,
+        120
+      ],
+      "audit": {
+        "node": "overlay:ovl_lips_bottom_right",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "0217894388761521023f1f6cf081335b7e69d5fdf9a936883b1f8",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 32890
+      },
+      "visible_bbox": [
+        1442,
+        935,
+        2452,
+        1501
+      ],
+      "output": "assets/overlay_ovl_lips_bottom_right.png",
+      "warnings": [
+        {
+          "overlay_id": "ovl_lips_bottom_right",
+          "label": "右下红唇印",
+          "code": "OVERLAY_EDGE_CLIPPED",
+          "message": "边缘存在可见像素，请结合整图检查",
+          "skipped": false
+        }
+      ],
+      "error": null
+    }
+  },
+  "last_error": null
+}

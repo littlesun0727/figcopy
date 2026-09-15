@@ -1,0 +1,338 @@
+{
+  "version": "collage-draft/3",
+  "status": "draft",
+  "source": {
+    "path": "reference.png",
+    "sha256": "df132ac1c91c929f8cd88b8bf3bc026d8c14edc1e3960338f0489afcc05a60c9",
+    "width": 1320,
+    "height": 1767
+  },
+  "canvas": {
+    "width": 1320,
+    "height": 1767,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "prompt_version": "collage-review-feedback/6",
+  "provider": {
+    "name": "yibu-audit-vlm",
+    "requested_model": "qwen3.8-max",
+    "actual_model": "qwen3.8-max",
+    "request_id": "chatcmpl-df7e9a7a-208c-9307-87f7-197ab727f595",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 210172
+  },
+  "created_at": "2026-09-15T01:21:03.017074+00:00",
+  "slots": [
+    {
+      "id": "slot_background",
+      "label": "满版黄昏街景背景（可替换客户照片）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "target_rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "upload_hint": "上传一张竖幅满版街景或风景照片，铺满整个画布作为底板",
+      "review_notes": "客户确认满版街景为可替换客户照片槽位；原右下区域内容并入该背景，不再单设照片槽"
+    },
+    {
+      "id": "slot_photo_1",
+      "label": "左上小照片（棕榈树夕阳街景）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        68,
+        205,
+        342,
+        260
+      ],
+      "target_rect": [
+        68,
+        205,
+        342,
+        260
+      ],
+      "upload_hint": "上传横向风景或街景照片，将居中裁切为此小矩形",
+      "review_notes": "矩形直边照片，无羽化无抠图，外围有白色虚线边框装饰"
+    },
+    {
+      "id": "slot_photo_2",
+      "label": "右上大照片（黄昏商场街景剪影）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        585,
+        82,
+        615,
+        818
+      ],
+      "target_rect": [
+        585,
+        82,
+        615,
+        818
+      ],
+      "upload_hint": "上传竖向照片，将裁切为此大矩形",
+      "review_notes": "矩形直边照片，顶部被回形针装饰压住"
+    },
+    {
+      "id": "slot_photo_3",
+      "label": "左中竖照片（车窗视角城市黄昏）",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        95,
+        848,
+        570,
+        772
+      ],
+      "target_rect": [
+        95,
+        848,
+        570,
+        772
+      ],
+      "upload_hint": "上传竖向照片，将裁切为此矩形",
+      "review_notes": "矩形直边照片，压在背景底板左下区域之上"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "ov_border_1",
+      "label": "左上小照片白色虚线边框",
+      "source_rect": [
+        62,
+        199,
+        354,
+        272
+      ],
+      "target_rect": [
+        62,
+        199,
+        354,
+        272
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "",
+      "attachment": {
+        "slot_id": "slot_photo_1",
+        "position": "above"
+      },
+      "text_content": null,
+      "shape": {
+        "kind": "dashed_rectangle",
+        "outline": "#FFFFFF",
+        "width": 6,
+        "dash": 20,
+        "gap": 16
+      }
+    },
+    {
+      "id": "ov_border_2",
+      "label": "右上大照片白色虚线边框",
+      "source_rect": [
+        579,
+        76,
+        627,
+        830
+      ],
+      "target_rect": [
+        579,
+        76,
+        627,
+        830
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "",
+      "attachment": {
+        "slot_id": "slot_photo_2",
+        "position": "above"
+      },
+      "text_content": null,
+      "shape": {
+        "kind": "dashed_rectangle",
+        "outline": "#FFFFFF",
+        "width": 6,
+        "dash": 20,
+        "gap": 16
+      }
+    },
+    {
+      "id": "ov_border_3",
+      "label": "左中竖照片白色虚线边框",
+      "source_rect": [
+        89,
+        842,
+        582,
+        784
+      ],
+      "target_rect": [
+        89,
+        842,
+        582,
+        784
+      ],
+      "action": "basic_shape",
+      "generation_brief": "",
+      "requires_exact_content": false,
+      "review_notes": "",
+      "attachment": {
+        "slot_id": "slot_photo_3",
+        "position": "above"
+      },
+      "text_content": null,
+      "shape": {
+        "kind": "dashed_rectangle",
+        "outline": "#FFFFFF",
+        "width": 6,
+        "dash": 20,
+        "gap": 16
+      }
+    },
+    {
+      "id": "ov_paperclip",
+      "label": "顶部白色手绘回形针",
+      "source_rect": [
+        855,
+        20,
+        100,
+        120
+      ],
+      "target_rect": [
+        855,
+        20,
+        100,
+        120
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手绘线条回形针，双环圆角矩形线框，略微向右倾斜，线条粗细均匀带轻微发光感，透明背景单件",
+      "requires_exact_content": false,
+      "review_notes": "夹在右上照片顶部边框上",
+      "attachment": {
+        "slot_id": "slot_photo_2",
+        "position": "above"
+      },
+      "text_content": null,
+      "shape": null
+    },
+    {
+      "id": "ov_starburst",
+      "label": "左中白色手绘放射星芒图案",
+      "source_rect": [
+        95,
+        600,
+        320,
+        250
+      ],
+      "target_rect": [
+        95,
+        600,
+        320,
+        250
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色手绘半圆形放射星芒装饰，由多条长短不一的放射粗线条、空心长条、小菱形与小圆点组成，线条带手绘涂抹感，透明背景单件",
+      "requires_exact_content": false,
+      "review_notes": "位于背景云层上，不附着于任何照片",
+      "attachment": null,
+      "text_content": null,
+      "shape": null
+    },
+    {
+      "id": "ov_hand_english",
+      "label": "左上白色手写英文两行",
+      "source_rect": [
+        65,
+        90,
+        460,
+        80
+      ],
+      "target_rect": [
+        65,
+        90,
+        460,
+        80
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色纤细手写花体英文两行文字，笔触流畅连笔，第一行较长第二行略短，透明背景单件",
+      "requires_exact_content": true,
+      "review_notes": "",
+      "attachment": null,
+      "text_content": "Sunset sells tenderness, and the world is full of romance.",
+      "shape": null
+    },
+    {
+      "id": "ov_moment",
+      "label": "右下白色手写中文“此刻”",
+      "source_rect": [
+        1090,
+        1600,
+        200,
+        140
+      ],
+      "target_rect": [
+        1090,
+        1600,
+        200,
+        140
+      ],
+      "action": "reference_generate",
+      "generation_brief": "白色细线勾勒手写中文“此刻”二字，笔画为双线描边带轻微阴影线条，字形倾斜潇洒，透明背景单件",
+      "requires_exact_content": true,
+      "review_notes": "原压右下区域之上；该区域已并入背景槽，现改为独立装饰浮于背景槽上方",
+      "attachment": null,
+      "text_content": "此刻",
+      "shape": null
+    }
+  ],
+  "background": {
+    "mode": "slot",
+    "slot_id": "slot_background",
+    "review_notes": "客户确认满版黄昏街景为可替换客户照片槽位；背景槽位于最底层铺满画布，不再设置固定底板"
+  },
+  "layer_order": [
+    {
+      "type": "slot",
+      "id": "slot_background"
+    },
+    {
+      "type": "overlay",
+      "id": "ov_starburst"
+    },
+    {
+      "type": "overlay",
+      "id": "ov_hand_english"
+    },
+    {
+      "type": "overlay",
+      "id": "ov_moment"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_2"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_3"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_1"
+    }
+  ],
+  "questions": []
+}

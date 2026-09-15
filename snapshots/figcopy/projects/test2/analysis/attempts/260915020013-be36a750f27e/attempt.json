@@ -1,0 +1,24 @@
+{
+  "id": "260915020013-be36a750f27e",
+  "started_at": "2026-09-15T02:00:13.277713+00:00",
+  "status": "succeeded",
+  "phase": "saving_draft",
+  "files": [
+    "prompt.txt",
+    "transport_response.txt",
+    "response.json",
+    "response_metadata.json",
+    "response.txt",
+    "candidate.json",
+    "audit.json",
+    "assembled_draft.json",
+    "validation.json"
+  ],
+  "job_id": "b4317ab6f90849b5a7e520874d7c4a92",
+  "kind": "correction",
+  "provider": "yibu-audit-vlm",
+  "model": "kimi-k3",
+  "fixture": false,
+  "prompt_version": "collage-review-feedback/6",
+  "finished_at": "2026-09-15T02:00:50.177328+00:00"
+}

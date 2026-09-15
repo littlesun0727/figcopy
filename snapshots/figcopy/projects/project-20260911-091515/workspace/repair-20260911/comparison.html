@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>拼贴修复预览</title>
+<style>
+body{margin:32px auto;padding:0 24px;max-width:1500px;font:16px/1.7 system-ui,sans-serif;color:#222;background:#f5f3ef}
+h1{font-size:26px}p{max-width:1000px}.notice{background:#fff3d7;padding:12px 18px;border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}figure{margin:0}img{width:100%;height:auto;background:white}
+figcaption{font-weight:600;margin:10px 0}a{color:#1b5bb5}
+@media(max-width:750px){.grid{grid-template-columns:1fr}}
+</style>
+<h1>背景与人物排版修复预览</h1>
+<p>采用完整清版背景，四张原照片改为铺满槽位、边缘羽化，并单独调整特写缩放与位置。</p>
+<p class="notice">这份预览的七个装饰仍沿用旧文件，顶部心形的裁断尚未恢复。生成后的像素已经被旧流程裁掉，需在图片服务配置可用时重新生成装饰。</p>
+<div class="grid">
+<figure><figcaption>原参考图</figcaption><a href="../../inputs/reference.png"><img src="../../inputs/reference.png" alt="原参考图"></a></figure>
+<figure><figcaption>之前的成图</figcaption><a href="../../renders/result.png"><img src="../../renders/result.png" alt="之前的成图"></a></figure>
+<figure><figcaption>修复预览：背景与照片</figcaption><a href="result.png"><img src="result.png" alt="背景与照片修复预览"></a></figure>
+</div>
+<p>背景问题：原 mask 覆盖约 95.1%，扩张与羽化均为 0。模型重画的底纹与剩余原图碎片硬拼，产生接缝。新预览背景已核对与完整候选逐像素一致。</p>
+<p>素材问题：心形的 2048 × 2048 输出被旧流程裁为 y=457 到 y=1590，再缩到 470 × 260，约 44.7% 的高度被舍弃。工程已改为完整内容等比补边，也取消按模型输入窗口回裁生成素材。</p>
+<p>人物问题：这次确认稿使用 cutout + contain，而参考分析稿为 photo_feather。新预览改用原照片，并为右侧特写增加缩放和位移。</p>
+<p>验证：106 项自动测试通过，静态检查及审核页 JavaScript 语法检查通过。此预览全部在本地合成，网络调用 0 次；真实模型重生成尚未验证。</p>
+<p><a href="README.md">修复说明与重生成方法</a> · <a href="regenerate.ps1">装饰重生成脚本</a> · <a href="build/inspection.html">构建检查报告</a></p>
+</html>

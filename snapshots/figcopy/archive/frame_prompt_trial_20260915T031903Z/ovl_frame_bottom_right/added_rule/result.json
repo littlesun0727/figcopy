@@ -1,0 +1,55 @@
+{
+  "id": "ovl_frame_bottom_right",
+  "variant": "added_rule",
+  "status": "complete",
+  "reference_sha256": "2019fda0db02ef80f6ea65b1ee7d2b505aa0a824607a2294a76aab6b772c7603",
+  "chroma_key": [
+    0,
+    255,
+    0
+  ],
+  "asset": {
+    "id": "ovl_frame_bottom_right",
+    "path": "assets/overlay_ovl_frame_bottom_right.png",
+    "role": "overlay",
+    "requires_alpha": true,
+    "sha256": "ad3abb6f28c28133993f7a7a9dd3fda775df7d408b4b5cd112dd5808495e0203"
+  },
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "021789442409945a04a47ac73179d3e64c063d7b69771fcfc3ce6",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 48326
+  },
+  "content_box": [
+    3,
+    2,
+    1536,
+    2038
+  ],
+  "warnings": [
+    {
+      "overlay_id": "ovl_frame_bottom_right",
+      "label": "右下浅色相框",
+      "code": "OVERLAY_EDGE_CLIPPED",
+      "message": "边缘存在可见像素，请结合整图检查",
+      "skipped": false
+    }
+  ],
+  "asset_size": [
+    1533,
+    2036
+  ],
+  "center_alpha": 0,
+  "central_region_xyxy": [
+    537,
+    713,
+    996,
+    1323
+  ],
+  "central_transparent_fraction": 1.0,
+  "central_opaque_fraction": 0.0
+}

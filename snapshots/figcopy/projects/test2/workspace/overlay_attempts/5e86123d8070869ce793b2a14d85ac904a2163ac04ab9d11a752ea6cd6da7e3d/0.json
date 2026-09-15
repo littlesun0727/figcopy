@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "底部中央浅灰色圆角气泡框，黑色可爱字体写着 Yes!! 与音符颜文字，气泡边缘柔和，带轻微贴纸阴影。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。\n必须逐字包含且仅包含客户确认的文字：Yes!! ♪( ´▽｀)",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "0217894388338561023f1f6cf081335b7e69d5fdf9a93687ddd94",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 38937
+  },
+  "raw_sha256": "11c86c7672537a154d5c48e92eaff7359dd74f2d7d0d3fde9e8f1130c54c30e1",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      3712,
+      1152
+    ],
+    "target_size": [
+      258,
+      80
+    ],
+    "scale": [
+      0.06950431034482758,
+      0.06944444444444445
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      258,
+      80
+    ]
+  }
+}

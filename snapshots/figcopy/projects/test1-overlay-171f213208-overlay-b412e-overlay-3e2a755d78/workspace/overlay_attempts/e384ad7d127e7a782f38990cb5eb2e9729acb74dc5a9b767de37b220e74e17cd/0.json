@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "白色细线勾勒手写中文“此刻”二字，笔画为双线描边带轻微阴影线条，字形倾斜潇洒，透明背景单件\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。\n必须逐字包含且仅包含客户确认的文字：此刻",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "021789436158033a92b4afba7ed5745e150097919eafbc65e5378",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 39422
+  },
+  "raw_sha256": "30a2c190e98c8de52775eb879c75794a9f7872bf4960e1a8860acba39385bea9",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      2464,
+      1856
+    ],
+    "target_size": [
+      242,
+      182
+    ],
+    "scale": [
+      0.09821428571428571,
+      0.0980603448275862
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      242,
+      182
+    ]
+  }
+}

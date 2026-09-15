@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "暗酒红色方形相框，四边有手绘蝴蝶结、卷曲缎带和小圆点图案，内边清晰裁出照片窗口，外缘略带不规则手账贴纸感与轻阴影；只生成边框，不包含照片。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "021789437837028ed9c07a18069cfb59ad66daf7e7bd9218bfef9",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 54532
+  },
+  "raw_sha256": "90bf72ed5bc70a32f5dffdc13c6b924b0304ab547580c9297f06163370b9e077",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      1824,
+      2144
+    ],
+    "target_size": [
+      585,
+      689
+    ],
+    "scale": [
+      0.3207236842105263,
+      0.3208955223880597
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      585,
+      688
+    ]
+  }
+}

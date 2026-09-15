@@ -1,0 +1,19 @@
+{
+  "request_id": "chatcmpl-272d6b45-fe5d-9529-83c2-421062943837",
+  "model": "qwen3.8-max",
+  "finish_reason": "stop",
+  "usage": {
+    "completion_tokens": 11219,
+    "completion_tokens_details": {
+      "reasoning_tokens": 8677,
+      "text_tokens": 2541
+    },
+    "prompt_tokens": 3700,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "image_tokens": 2257,
+      "text_tokens": 1443
+    },
+    "total_tokens": 14919
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "status": "failed",
+  "nodes": {
+    "overlay_crops": {
+      "status": "complete",
+      "count": 4
+    },
+    "background": {
+      "status": "complete",
+      "input_sha256": "df132ac1c91c929f8cd88b8bf3bc026d8c14edc1e3960338f0489afcc05a60c9",
+      "audit": {
+        "node": "background",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "0217891063545664a1810d33f699289e71a4471e6f798a53f5e81",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 75703
+      },
+      "outputs": [
+        "background_candidate.png",
+        "background.png",
+        "remove_mask.png",
+        "blend_mask.png"
+      ]
+    },
+    "overlay:overlay_dashed_frames": {
+      "status": "complete",
+      "source_rect": [
+        55,
+        75,
+        1160,
+        1560
+      ],
+      "audit": {
+        "node": "overlay:overlay_dashed_frames",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789106428806d5e3a06b1d3d650f0fc414a0e965c499bf983e",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 54219
+      },
+      "visible_bbox": [
+        12,
+        89,
+        1158,
+        1490
+      ],
+      "output": "assets/overlay_overlay_dashed_frames.png"
+    },
+    "overlay:overlay_paperclip": {
+      "status": "failed",
+      "source_rect": [
+        840,
+        18,
+        130,
+        135
+      ],
+      "error": {
+        "code": "EMPTY_OVERLAY",
+        "message": "overlay 没有任何可见像素"
+      }
+    }
+  },
+  "last_error": {
+    "code": "EMPTY_OVERLAY",
+    "message": "overlay 没有任何可见像素"
+  }
+}

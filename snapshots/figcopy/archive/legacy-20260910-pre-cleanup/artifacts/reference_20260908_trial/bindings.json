@@ -1,0 +1,37 @@
+{
+  "version": "collage-bindings/1",
+  "slots": {
+    "photo_background": {
+      "path": "inputs/photo_city.png",
+      "scale": 1.0,
+      "offset_px": [
+        0,
+        0
+      ]
+    },
+    "photo_small_left": {
+      "path": "inputs/photo_ocean.png",
+      "scale": 1.0,
+      "offset_px": [
+        0,
+        0
+      ]
+    },
+    "photo_tall_right": {
+      "path": "inputs/photo_cafe.png",
+      "scale": 1.0,
+      "offset_px": [
+        0,
+        0
+      ]
+    },
+    "photo_large_left": {
+      "path": "inputs/photo_mountain.png",
+      "scale": 1.0,
+      "offset_px": [
+        0,
+        0
+      ]
+    }
+  }
+}

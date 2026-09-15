@@ -1,0 +1,46 @@
+{
+  "kind": "identity",
+  "source_size": [
+    586,
+    655
+  ],
+  "target_size": [
+    586,
+    655
+  ],
+  "scale": [
+    1.0,
+    1.0
+  ],
+  "offset": [
+    0.0,
+    0.0
+  ],
+  "content_size": [
+    586,
+    655
+  ],
+  "content_box": [
+    193,
+    156,
+    1686,
+    1904
+  ],
+  "technical": {
+    "bbox": [
+      0,
+      0,
+      1888,
+      2112
+    ],
+    "size": [
+      1888,
+      2112
+    ],
+    "required_clearance_px": 28,
+    "issues": [
+      "OVERLAY_EDGE_CLIPPED"
+    ]
+  },
+  "evidence_cache_key": "418fa8b8b39682bba569fa9b5544757cf3fcd88117bd90203d9a7ec580caa8da"
+}

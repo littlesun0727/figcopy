@@ -1,0 +1,433 @@
+{
+  "version": "collage-template/4",
+  "status": "ready",
+  "canvas": {
+    "width": 1320,
+    "height": 1767,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "assets": [
+    {
+      "id": "ov_border_1",
+      "path": "assets/overlay_ov_border_1.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "972adc726f50f54b6df4dcb92743713f61666d47d316820f6b75d2e9ee3b1046"
+    },
+    {
+      "id": "ov_border_2",
+      "path": "assets/overlay_ov_border_2.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "c634010318a7ef70ffe213580d3a7738db07d6dce44a391ee107b0dd3dbe3bfd"
+    },
+    {
+      "id": "ov_border_3",
+      "path": "assets/overlay_ov_border_3.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "9edd9bc12b64d8c61a8310b9ba8a29bcd1b090572c61eb65215fb775acb6bf81"
+    },
+    {
+      "id": "ov_paperclip",
+      "path": "assets/overlay_ov_paperclip.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "23c937ea01a3b01f87544580781d57cfb1d35610efebbd2501b8fe72de1f4d7c"
+    },
+    {
+      "id": "ov_starburst",
+      "path": "assets/overlay_ov_starburst.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "963d836219d3c60b914df54ff96beb7b7977ae914c91b8af51c93c592a05734c"
+    },
+    {
+      "id": "ov_hand_english",
+      "path": "assets/overlay_ov_hand_english.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "af6085c72c69b9061ef9b655e51b2c8afc6a772139867615a74938ecf7669d29"
+    },
+    {
+      "id": "ov_moment",
+      "path": "assets/overlay_ov_moment.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "8aa38b3a820ed8e3db69fa846ac4285ecc5cc070469cee59d70d823fa6b983fb"
+    }
+  ],
+  "slots": [
+    {
+      "id": "slot_background",
+      "type": "image",
+      "label": "满版黄昏街景背景（可替换客户照片）",
+      "required": true,
+      "upload_hint": "上传一张竖幅满版街景或风景照片，铺满整个画布作为底板",
+      "rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0,
+      "clip_mask_sha256": null
+    },
+    {
+      "id": "slot_photo_1",
+      "type": "image",
+      "label": "左上小照片（棕榈树夕阳街景）",
+      "required": true,
+      "upload_hint": "上传横向风景或街景照片，将居中裁切为此小矩形",
+      "rect": [
+        68,
+        205,
+        342,
+        260
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0,
+      "clip_mask_sha256": null
+    },
+    {
+      "id": "slot_photo_2",
+      "type": "image",
+      "label": "右上大照片（黄昏商场街景剪影）",
+      "required": true,
+      "upload_hint": "上传竖向照片，将裁切为此大矩形",
+      "rect": [
+        585,
+        82,
+        615,
+        818
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0,
+      "clip_mask_sha256": null
+    },
+    {
+      "id": "slot_photo_3",
+      "type": "image",
+      "label": "左中竖照片（车窗视角城市黄昏）",
+      "required": true,
+      "upload_hint": "上传竖向照片，将裁切为此矩形",
+      "rect": [
+        95,
+        848,
+        570,
+        772
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0,
+      "clip_mask_sha256": null
+    }
+  ],
+  "overlays": [
+    {
+      "id": "ov_border_1",
+      "attachment": {
+        "slot_id": "slot_photo_1",
+        "position": "above"
+      },
+      "rect": [
+        62,
+        199,
+        354,
+        272
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "ov_border_2",
+      "attachment": {
+        "slot_id": "slot_photo_2",
+        "position": "above"
+      },
+      "rect": [
+        579,
+        76,
+        627,
+        830
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "ov_border_3",
+      "attachment": {
+        "slot_id": "slot_photo_3",
+        "position": "above"
+      },
+      "rect": [
+        89,
+        842,
+        582,
+        784
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "ov_paperclip",
+      "attachment": {
+        "slot_id": "slot_photo_2",
+        "position": "above"
+      },
+      "rect": [
+        855,
+        20,
+        100,
+        120
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "ov_starburst",
+      "attachment": null,
+      "rect": [
+        95,
+        600,
+        320,
+        250
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "ov_hand_english",
+      "attachment": null,
+      "rect": [
+        65,
+        90,
+        460,
+        80
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "ov_moment",
+      "attachment": null,
+      "rect": [
+        1090,
+        1600,
+        200,
+        140
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "layer_order": [
+    {
+      "type": "slot",
+      "id": "slot_background"
+    },
+    {
+      "type": "overlay",
+      "id": "ov_starburst"
+    },
+    {
+      "type": "overlay",
+      "id": "ov_hand_english"
+    },
+    {
+      "type": "overlay",
+      "id": "ov_moment"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_2"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_3"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_1"
+    }
+  ],
+  "build": {
+    "source_sha256": "df132ac1c91c929f8cd88b8bf3bc026d8c14edc1e3960338f0489afcc05a60c9",
+    "created_at": "2026-09-15T01:23:22+00:00",
+    "tool_version": "0.1.0",
+    "fixture_used": false,
+    "providers": [
+      {
+        "node": "overlay:ov_border_1",
+        "name": "local-basic-shape",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:ov_border_2",
+        "name": "local-basic-shape",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:ov_border_3",
+        "name": "local-basic-shape",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:ov_paperclip",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "0217894358554335bf05a230eba2dfb3c75629cf63151ecc104a1",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 35766
+      },
+      {
+        "node": "overlay:ov_starburst",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789435915777de2cfbc22a0f44ef1f4fdf213841a20e2f5d60",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 51328
+      },
+      {
+        "node": "overlay:ov_hand_english",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789436068280de2cfbc22a0f44ef1f4fdf213841a20edde94c",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 36859
+      },
+      {
+        "node": "overlay:ov_moment",
+        "name": "yibu-audit-seedream-image",
+        "requested_model": "doubao-seedream-5-0-260128",
+        "actual_model": "doubao-seedream-5-0-260128",
+        "request_id": "021789436158033a92b4afba7ed5745e150097919eafbc65e5378",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 39422
+      }
+    ],
+    "warnings": [
+      {
+        "overlay_id": "ov_paperclip",
+        "label": "顶部白色手绘回形针",
+        "code": "OVERLAY_EDGE_CLIPPED",
+        "message": "边缘存在可见像素，请结合整图检查",
+        "skipped": false
+      },
+      {
+        "overlay_id": "ov_starburst",
+        "label": "左中白色手绘放射星芒图案",
+        "code": "OVERLAY_EDGE_CLIPPED",
+        "message": "边缘存在可见像素，请结合整图检查",
+        "skipped": false
+      },
+      {
+        "overlay_id": "ov_hand_english",
+        "label": "左上白色手写英文两行",
+        "code": "OVERLAY_EDGE_CLIPPED",
+        "message": "边缘存在可见像素，请结合整图检查",
+        "skipped": false
+      }
+    ]
+  },
+  "review": {
+    "visual_approved": true,
+    "reviewer": "wang jing",
+    "reviewed_at": "2026-09-15T01:49:03+00:00",
+    "notes": "",
+    "evidence_sha256": [
+      "7495ad97219b2d9538ae0750047275fc537c4bd96fa931c2e6f56f893dbc90a3"
+    ]
+  },
+  "provenance": {
+    "kind": "human",
+    "policy_version": "customer-photo-background/1",
+    "evidence_sha256": [
+      "c4f999d2180240f6154303254fa78bd7011306faead1345cfb28ff70db2e113c"
+    ],
+    "unresolved": []
+  },
+  "background": {
+    "mode": "slot",
+    "slot_id": "slot_background"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "0217894424722430451d664a5d5fd238884dd8fb7ca7e60dcda8c",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 55147
+  },
+  "background_mode": "chroma_key",
+  "chroma_key": [
+    0,
+    255,
+    0
+  ],
+  "transform": {
+    "kind": "identity",
+    "source_size": [
+      418,
+      378
+    ],
+    "target_size": [
+      418,
+      378
+    ],
+    "scale": [
+      1.0,
+      1.0
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      418,
+      378
+    ],
+    "content_box": [
+      320,
+      364,
+      1580,
+      1653
+    ],
+    "technical": {
+      "bbox": [
+        0,
+        0,
+        2048,
+        1856
+      ],
+      "size": [
+        2048,
+        1856
+      ],
+      "required_clearance_px": 28,
+      "issues": [
+        "OVERLAY_EDGE_CLIPPED"
+      ]
+    }
+  },
+  "normalized": true,
+  "pipeline_version": "candidate-overlay/1",
+  "processing_version": "pyav-colorkey-despill/1",
+  "image_fingerprint": "340e8be4a70fe6d21b8595e79acb1be0d4fb2fbbf9a4f0ce0b14a55faa3688a4"
+}

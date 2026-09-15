@@ -1,0 +1,37 @@
+{
+  "version": "collage-bindings/1",
+  "slots": {
+    "slot_background": {
+      "path": "../inputs/customer/001_image.png",
+      "scale": 1,
+      "offset_px": [
+        0,
+        0
+      ]
+    },
+    "slot_photo_1": {
+      "path": "../inputs/customer/002_image.png",
+      "scale": 1,
+      "offset_px": [
+        0,
+        0
+      ]
+    },
+    "slot_photo_2": {
+      "path": "../inputs/customer/003_image.png",
+      "scale": 1,
+      "offset_px": [
+        0,
+        0
+      ]
+    },
+    "slot_photo_3": {
+      "path": "../inputs/customer/004_image.png",
+      "scale": 1,
+      "offset_px": [
+        0,
+        0
+      ]
+    }
+  }
+}

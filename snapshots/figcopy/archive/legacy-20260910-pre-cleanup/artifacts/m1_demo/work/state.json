@@ -1,0 +1,56 @@
+{
+  "status": "needs_review",
+  "nodes": {
+    "overlay_crops": {
+      "status": "complete",
+      "count": 1
+    },
+    "background": {
+      "status": "complete",
+      "input_sha256": "16c8eb4f8fdb2d8a22ec0da92e47f2912fb9fbc9e6ab79151b392dc12e4bbca3",
+      "audit": {
+        "node": "background",
+        "name": "imported-background",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "outputs": [
+        "background_candidate.png",
+        "background.png",
+        "remove_mask.png",
+        "blend_mask.png"
+      ]
+    },
+    "overlay:star": {
+      "status": "complete",
+      "source_rect": [
+        170,
+        140,
+        120,
+        100
+      ],
+      "audit": {
+        "node": "overlay:star",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      "visible_bbox": [
+        4,
+        3,
+        117,
+        98
+      ],
+      "output": "assets/overlay_star.png"
+    }
+  },
+  "last_error": null
+}

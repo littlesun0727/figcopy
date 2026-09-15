@@ -1,0 +1,42 @@
+{
+  "version": "collage-review-feedback/6",
+  "status": "complete",
+  "base_revision": "25e7b2bb03dd044f3aeb6050b600017ca65d2ac38a971fcb978613bc895be206",
+  "submitted_at": "2026-09-15T01:17:32.753781+00:00",
+  "question_resolutions": [
+    {
+      "question": "满版街景背景是否需要作为可替换的客户照片槽位，还是固定保留为底板？",
+      "answer": "满街街景作为可替换客户照片槽位"
+    },
+    {
+      "question": "右上照片与右下照片在相邻边界处的上下遮挡关系不明确，当前层序是否需要调整？",
+      "answer": "右下照片为底板满铺照片，删除单独右下照片槽位"
+    },
+    {
+      "question": "右下照片延伸至画布右边缘与下边缘，其虚线边框是否只需保留顶部与左侧？",
+      "answer": "右下照片为底板满铺照片，删除单独右下照片槽位"
+    }
+  ],
+  "other_feedback": "",
+  "background_decision": {
+    "before": {
+      "mode": "fixed"
+    },
+    "after": {
+      "mode": "fixed"
+    },
+    "source": "accepted_current",
+    "before_revision": "25e7b2bb03dd044f3aeb6050b600017ca65d2ac38a971fcb978613bc895be206",
+    "edited_revision": "25e7b2bb03dd044f3aeb6050b600017ca65d2ac38a971fcb978613bc895be206"
+  },
+  "revision": "cd2c7dfb6e0d14e56fceb0ababe924d41dee39ceded27933ccb2177b1c628967",
+  "audit": {
+    "name": "yibu-audit-vlm",
+    "requested_model": "qwen3.8-max",
+    "actual_model": "qwen3.8-max",
+    "request_id": "chatcmpl-df7e9a7a-208c-9307-87f7-197ab727f595",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 210172
+  }
+}

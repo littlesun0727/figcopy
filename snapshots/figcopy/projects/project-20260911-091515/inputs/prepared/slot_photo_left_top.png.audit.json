@@ -1,0 +1,13 @@
+{
+  "input_sha256": "55bde55958d3f83e1fd8d2164e6ba6bbdcf0bca18845ba29dcaf726cb62a40b6",
+  "output_sha256": "03b50a7b6b304f49b0e07795cad33b08d45709f7e1e28aedd698fc6119cd3748",
+  "provider": {
+    "name": "local-birefnet-lite-matting",
+    "requested_model": "ZhengPeng7/BiRefNet_lite-matting",
+    "actual_model": "ZhengPeng7/BiRefNet_lite-matting@99c33412e3f58e1f33187abdc8c435c645243690",
+    "request_id": null,
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 17194
+  }
+}

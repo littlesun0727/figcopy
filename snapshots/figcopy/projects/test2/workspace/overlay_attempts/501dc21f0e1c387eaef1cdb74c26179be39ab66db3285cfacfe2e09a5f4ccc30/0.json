@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "黑色圆角胶片/拍立得风格相框，上左右窄黑边，底部更宽并带白色小表情区域，四角有胶片感白点与细小星芒，外缘轻微粗糙手绘；只生成边框，不包含照片。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "0217894378971972d60f60bba313662d1f7bb8a224af9f4bb5b55",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 72562
+  },
+  "raw_sha256": "47968c5e830a4f803dc8bfacf771504bd29abcce49acd458207d39d4bb4f4e2d",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      1760,
+      2240
+    ],
+    "target_size": [
+      597,
+      760
+    ],
+    "scale": [
+      0.3392045454545455,
+      0.3392857142857143
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      597,
+      760
+    ]
+  }
+}

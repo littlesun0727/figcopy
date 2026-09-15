@@ -1,0 +1,55 @@
+{
+  "id": "ovl_star_cluster_center",
+  "variant": "added_rule",
+  "status": "complete",
+  "reference_sha256": "1e8d23d871f3512f30d9be06c1466af83250a5573701a126f7c2eeadbe041e44",
+  "chroma_key": [
+    0,
+    255,
+    0
+  ],
+  "asset": {
+    "id": "ovl_star_cluster_center",
+    "path": "assets/overlay_ovl_star_cluster_center.png",
+    "role": "overlay",
+    "requires_alpha": true,
+    "sha256": "b1154e8e8dfb89a9398af66b31019fc2cda2c9623e58c56c08c613cc49f12d39"
+  },
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "0217894424722430451d664a5d5fd238884dd8fb7ca7e60dcda8c",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 55147
+  },
+  "content_box": [
+    320,
+    364,
+    1580,
+    1653
+  ],
+  "warnings": [
+    {
+      "overlay_id": "ovl_star_cluster_center",
+      "label": "中央粉色流星与星芒",
+      "code": "OVERLAY_EDGE_CLIPPED",
+      "message": "边缘存在可见像素，请结合整图检查",
+      "skipped": false
+    }
+  ],
+  "asset_size": [
+    1260,
+    1289
+  ],
+  "center_alpha": 255,
+  "central_region_xyxy": [
+    441,
+    451,
+    819,
+    838
+  ],
+  "central_transparent_fraction": 0.423923,
+  "central_opaque_fraction": 0.568407
+}

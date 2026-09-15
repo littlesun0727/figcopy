@@ -1,0 +1,23 @@
+{
+  "kind": "imported_exact_canvas",
+  "source_size": [
+    480,
+    360
+  ],
+  "target_size": [
+    480,
+    360
+  ],
+  "scale": [
+    1.0,
+    1.0
+  ],
+  "offset": [
+    0.0,
+    0.0
+  ],
+  "content_size": [
+    480,
+    360
+  ]
+}

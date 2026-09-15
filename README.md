@@ -249,3 +249,7 @@ provider 对象必须能以 `module:object` 加载；`object` 可以是无参类
 每件生成素材最多尝试两次。程序先在原始输出上检测空图、透明背景和边界问题，再检查最终尺寸下的组成与文字；失败和不确定的请求均有独立记录。此门禁用于拒收问题素材，不能保证模型永不漏检。
 
 [本轮实现、测试与真实试验记录](artifacts/pipeline_interactive_verified/README.md)。
+
+## 配套项目数据快照
+
+此分支包含完整项目数据和前端过程产物，恢复步骤见 [snapshots/README.md](snapshots/README.md)。图片及视频使用 Git LFS；test2 保留在生成预览前，可使用现有照片验证本地相框窗口修复。

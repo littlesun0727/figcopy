@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "白色至浅灰渐变拍立得相框，顶部和左右窄边，底部较宽 caption 区，边角轻微微圆，带纸张厚度与柔和小阴影；只生成边框与底板，不包含内部照片。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "0217894423458239888986ffb34c69cf48a5af66589c30c5e50af",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 53181
+  },
+  "raw_sha256": "3c7de0874c8bf89b390b6f7bf45886775fc4de9e8977ecb5b64d37769bf63be2",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      1888,
+      2112
+    ],
+    "target_size": [
+      586,
+      655
+    ],
+    "scale": [
+      0.3103813559322034,
+      0.31013257575757575
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      586,
+      655
+    ]
+  }
+}

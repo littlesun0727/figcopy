@@ -1,0 +1,83 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T02:00:13.256101+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=b4317ab6f90849b5a7e520874d7c4a92 kind=revise_review"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T02:00:13.274667+00:00",
+      "level": "INFO",
+      "logger": "collage.template.review.feedback",
+      "message": "开始根据客户问答纠正识别 | questions=4"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-15T02:00:13.286848+00:00",
+      "level": "INFO",
+      "logger": "collage.core.diagnostics",
+      "message": "开始分析尝试 | attempt=260915020013-be36a750f27e"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-15T02:00:13.308387+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.chat",
+      "message": "准备 VLM 请求 | model=kimi-k3 max_tokens=16384 reasoning_effort=high"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-15T02:00:13.318555+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "yibu 审计代理健康检查通过 | endpoint=<service-url>"
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-15T02:00:13.358332+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=analyze-reference model=kimi-k3 path=<path>"
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-15T02:00:49.676977+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.chat",
+      "message": "收到 VLM 回答 | model=kimi-k3 characters=7783 finish_reason=stop"
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-15T02:00:49.858281+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=reference.png"
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-15T02:00:50.188348+00:00",
+      "level": "INFO",
+      "logger": "collage.template.review.feedback",
+      "message": "识别纠正完成，等待客户复核 | remaining_questions=3"
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-15T02:00:50.193003+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务完成 | job=b4317ab6f90849b5a7e520874d7c4a92"
+    }
+  ],
+  "last_seq": 10,
+  "id": "b4317ab6f90849b5a7e520874d7c4a92",
+  "project_id": "test2",
+  "kind": "revise_review",
+  "state": "succeeded",
+  "created_at": "2026-09-15T02:00:13.242570+00:00",
+  "updated_at": "2026-09-15T02:00:50.196209+00:00",
+  "error": null,
+  "result": null
+}

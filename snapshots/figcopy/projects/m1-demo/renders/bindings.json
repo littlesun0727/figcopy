@@ -1,0 +1,21 @@
+{
+  "version": "collage-bindings/1",
+  "slots": {
+    "photo_left": {
+      "path": "../inputs/customer_photo.png",
+      "scale": 1.0,
+      "offset_px": [
+        0,
+        0
+      ]
+    },
+    "person_main": {
+      "path": "../inputs/customer_cutout.png",
+      "scale": 1.0,
+      "offset_px": [
+        0,
+        0
+      ]
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "audit": {
+    "name": "yibu-audit-gemini-image",
+    "requested_model": "gemini-3-pro-image-preview",
+    "actual_model": "gemini-3-pro-image",
+    "request_id": "F3GiapXbIPnYxs0P94b2-QU",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 138844
+  },
+  "background_mode": "chroma_key",
+  "chroma_key": [
+    255,
+    255,
+    0
+  ],
+  "transform": {
+    "kind": "identity",
+    "source_size": [
+      295,
+      130
+    ],
+    "target_size": [
+      295,
+      130
+    ],
+    "scale": [
+      1.0,
+      1.0
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      295,
+      130
+    ],
+    "provider_output": {
+      "kind": "center_crop_uniform_resize",
+      "source_size": [
+        1584,
+        672
+      ],
+      "crop_box": [
+        29,
+        0,
+        1554,
+        672
+      ],
+      "target_size": [
+        295,
+        130
+      ]
+    }
+  },
+  "normalized": true
+}

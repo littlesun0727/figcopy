@@ -1,0 +1,205 @@
+{
+  "version": "collage-reviewed/1",
+  "status": "reviewed",
+  "reference": {
+    "path": "inputs/reference.png",
+    "sha256": "3c72b1ce0781cff7011dc99c40ce76cd37880fd50a31f417ffa8cc2a3a59b7c3"
+  },
+  "canvas": {
+    "width": 1320,
+    "height": 1767,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "slots": [
+    {
+      "id": "photo_background",
+      "label": "全画布主照片",
+      "type": "image",
+      "required": true,
+      "mode": "photo",
+      "source_rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "target_rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "upload_hint": "上传任意照片；渲染器会按 cover 等比裁切",
+      "review_notes": "根据参考图虚线框内边缘人工量取",
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "photo_small_left",
+      "label": "左上小照片",
+      "type": "image",
+      "required": true,
+      "mode": "photo",
+      "source_rect": [
+        70,
+        213,
+        340,
+        252
+      ],
+      "target_rect": [
+        70,
+        213,
+        340,
+        252
+      ],
+      "upload_hint": "上传任意照片；渲染器会按 cover 等比裁切",
+      "review_notes": "根据参考图虚线框内边缘人工量取",
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "photo_tall_right",
+      "label": "右上竖照片",
+      "type": "image",
+      "required": true,
+      "mode": "photo",
+      "source_rect": [
+        598,
+        99,
+        602,
+        800
+      ],
+      "target_rect": [
+        598,
+        99,
+        602,
+        800
+      ],
+      "upload_hint": "上传任意照片；渲染器会按 cover 等比裁切",
+      "review_notes": "根据参考图虚线框内边缘人工量取",
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "photo_large_left",
+      "label": "左下大照片",
+      "type": "image",
+      "required": true,
+      "mode": "photo",
+      "source_rect": [
+        106,
+        862,
+        559,
+        747
+      ],
+      "target_rect": [
+        106,
+        862,
+        559,
+        747
+      ],
+      "upload_hint": "上传任意照片；渲染器会按 cover 等比裁切",
+      "review_notes": "根据参考图虚线框内边缘人工量取",
+      "rotation_deg": 0,
+      "fit": "cover",
+      "anchor": [
+        0.56,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    }
+  ],
+  "overlays": [
+    {
+      "id": "fixed_foreground",
+      "label": "虚线相框与前景涂鸦",
+      "source_rect": [
+        44,
+        9,
+        1276,
+        1750
+      ],
+      "target_rect": [
+        44,
+        9,
+        1276,
+        1750
+      ],
+      "action": "reference_generate",
+      "generation_brief": "保留参考图白色虚线相框、回形针和右下角手写字。",
+      "requires_exact_content": true,
+      "review_notes": "由原图像素阈值和受限 ROI 提取，不重新绘制文字。",
+      "rotation_deg": 0,
+      "prepared_asset": "inputs/fixed_foreground.png",
+      "background_mode": "alpha",
+      "chroma_key": null,
+      "chroma_tolerance": 40,
+      "shape": null
+    }
+  ],
+  "background": {
+    "background_brief": "移除四张旧照片，在原位置延续灰蓝到暖金色的柔和云层；不得修改照片区外像素。",
+    "review_notes": "生成候选已居中裁切并等比缩放到原始画布。",
+    "remove_mask": "inputs/remove_mask.png",
+    "allowed_mask": "inputs/remove_mask.png",
+    "candidate_path": "inputs/clean_background_aligned.png",
+    "expand_px": 0,
+    "feather_px": 0
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "photo_background"
+    },
+    {
+      "type": "slot",
+      "id": "photo_large_left"
+    },
+    {
+      "type": "slot",
+      "id": "photo_tall_right"
+    },
+    {
+      "type": "slot",
+      "id": "photo_small_left"
+    },
+    {
+      "type": "overlay",
+      "id": "fixed_foreground"
+    }
+  ],
+  "review": {
+    "reviewer": "codex-assisted-trial",
+    "reviewed_at": "2026-09-10T01:33:36.565738+00:00",
+    "notes": "用户提供真实参考图后的首次试拼；等待用户视觉确认。",
+    "questions_resolved": true
+  },
+  "audit": {
+    "fixture": false,
+    "source": "user-reference-plus-generated-placeholder-photos",
+    "foreground_asset": "fixed_foreground.png"
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T01:46:27.541807+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=506aee25ddbf482c9a13bc1eb891cf81 kind=render"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T01:46:27.569789+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=001_image_bin"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-15T01:46:28.108167+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=002_image_bin"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-15T01:46:28.231949+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=003_image_bin"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-15T01:46:28.779391+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=004_image_bin"
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-15T01:46:29.276209+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78 stage=awaiting_bindings"
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-15T01:46:29.550862+00:00",
+      "level": "INFO",
+      "logger": "collage.template.guide",
+      "message": "上传指南已生成 | html=<path>"
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-15T01:46:30.112345+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78 stage=rendering"
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-15T01:46:30.374763+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.bindings",
+      "message": "准备客户素材 | slots=4"
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-15T01:46:30.380476+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=001_image.png"
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-15T01:46:30.482490+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=002_image.png"
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-15T01:46:30.513834+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=003_image.png"
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-15T01:46:30.627577+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=004_image.png"
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-15T01:46:31.029423+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.service",
+      "message": "开始本地合成 | layers=11"
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-15T01:46:31.732591+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.service",
+      "message": "本地合成完成"
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-15T01:46:32.235330+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.service",
+      "message": "PNG 已导出 | output=<path>"
+    },
+    {
+      "seq": 17,
+      "at": "2026-09-15T01:46:32.244806+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78 stage=awaiting_approval"
+    },
+    {
+      "seq": 18,
+      "at": "2026-09-15T01:46:32.523984+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78 stage=awaiting_approval"
+    },
+    {
+      "seq": 19,
+      "at": "2026-09-15T01:46:32.540652+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务完成 | job=506aee25ddbf482c9a13bc1eb891cf81"
+    }
+  ],
+  "last_seq": 19,
+  "id": "506aee25ddbf482c9a13bc1eb891cf81",
+  "project_id": "test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78",
+  "kind": "render",
+  "state": "succeeded",
+  "created_at": "2026-09-15T01:46:27.529294+00:00",
+  "updated_at": "2026-09-15T01:46:32.543765+00:00",
+  "error": null,
+  "result": null
+}

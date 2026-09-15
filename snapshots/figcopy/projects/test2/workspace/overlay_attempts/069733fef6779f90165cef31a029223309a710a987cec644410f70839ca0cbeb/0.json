@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "右上角浅粉底色圆角音乐播放器贴纸，虚线描边，左侧暂停符号，中间黑色时间文字与进度条，右侧音量喇叭图标，整体为手账 UI 涂鸦风。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。\n必须逐字包含且仅包含客户确认的文字：0:30/3:20",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "021789438680265340e160c71121bcc773a2f9b8185f6569f57ec",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 40359
+  },
+  "raw_sha256": "0191d3cd17902f175bf0ef8e5c5cda2f82f69a78aad1edc23d7b4fa3c07ec059",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      4128,
+      1088
+    ],
+    "target_size": [
+      532,
+      140
+    ],
+    "scale": [
+      0.12863372093023256,
+      0.12867647058823528
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      531,
+      140
+    ]
+  }
+}

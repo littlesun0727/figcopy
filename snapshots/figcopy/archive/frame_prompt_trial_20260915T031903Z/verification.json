@@ -1,0 +1,37 @@
+{
+  "status": "complete",
+  "real_image_calls": 8,
+  "vlm_calls": 0,
+  "fresh_uncached_results": 8,
+  "unique_request_ids": 8,
+  "prompt_checks": [
+    {
+      "id": "ovl_frame_top_left",
+      "same_input_and_parameters": true,
+      "exactly_one_rule_added": true
+    },
+    {
+      "id": "ovl_frame_bottom_right",
+      "same_input_and_parameters": true,
+      "exactly_one_rule_added": true
+    },
+    {
+      "id": "ovl_star_cluster_center",
+      "same_input_and_parameters": true,
+      "exactly_one_rule_added": true
+    },
+    {
+      "id": "ovl_player_top_right",
+      "same_input_and_parameters": true,
+      "exactly_one_rule_added": true
+    }
+  ],
+  "source_template_unchanged": true,
+  "visual_review": "assistant inspected all four raw/processed comparison images",
+  "limitations": [
+    "one image per prompt per input",
+    "no fixed generation seed",
+    "two non-frame input categories only",
+    "not an end-to-end layout repair validation"
+  ]
+}

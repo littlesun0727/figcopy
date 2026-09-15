@@ -1,0 +1,125 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T01:23:22.300502+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=0ae28b82162b4174996233d2c7c05166 kind=build"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T01:23:22.330204+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1 stage=reviewed"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-15T01:23:22.345068+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1 stage=building"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-15T01:23:22.355755+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.service",
+      "message": "开始构建模板 | version=collage-build/4"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-15T01:23:22.497104+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.service",
+      "message": "原图 overlay crop 已保存 | count=4"
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-15T01:23:22.502708+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.service",
+      "message": "跳过固定背景制作 | code=BACKGROUND_PROVIDED_BY_SLOT slot=slot_background"
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-15T01:23:22.686295+00:00",
+      "level": "WARNING",
+      "logger": "collage.template.build.service",
+      "message": "跳过不可用装饰，继续构建 | id=ov_paperclip code=CHROMA_DEPENDENCY_MISSING"
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-15T01:23:22.693414+00:00",
+      "level": "WARNING",
+      "logger": "collage.template.build.service",
+      "message": "跳过不可用装饰，继续构建 | id=ov_starburst code=CHROMA_DEPENDENCY_MISSING"
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-15T01:23:22.701008+00:00",
+      "level": "WARNING",
+      "logger": "collage.template.build.service",
+      "message": "跳过不可用装饰，继续构建 | id=ov_hand_english code=CHROMA_DEPENDENCY_MISSING"
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-15T01:23:22.708586+00:00",
+      "level": "WARNING",
+      "logger": "collage.template.build.service",
+      "message": "跳过不可用装饰，继续构建 | id=ov_moment code=CHROMA_DEPENDENCY_MISSING"
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-15T01:23:22.741842+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.service",
+      "message": "模板构建完成，等待验收 | status=needs_review"
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-15T01:23:22.767803+00:00",
+      "level": "INFO",
+      "logger": "collage.template.guide",
+      "message": "上传指南已生成 | html=<path>"
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-15T01:23:22.798106+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1 stage=awaiting_bindings"
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-15T01:23:22.819589+00:00",
+      "level": "INFO",
+      "logger": "collage.template.guide",
+      "message": "上传指南已生成 | html=<path>"
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-15T01:23:22.854074+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1 stage=awaiting_bindings"
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-15T01:23:22.869624+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务完成 | job=0ae28b82162b4174996233d2c7c05166"
+    }
+  ],
+  "last_seq": 16,
+  "id": "0ae28b82162b4174996233d2c7c05166",
+  "project_id": "test1",
+  "kind": "build",
+  "state": "succeeded",
+  "created_at": "2026-09-15T01:23:22.288200+00:00",
+  "updated_at": "2026-09-15T01:23:22.874349+00:00",
+  "error": null,
+  "result": null
+}

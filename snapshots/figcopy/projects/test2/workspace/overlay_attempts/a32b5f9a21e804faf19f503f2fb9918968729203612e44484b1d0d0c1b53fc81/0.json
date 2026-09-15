@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "左上拍立得底部白色 caption 区内的黑色手写日文短句，左侧有小笑脸，句尾带两个感叹号，周围点缀两颗蓝色圆点和一颗蓝色小星，保持手账涂鸦质感。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。\n必须逐字包含且仅包含客户确认的文字：アイスクリーム!!",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "021789437779037ed9c07a18069cfb59ad66daf7e7bd92127fd7f",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 51578
+  },
+  "raw_sha256": "52901e04429f39a8de2f0ba41cd01689e72af309d34b468c96bfe59f0dc39e69",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      4160,
+      1088
+    ],
+    "target_size": [
+      406,
+      106
+    ],
+    "scale": [
+      0.09735576923076923,
+      0.0974264705882353
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      405,
+      106
+    ]
+  }
+}

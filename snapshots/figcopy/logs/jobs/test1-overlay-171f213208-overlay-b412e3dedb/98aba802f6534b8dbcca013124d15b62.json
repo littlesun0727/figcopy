@@ -1,0 +1,121 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T01:31:54.038628+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=98aba802f6534b8dbcca013124d15b62 kind=regenerate_overlay"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T01:31:54.044860+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.layout",
+      "message": "开始保存布局新版本 | project=test1-overlay-171f213208-overlay-b412e3dedb"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-15T01:31:54.436001+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.overlays",
+      "message": "生成单件装饰 | id=ov_starburst provider=yibu-audit-seedream-image"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-15T01:31:54.476167+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "yibu 审计代理健康检查通过 | endpoint=<service-url>"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-15T01:31:54.480783+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.client",
+      "message": "通过审计代理调用 yibu | operation=make-overlay model=doubao-seedream-5-0-260128 path=<path>"
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-15T01:32:44.767290+00:00",
+      "level": "INFO",
+      "logger": "collage.providers.yibu.image",
+      "message": "下载 yibu 返回的图片文件 | host=ark-acg-cn-beijing.tos-cn-beijing.volces.com"
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-15T01:32:46.620776+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底开始 | size=2176x1792"
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-15T01:32:46.699794+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.chroma",
+      "message": "PyAV 色键去底完成 | elapsed_ms=134.25"
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-15T01:32:50.590515+00:00",
+      "level": "INFO",
+      "logger": "collage.template.guide",
+      "message": "上传指南已生成 | html=<path>"
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-15T01:32:50.596259+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1-overlay-171f213208-overlay-b412e-overlay-28d63d1dc5 stage=awaiting_bindings"
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-15T01:32:50.788573+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.bindings",
+      "message": "准备客户素材 | slots=4"
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-15T01:32:50.792163+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=REPLACE_slot_background.png"
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-15T01:32:50.806710+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1-overlay-171f213208-overlay-b412e-overlay-28d63d1dc5 stage=awaiting_bindings"
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-15T01:32:50.809814+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.layout",
+      "message": "布局新版本已保存 | project=test1-overlay-171f213208-overlay-b412e-overlay-28d63d1dc5 source=test1-overlay-171f213208-overlay-b412e3dedb"
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-15T01:32:50.812593+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务完成 | job=98aba802f6534b8dbcca013124d15b62"
+    }
+  ],
+  "last_seq": 15,
+  "id": "98aba802f6534b8dbcca013124d15b62",
+  "project_id": "test1-overlay-171f213208-overlay-b412e3dedb",
+  "kind": "regenerate_overlay",
+  "state": "succeeded",
+  "created_at": "2026-09-15T01:31:54.024603+00:00",
+  "updated_at": "2026-09-15T01:32:50.816863+00:00",
+  "error": null,
+  "result": {
+    "project_id": "test1-overlay-171f213208-overlay-b412e-overlay-28d63d1dc5",
+    "url": "<path>"
+  }
+}

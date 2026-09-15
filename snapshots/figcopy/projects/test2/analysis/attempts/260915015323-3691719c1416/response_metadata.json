@@ -1,0 +1,17 @@
+{
+  "request_id": "chatcmpl-caf5fa79a463b123f33bee8c",
+  "model": "kimi-k3",
+  "finish_reason": "stop",
+  "usage": {
+    "cached_tokens": 0,
+    "completion_tokens": 5411,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2476
+    },
+    "prompt_tokens": 3474,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 8885
+  }
+}

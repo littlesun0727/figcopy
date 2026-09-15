@@ -1,0 +1,249 @@
+{
+  "status": "needs_review",
+  "nodes": {
+    "overlay_crops": {
+      "status": "complete",
+      "count": 8
+    },
+    "background": {
+      "status": "complete",
+      "input_sha256": "314ca6dd0548a5bf8861584140fcb27c71707cca5420746878acee02a91c8c2b",
+      "error": {
+        "code": "IMAGE_PROVIDER_UNAVAILABLE",
+        "message": "没有背景候选且未配置图片编辑 provider；不能用原图或空白图伪装清版结果"
+      },
+      "audit": {
+        "node": "background",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "s1-iaq7VKvOX3boP08iTUQ",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 191390
+      },
+      "outputs": [
+        "background_candidate.png",
+        "background.png",
+        "remove_mask.png",
+        "blend_mask.png"
+      ]
+    },
+    "overlay:overlay_hearts": {
+      "status": "complete",
+      "source_rect": [
+        420,
+        0,
+        510,
+        280
+      ],
+      "audit": {
+        "node": "overlay:overlay_hearts",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "ZWCiauetJJmZ3boPtfD-2Ao",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 135641
+      },
+      "visible_bbox": [
+        121,
+        28,
+        385,
+        245
+      ],
+      "output": "assets/overlay_overlay_hearts.png"
+    },
+    "overlay:overlay_coffee_polka": {
+      "status": "complete",
+      "source_rect": [
+        845,
+        95,
+        425,
+        300
+      ],
+      "audit": {
+        "node": "overlay:overlay_coffee_polka",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "7WCiasX2MLrR28oPibGWoA4",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 157828
+      },
+      "visible_bbox": [
+        51,
+        24,
+        390,
+        279
+      ],
+      "output": "assets/overlay_overlay_coffee_polka.png"
+    },
+    "overlay:overlay_ticket": {
+      "status": "complete",
+      "source_rect": [
+        605,
+        265,
+        445,
+        255
+      ],
+      "audit": {
+        "node": "overlay:overlay_ticket",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "jGGiarJ76uOR1Q-84I2ACw",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 264500
+      },
+      "visible_bbox": [
+        16,
+        10,
+        430,
+        249
+      ],
+      "output": "assets/overlay_overlay_ticket.png"
+    },
+    "overlay:overlay_together_paper": {
+      "status": "complete",
+      "source_rect": [
+        25,
+        790,
+        555,
+        215
+      ],
+      "audit": {
+        "node": "overlay:overlay_together_paper",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "lGKiatGvOfOX3boP08iTUQ",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 180921
+      },
+      "visible_bbox": [
+        35,
+        32,
+        506,
+        189
+      ],
+      "output": "assets/overlay_overlay_together_paper.png"
+    },
+    "overlay:overlay_rabbit_star": {
+      "status": "complete",
+      "source_rect": [
+        930,
+        940,
+        360,
+        570
+      ],
+      "audit": {
+        "node": "overlay:overlay_rabbit_star",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "SmOiaorWGqKKvdIPqZWW-Q8",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 129125
+      },
+      "visible_bbox": [
+        1,
+        33,
+        359,
+        569
+      ],
+      "output": "assets/overlay_overlay_rabbit_star.png"
+    },
+    "overlay:overlay_snack_cat": {
+      "status": "complete",
+      "source_rect": [
+        25,
+        1630,
+        560,
+        676
+      ],
+      "error": {
+        "code": "TEMPORARY_NETWORK_ERROR",
+        "message": "yibu 请求失败：HTTP 502"
+      },
+      "audit": {
+        "node": "overlay:overlay_snack_cat",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "_2-iaqq3B6KKvdIPqZWW-Q8",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 282609
+      },
+      "visible_bbox": [
+        2,
+        2,
+        543,
+        674
+      ],
+      "output": "assets/overlay_overlay_snack_cat.png"
+    },
+    "overlay:overlay_hello_label": {
+      "status": "complete",
+      "source_rect": [
+        595,
+        1945,
+        295,
+        130
+      ],
+      "audit": {
+        "node": "overlay:overlay_hello_label",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "F3GiapXbIPnYxs0P94b2-QU",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 138844
+      },
+      "visible_bbox": [
+        63,
+        17,
+        232,
+        100
+      ],
+      "output": "assets/overlay_overlay_hello_label.png"
+    },
+    "overlay:overlay_artist_label": {
+      "status": "complete",
+      "source_rect": [
+        555,
+        2075,
+        545,
+        145
+      ],
+      "audit": {
+        "node": "overlay:overlay_artist_label",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "onGiasG_MvWyvdIP8vuogQI",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 194250
+      },
+      "visible_bbox": [
+        11,
+        1,
+        534,
+        144
+      ],
+      "output": "assets/overlay_overlay_artist_label.png"
+    }
+  },
+  "last_error": {
+    "code": "TEMPORARY_NETWORK_ERROR",
+    "message": "yibu 请求失败：HTTP 502"
+  }
+}

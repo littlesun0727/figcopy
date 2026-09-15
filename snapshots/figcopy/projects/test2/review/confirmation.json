@@ -1,0 +1,27 @@
+{
+  "revision": "857376f2d827337cd2461a63588a7a2279517c94f980572c828342f02051352d",
+  "final_confirmed": true,
+  "reviewer": "wang jing",
+  "confirmed_draft": "ui_confirmed_draft.json",
+  "questions_accepted_as_is": [
+    "底部灰色气泡中的颜文字括号与符号是否为固定文案，是否需要改为客户可编辑文本？",
+    "右上音乐播放器的时间 0:30/3:20 是固定装饰文案，还是需要随客户内容修改？",
+    "中央大流星与右上红框、左下黑框的前后遮挡关系若需严格复刻，请确认流星始终位于所有照片之上。"
+  ],
+  "default_text_accepted": [
+    "ovl_text_top_left_caption",
+    "ovl_player_top_right",
+    "ovl_yes_bubble_bottom"
+  ],
+  "background_decision": {
+    "before": {
+      "mode": "fixed"
+    },
+    "after": {
+      "mode": "fixed"
+    },
+    "source": "accepted_current",
+    "before_revision": "857376f2d827337cd2461a63588a7a2279517c94f980572c828342f02051352d",
+    "edited_revision": "857376f2d827337cd2461a63588a7a2279517c94f980572c828342f02051352d"
+  }
+}

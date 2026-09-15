@@ -1,0 +1,49 @@
+{
+  "pipeline_version": "candidate-overlay/1",
+  "processing_version": "pyav-colorkey-despill/1",
+  "status": "candidate",
+  "semantic_checked": false,
+  "kind": "identity",
+  "source_size": [
+    246,
+    156
+  ],
+  "target_size": [
+    246,
+    156
+  ],
+  "scale": [
+    1.0,
+    1.0
+  ],
+  "offset": [
+    0.0,
+    0.0
+  ],
+  "content_size": [
+    246,
+    156
+  ],
+  "content_box": [
+    1442,
+    935,
+    2452,
+    1501
+  ],
+  "technical": {
+    "bbox": [
+      0,
+      0,
+      2624,
+      1664
+    ],
+    "size": [
+      2624,
+      1664
+    ],
+    "required_clearance_px": 25,
+    "issues": [
+      "OVERLAY_EDGE_CLIPPED"
+    ]
+  }
+}

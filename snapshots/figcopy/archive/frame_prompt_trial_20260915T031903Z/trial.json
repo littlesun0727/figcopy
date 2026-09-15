@@ -1,0 +1,26 @@
+{
+  "status": "complete",
+  "model": "doubao-seedream-5-0-260128",
+  "image_size": "2K",
+  "scope": "prompt_only_live_ab",
+  "cases": [
+    "ovl_frame_top_left",
+    "ovl_frame_bottom_right",
+    "ovl_star_cluster_center",
+    "ovl_player_top_right"
+  ],
+  "variants": [
+    "baseline",
+    "added_rule"
+  ],
+  "planned_image_calls": 8,
+  "vlm_calls": 0,
+  "added_rule": "如果本素材是相框、拍立得或胶片边框，照片窗口内部必须填充与外部背景完全相同的纯色色键 {key_hex}。窗口内不得出现照片、白色或灰色底板、渐变、纹理、阴影或透明棋盘格。相框纸边、底部宽边及其装饰保留原有颜色和质感。照片窗口与外部背景均供程序后续去底。",
+  "postprocessing": "existing _build_overlay unchanged",
+  "fresh_isolated_caches": true,
+  "seed_control": null,
+  "source_template_sha256": "938e4de77f69ba246757a065f2f4cd4b12a5366c62df2fa2200c05a44b1f3630",
+  "completed_cases": 8,
+  "successful_image_cases": 8,
+  "source_template_unchanged": true
+}

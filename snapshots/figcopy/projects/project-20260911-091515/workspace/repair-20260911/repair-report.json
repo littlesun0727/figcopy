@@ -1,0 +1,41 @@
+{
+  "status": "preview_needs_sticker_regeneration",
+  "background": "full_candidate",
+  "photos": "photo_feather + cover, original customer photos",
+  "crop_adjustments": {
+    "slot_photo_left_top": [
+      1.25,
+      [
+        -65,
+        0
+      ]
+    ],
+    "slot_photo_right_top": [
+      2.0,
+      [
+        -85,
+        85
+      ]
+    ],
+    "slot_photo_left_mid": [
+      1.15,
+      [
+        -40,
+        0
+      ]
+    ],
+    "slot_photo_right_bottom": [
+      2.2,
+      [
+        -430,
+        220
+      ]
+    ]
+  },
+  "sticker_regeneration": {
+    "status": "blocked",
+    "code": "YIBU_CREDENTIAL_MISSING",
+    "reused_existing_assets": true
+  },
+  "network_calls": 0
+}

@@ -1,0 +1,261 @@
+{
+  "version": "collage-draft/1",
+  "status": "draft",
+  "source": {
+    "path": "reference.png",
+    "sha256": "df132ac1c91c929f8cd88b8bf3bc026d8c14edc1e3960338f0489afcc05a60c9",
+    "width": 1320,
+    "height": 1767
+  },
+  "canvas": {
+    "width": 1320,
+    "height": 1767,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "prompt_version": "collage-draft/1",
+  "provider": {
+    "name": "yibu-audit-vlm",
+    "requested_model": "claude-opus-4-8",
+    "actual_model": "claude-opus-4-8",
+    "request_id": "msg_8c9a089d2282458e91e68ee2e0451c35",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 58563
+  },
+  "created_at": "2026-09-10T03:25:34+00:00",
+  "slots": [
+    {
+      "id": "photo_topleft",
+      "label": "左上角小照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        59,
+        207,
+        361,
+        295
+      ],
+      "target_rect": [
+        59,
+        207,
+        361,
+        295
+      ],
+      "upload_hint": "上传横向街景/风景照，会以小尺寸放在左上角虚线框内",
+      "review_notes": "带白色虚线相框，照片本体为矩形。相框作为装饰单独成组，源图内容为待替换客户照片。"
+    },
+    {
+      "id": "photo_topright",
+      "label": "右上角主照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        604,
+        81,
+        619,
+        790
+      ],
+      "target_rect": [
+        604,
+        81,
+        619,
+        790
+      ],
+      "upload_hint": "上传竖向照片，作为右上主图，略微倾斜放置",
+      "review_notes": "照片略有旋转，建议 rect 为外接框。为普通照片非抠图。"
+    },
+    {
+      "id": "photo_bottomleft",
+      "label": "左下角照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        96,
+        871,
+        567,
+        738
+      ],
+      "target_rect": [
+        96,
+        871,
+        567,
+        738
+      ],
+      "upload_hint": "上传竖向风景/城市照，作为左下主图",
+      "review_notes": "照片略倾斜，带虚线相框。矩形为外接框待确认。"
+    },
+    {
+      "id": "photo_bottomright",
+      "label": "右下角照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        663,
+        908,
+        657,
+        701
+      ],
+      "target_rect": [
+        663,
+        908,
+        657,
+        701
+      ],
+      "upload_hint": "上传竖向人物/街拍照，作为右下主图",
+      "review_notes": "画面含人物但整体为矩形照片，判定为 photo 而非 cutout。相框单独成组。"
+    },
+    {
+      "id": "text_caption",
+      "label": "左上角英文标语",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        66,
+        96,
+        493,
+        66
+      ],
+      "target_rect": [
+        66,
+        96,
+        493,
+        66
+      ],
+      "upload_hint": "两行手写体英文标语，可替换为客户文案",
+      "review_notes": "源文字可辨识为 “Sunset sells tenderness, and the world is full of romance.”，作为可编辑文字槽位，精确字体需人工确认。"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "overlay_dashed_frames",
+      "label": "虚线相框组",
+      "source_rect": [
+        40,
+        96,
+        1280,
+        1520
+      ],
+      "target_rect": [
+        40,
+        96,
+        1280,
+        1520
+      ],
+      "action": "basic_shape",
+      "generation_brief": "为四张照片生成白色手绘风虚线矩形相框，随各照片位置与轻微旋转对齐",
+      "requires_exact_content": false,
+      "review_notes": "装饰性相框，不跨客户图层可成组。rect 为覆盖全部相框的粗略范围，实际应贴合各照片边缘。"
+    },
+    {
+      "id": "overlay_paperclip",
+      "label": "回形针装饰",
+      "source_rect": [
+        869,
+        44,
+        88,
+        118
+      ],
+      "target_rect": [
+        869,
+        44,
+        88,
+        118
+      ],
+      "action": "basic_shape",
+      "generation_brief": "顶部中间手绘白色回形针图形，压在右上照片上沿",
+      "requires_exact_content": false,
+      "review_notes": "纯装饰线条元素。"
+    },
+    {
+      "id": "overlay_sparkle",
+      "label": "手绘爆闪/星光装饰",
+      "source_rect": [
+        88,
+        620,
+        354,
+        177
+      ],
+      "target_rect": [
+        88,
+        620,
+        354,
+        177
+      ],
+      "action": "basic_shape",
+      "generation_brief": "左中区域手绘白色放射状线条与星点装饰",
+      "requires_exact_content": false,
+      "review_notes": "装饰图形，位置在左侧空白背景上。"
+    },
+    {
+      "id": "overlay_watermark",
+      "label": "右下角签名/水印",
+      "source_rect": [
+        1060,
+        1624,
+        221,
+        103
+      ],
+      "target_rect": [
+        1060,
+        1624,
+        221,
+        103
+      ],
+      "action": "reference_generate",
+      "generation_brief": "右下角手写风格签名/水印字样，样式参考源图",
+      "requires_exact_content": true,
+      "review_notes": "字形为手写变体，内容无法确定辨识，标记 requires_exact_content，需原始素材或人工确认，勿近似编造文字。"
+    }
+  ],
+  "background": {
+    "background_brief": "灰调渐变云雾背景，从左上浅灰到中部云层，保留整体柔和纸感底纹，清除四张照片、相框及所有装饰后作为整版底图",
+    "review_notes": "背景为渐变+云雾纹理，作为整体背景不逐片拆解。"
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "photo_topleft"
+    },
+    {
+      "type": "slot",
+      "id": "photo_topright"
+    },
+    {
+      "type": "slot",
+      "id": "photo_bottomleft"
+    },
+    {
+      "type": "slot",
+      "id": "photo_bottomright"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_dashed_frames"
+    },
+    {
+      "type": "slot",
+      "id": "text_caption"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_sparkle"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_paperclip"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_watermark"
+    }
+  ],
+  "questions": [
+    "右下角签名/水印的实际文字内容无法辨识，请确认文本或提供原始素材。",
+    "四张照片均带轻微旋转，当前 rect 为外接框，是否需要按各自旋转角度精确对齐？",
+    "左上角英文标语是否作为可编辑文字保留，还是固定为装饰？请确认字体要求。"
+  ]
+}

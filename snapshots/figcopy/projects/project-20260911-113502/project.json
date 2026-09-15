@@ -1,0 +1,80 @@
+{
+  "version": "figcopy-project/1",
+  "id": "project-20260911-113502",
+  "name": "落日拼贴",
+  "status": "failed",
+  "created_at": "2026-09-11T03:35:12.907961+00:00",
+  "updated_at": "2026-09-11T06:01:57.150869+00:00",
+  "workflow": {
+    "version": "figcopy-workflow/1",
+    "stage": "failed",
+    "resume_stage": "building",
+    "started_at": "2026-09-11T03:35:12.904876+00:00",
+    "stage_updated_at": "2026-09-11T06:01:57.149323+00:00",
+    "options": {
+      "reviewer": "wang jing",
+      "vision_provider": "collage.providers.yibu:YibuVisionProvider",
+      "image_provider": "collage.providers.yibu:YibuImageProvider",
+      "cutout_provider": "collage.providers.birefnet:BiRefNetLiteMattingProvider",
+      "fixture_provider": false,
+      "allow_cloud_upload": false,
+      "review_port": 8765
+    },
+    "artifacts": {
+      "reference": "inputs/reference.png",
+      "manual_draft": "inputs/manual_draft.json",
+      "product_policy": "inputs/product_policy.json",
+      "background_candidate": "inputs/background_candidate.png",
+      "initial_mask": "inputs/initial_remove_mask.png",
+      "allowed_mask": "inputs/allowed_mask.png",
+      "draft": "analysis/draft.json",
+      "draft_preview": "analysis/draft_preview.png",
+      "reviewed": "review/reviewed.json",
+      "remove_mask": "review/remove_mask.png",
+      "template_manifest": "template/template.json",
+      "inspection_report": "workspace/inspection.html",
+      "upload_guide": "reports/upload_guide.html",
+      "bindings_example": "renders/bindings.example.json",
+      "bindings": "renders/bindings.json",
+      "render": "renders/result.png",
+      "render_audit": "renders/result.png.render.json"
+    },
+    "wait": null,
+    "last_error": {
+      "code": "EMPTY_OVERLAY",
+      "message": "overlay 没有任何可见像素"
+    },
+    "history": [
+      {
+        "stage": "analyzing",
+        "at": "2026-09-11T03:35:12.904876+00:00"
+      },
+      {
+        "stage": "awaiting_review",
+        "at": "2026-09-11T03:37:15.925600+00:00"
+      },
+      {
+        "stage": "reviewed",
+        "at": "2026-09-11T04:10:54.061617+00:00"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T04:10:54.072391+00:00"
+      },
+      {
+        "stage": "blocked",
+        "at": "2026-09-11T04:10:54.084611+00:00",
+        "code": "YIBU_CREDENTIAL_MISSING"
+      },
+      {
+        "stage": "building",
+        "at": "2026-09-11T05:59:10.841265+00:00"
+      },
+      {
+        "stage": "failed",
+        "at": "2026-09-11T06:01:57.149323+00:00",
+        "code": "EMPTY_OVERLAY"
+      }
+    ]
+  }
+}

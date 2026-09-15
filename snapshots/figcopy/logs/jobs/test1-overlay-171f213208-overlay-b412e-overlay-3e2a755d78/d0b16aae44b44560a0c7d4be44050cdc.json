@@ -1,0 +1,41 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T01:49:01.988288+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=d0b16aae44b44560a0c7d4be44050cdc kind=approve"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T01:49:03.493507+00:00",
+      "level": "INFO",
+      "logger": "collage.template.build.approval",
+      "message": "模板已通过人工验收并发布 | path=<path>"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-15T01:49:03.502365+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78 stage=complete"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-15T01:49:03.516350+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务完成 | job=d0b16aae44b44560a0c7d4be44050cdc"
+    }
+  ],
+  "last_seq": 4,
+  "id": "d0b16aae44b44560a0c7d4be44050cdc",
+  "project_id": "test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78",
+  "kind": "approve",
+  "state": "succeeded",
+  "created_at": "2026-09-15T01:49:01.976047+00:00",
+  "updated_at": "2026-09-15T01:49:03.519372+00:00",
+  "error": null,
+  "result": null
+}

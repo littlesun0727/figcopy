@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "中央偏左的粉色大流星贴纸：五角星主体带奶油色高光与拟人小眼睛，尾部向右拖出两条粉白流星尾，周围配两颗较小粉星与黑色小星芒，描边为深粉/酒红，覆盖在照片间隙前景。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "0217894424622465ffee7bd9f8ed62699b3e2c08b3f2375fb64c7",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 53216
+  },
+  "raw_sha256": "44b6623361a2e03d658f36282346c6ee5f86180c711c86d05d0bfa2791364671",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      2048,
+      1856
+    ],
+    "target_size": [
+      418,
+      378
+    ],
+    "scale": [
+      0.20361328125,
+      0.2036637931034483
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      417,
+      378
+    ]
+  }
+}

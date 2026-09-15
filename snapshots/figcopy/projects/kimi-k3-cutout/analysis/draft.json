@@ -1,0 +1,406 @@
+{
+  "version": "collage-draft/1",
+  "status": "draft",
+  "source": {
+    "path": "reference.png",
+    "sha256": "314ca6dd0548a5bf8861584140fcb27c71707cca5420746878acee02a91c8c2b",
+    "width": 1290,
+    "height": 2306
+  },
+  "canvas": {
+    "width": 1290,
+    "height": 2306,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "prompt_version": "collage-draft/1",
+  "provider": {
+    "name": "yibu-audit-vlm",
+    "requested_model": "kimi-k3",
+    "actual_model": "kimi-k3",
+    "request_id": "chatcmpl-58ed36bd9275",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 604797
+  },
+  "created_at": "2026-09-10T04:13:37+00:00",
+  "slots": [
+    {
+      "id": "slot_photo_1",
+      "label": "左上人物照片",
+      "type": "image",
+      "mode": "photo_feather",
+      "source_rect": [
+        20,
+        100,
+        770,
+        900
+      ],
+      "target_rect": [
+        20,
+        100,
+        770,
+        900
+      ],
+      "upload_hint": "上传竖版半身人像，人物居中、头顶略留空，边缘将自动羽化与背景融合",
+      "review_notes": "矩形为目测建议；顶部白色羽化光晕范围大，实际羽化边界待确认"
+    },
+    {
+      "id": "slot_photo_2",
+      "label": "右上特写人物照片",
+      "type": "image",
+      "mode": "photo_feather",
+      "source_rect": [
+        680,
+        340,
+        610,
+        870
+      ],
+      "target_rect": [
+        680,
+        340,
+        610,
+        870
+      ],
+      "upload_hint": "上传面部特写或半身照，建议手部入镜，左边缘将羽化融合",
+      "review_notes": "与底部大照片的叠放次序因羽化无法完全确定，待复核"
+    },
+    {
+      "id": "slot_photo_3",
+      "label": "中左人物照片",
+      "type": "image",
+      "mode": "photo_feather",
+      "source_rect": [
+        0,
+        930,
+        740,
+        900
+      ],
+      "target_rect": [
+        0,
+        930,
+        740,
+        900
+      ],
+      "upload_hint": "上传半身人像，人物偏左，右侧与底部边缘将羽化融合",
+      "review_notes": "手臂横向伸出区域与底部大照片相交，归属与叠放层次待复核"
+    },
+    {
+      "id": "slot_photo_4",
+      "label": "底部大人物照片",
+      "type": "image",
+      "mode": "photo_feather",
+      "source_rect": [
+        420,
+        1110,
+        870,
+        1196
+      ],
+      "target_rect": [
+        420,
+        1110,
+        870,
+        1196
+      ],
+      "upload_hint": "上传竖版自拍式人像，面部偏上居中，左侧与顶部边缘将羽化融合",
+      "review_notes": "矩形为目测建议；与中左照片的交叠关系（头发压肩 vs 手臂压胸口）需确认羽化混合方案"
+    },
+    {
+      "id": "slot_text_together",
+      "label": "文字「together.」",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        45,
+        810,
+        510,
+        180
+      ],
+      "target_rect": [
+        45,
+        810,
+        510,
+        180
+      ],
+      "upload_hint": "输入一句简短英文单词或短句",
+      "review_notes": "原文字清晰可读为 together.，黑色衬线斜体；衬底撕纸为独立固定装饰"
+    },
+    {
+      "id": "slot_text_hello",
+      "label": "文字「hello」",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        615,
+        1960,
+        255,
+        100
+      ],
+      "target_rect": [
+        615,
+        1960,
+        255,
+        100
+      ],
+      "upload_hint": "输入一个简短单词",
+      "review_notes": "原文字清晰可读为 hello，打字机字体；白色标签底与小星星为独立固定装饰"
+    },
+    {
+      "id": "slot_text_artist",
+      "label": "文字「I am a artist」",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        580,
+        2095,
+        510,
+        115
+      ],
+      "target_rect": [
+        580,
+        2095,
+        510,
+        115
+      ],
+      "upload_hint": "输入一句简短英文短句",
+      "review_notes": "原文字清晰可读为 I am a artist（按原文转写，语法未修正），打字机字体；白色标签底为独立固定装饰"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "overlay_hearts",
+      "label": "顶部粉白爱心簇",
+      "source_rect": [
+        420,
+        0,
+        510,
+        280
+      ],
+      "target_rect": [
+        420,
+        0,
+        510,
+        280
+      ],
+      "action": "reference_generate",
+      "generation_brief": "一组半透明粉色爱心与一朵白色云朵状爱心，柔和粉彩贴纸风，位于顶部中央",
+      "requires_exact_content": false,
+      "review_notes": "与照片顶部羽化光晕相交，置于照片层之下；透明度与层次待复核"
+    },
+    {
+      "id": "overlay_coffee_polka",
+      "label": "波点方块+咖啡杯贴纸组",
+      "source_rect": [
+        845,
+        95,
+        425,
+        300
+      ],
+      "target_rect": [
+        845,
+        95,
+        425,
+        300
+      ],
+      "action": "reference_generate",
+      "generation_brief": "深棕底白波点方块贴纸，右下叠一杯拿铁咖啡贴纸（绿色描边、心形拉花），两件成组不拆分",
+      "requires_exact_content": false,
+      "review_notes": "成组装饰；与票券的交叠关系为票券在上"
+    },
+    {
+      "id": "overlay_ticket",
+      "label": "Ticket To Anywhere 票券",
+      "source_rect": [
+        605,
+        265,
+        445,
+        255
+      ],
+      "target_rect": [
+        605,
+        265,
+        445,
+        255
+      ],
+      "action": "reference_generate",
+      "generation_brief": "做旧牛皮纸票券，打字机字体两行文字 Ticket To / Anywhere，右侧竖排打孔数字 017，边缘撕裂",
+      "requires_exact_content": true,
+      "review_notes": "含精确文字与编号 017，需原始素材或精确重制；如需客户可改文字请转为文字槽位"
+    },
+    {
+      "id": "overlay_together_paper",
+      "label": "together 衬底撕纸",
+      "source_rect": [
+        25,
+        790,
+        555,
+        215
+      ],
+      "target_rect": [
+        25,
+        790,
+        555,
+        215
+      ],
+      "action": "reference_generate",
+      "generation_brief": "米白色手撕纸长条，边缘不规则撕裂，置于文字之下",
+      "requires_exact_content": false,
+      "review_notes": "仅纸底，文字为独立槽位"
+    },
+    {
+      "id": "overlay_rabbit_star",
+      "label": "蓝色星爆+兔子贴纸组",
+      "source_rect": [
+        930,
+        940,
+        360,
+        570
+      ],
+      "target_rect": [
+        930,
+        940,
+        360,
+        570
+      ],
+      "action": "reference_generate",
+      "generation_brief": "纯蓝色不规则星爆形状垫底，前方叠浅棕色兔子正面照贴纸（紫色描边），两件成组",
+      "requires_exact_content": false,
+      "review_notes": "成组装饰；压在右上与底部照片之上"
+    },
+    {
+      "id": "overlay_snack_cat",
+      "label": "左下食物猫咪贴纸组",
+      "source_rect": [
+        25,
+        1630,
+        560,
+        676
+      ],
+      "target_rect": [
+        25,
+        1630,
+        560,
+        676
+      ],
+      "action": "reference_generate",
+      "generation_brief": "牛角包贴纸（黄色描边）、蓝底白波点五角星、橘猫正面头像贴纸（黄色描边）、两枚粉色小箭头，整体成组",
+      "requires_exact_content": false,
+      "review_notes": "成组装饰；压在照片层之上，组内相对位置保持参考图"
+    },
+    {
+      "id": "overlay_hello_label",
+      "label": "hello 白色标签底",
+      "source_rect": [
+        595,
+        1945,
+        295,
+        130
+      ],
+      "target_rect": [
+        595,
+        1945,
+        295,
+        130
+      ],
+      "action": "reference_generate",
+      "generation_brief": "微倾斜白色小标签底，右侧带一颗小星星点缀，置于文字之下",
+      "requires_exact_content": false,
+      "review_notes": "仅标签底，文字为独立槽位"
+    },
+    {
+      "id": "overlay_artist_label",
+      "label": "artist 白色标签底",
+      "source_rect": [
+        555,
+        2075,
+        545,
+        145
+      ],
+      "target_rect": [
+        555,
+        2075,
+        545,
+        145
+      ],
+      "action": "reference_generate",
+      "generation_brief": "微倾斜白色长条标签底，右侧带小星星点缀，置于文字之下",
+      "requires_exact_content": false,
+      "review_notes": "仅标签底，文字为独立槽位"
+    }
+  ],
+  "background": {
+    "background_brief": "清除全部人物照片、贴纸与文字后，保留亮灰白色纸纹基底：左上与右上旧英文报纸碎片、右侧手写体纸边、左下灰色揉纸质感；原人物区域用柔和白灰渐变填平，保持整体高亮低对比做旧拼贴感",
+    "review_notes": "报纸小字不可辨认，按近似纹理处理不逐片拆解；若需精确报纸内容请提供原始素材"
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_hearts"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_1"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_3"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_4"
+    },
+    {
+      "type": "slot",
+      "id": "slot_photo_2"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_coffee_polka"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_ticket"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_together_paper"
+    },
+    {
+      "type": "slot",
+      "id": "slot_text_together"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_rabbit_star"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_snack_cat"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_hello_label"
+    },
+    {
+      "type": "slot",
+      "id": "slot_text_hello"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_artist_label"
+    },
+    {
+      "type": "slot",
+      "id": "slot_text_artist"
+    }
+  ],
+  "questions": [
+    "四张照片均为羽化融合，photo_2 与 photo_4、photo_3 与 photo_4 的前后叠放次序无法完全确定，请确认当前 layer_order 是否正确？",
+    "票券上的文字 Ticket To Anywhere 与编号 017 目前按固定装饰处理并标记 requires_exact_content，是否需要改为客户可编辑文字？",
+    "together. / hello / I am a artist 已设为可编辑文字槽位，若模板文案固定不改，请确认后转为固定装饰？",
+    "背景报纸上的文字无法辨认，是否接受以近似报纸纹理代替，还是需要提供原始素材精确还原？"
+  ]
+}

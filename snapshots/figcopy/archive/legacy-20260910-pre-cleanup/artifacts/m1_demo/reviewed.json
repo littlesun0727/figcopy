@@ -1,0 +1,138 @@
+{
+  "version": "collage-reviewed/1",
+  "status": "reviewed",
+  "reference": {
+    "path": "inputs/reference.png",
+    "sha256": "16c8eb4f8fdb2d8a22ec0da92e47f2912fb9fbc9e6ab79151b392dc12e4bbca3"
+  },
+  "canvas": {
+    "width": 480,
+    "height": 360,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "slots": [
+    {
+      "id": "photo_left",
+      "label": "左侧照片",
+      "type": "image",
+      "required": true,
+      "mode": "photo",
+      "source_rect": [
+        20,
+        60,
+        260,
+        240
+      ],
+      "target_rect": [
+        20,
+        60,
+        260,
+        240
+      ],
+      "upload_hint": "上传横向或方形照片",
+      "review_notes": "演示槽",
+      "rotation_deg": -3,
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "person_main",
+      "label": "右侧透明主体",
+      "type": "image",
+      "required": true,
+      "mode": "cutout",
+      "source_rect": [
+        190,
+        40,
+        250,
+        300
+      ],
+      "target_rect": [
+        190,
+        40,
+        250,
+        300
+      ],
+      "upload_hint": "上传透明 PNG",
+      "review_notes": "演示槽",
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        1.0
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    }
+  ],
+  "overlays": [
+    {
+      "id": "star",
+      "label": "紫色星形",
+      "source_rect": [
+        170,
+        140,
+        120,
+        100
+      ],
+      "target_rect": [
+        170,
+        140,
+        120,
+        100
+      ],
+      "action": "reference_generate",
+      "generation_brief": "保持星形、紫色和白色描边；这是预制测试素材。",
+      "requires_exact_content": false,
+      "review_notes": "导入预制透明素材",
+      "rotation_deg": 0,
+      "prepared_asset": "inputs/overlay_star.png",
+      "background_mode": "alpha",
+      "chroma_key": null,
+      "chroma_tolerance": 40,
+      "shape": null
+    }
+  ],
+  "background": {
+    "background_brief": "延续米色纸纹，不保留旧色块。",
+    "review_notes": "导入确定性测试底图",
+    "remove_mask": "inputs/remove_mask.png",
+    "allowed_mask": null,
+    "candidate_path": "inputs/background_candidate.png",
+    "expand_px": 0,
+    "feather_px": 0
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "photo_left"
+    },
+    {
+      "type": "overlay",
+      "id": "star"
+    },
+    {
+      "type": "slot",
+      "id": "person_main"
+    }
+  ],
+  "review": {
+    "reviewer": "demo-author",
+    "reviewed_at": "2026-09-09T00:00:00+00:00",
+    "notes": "程序构造的 M1 测试",
+    "questions_resolved": true
+  },
+  "audit": {
+    "fixture": false,
+    "source": "programmatic-demo"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "浅灰白竖向相框，内边为清晰矩形照片窗，底部留较宽空白边，纸面有轻微纹理和柔和投影，风格与左上拍立得一致但更简洁；只生成边框，不包含照片与红唇印。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "021789443447695114488fbfaf31238bc59a8d8e7bd2490575c00",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 51422
+  },
+  "raw_sha256": "6751e0d5ac0721388f2bc40c54a89120f97ef6741350a770d494019c749fd91f",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      1728,
+      2208
+    ],
+    "target_size": [
+      578,
+      739
+    ],
+    "scale": [
+      0.33449074074074076,
+      0.33469202898550726
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      578,
+      739
+    ]
+  }
+}

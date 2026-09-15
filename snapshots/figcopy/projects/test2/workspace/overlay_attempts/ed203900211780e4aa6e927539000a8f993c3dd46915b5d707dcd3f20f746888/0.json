@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "左下黑色相框底部宽边内的白色简笔颜文字/小动物表情，圆角气泡或横幅底，线条为黑色手绘风，左右有小星芒点缀。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "021789437973231637105f9e0c7bada5e282be23591e67a634432",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 49593
+  },
+  "raw_sha256": "a8d1dac27fb201079d9783b7bb68a4fd796b2c1f83f2f1e28b37ff839aaeadc0",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      3392,
+      1216
+    ],
+    "target_size": [
+      223,
+      80
+    ],
+    "scale": [
+      0.06574292452830188,
+      0.06578947368421052
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      223,
+      80
+    ]
+  }
+}

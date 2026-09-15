@@ -1,0 +1,510 @@
+{
+  "version": "collage-template/1",
+  "status": "needs_review",
+  "canvas": {
+    "width": 1290,
+    "height": 2306,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "assets": [
+    {
+      "id": "bg",
+      "path": "assets/background.png",
+      "role": "background",
+      "requires_alpha": false,
+      "sha256": "261ea7c6a47ffcf99bcf27c98350e8a85dbddde979ecb1cd604fd9a8232a2fd8"
+    },
+    {
+      "id": "overlay_hearts",
+      "path": "assets/overlay_overlay_hearts.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "99a55dd311b149016e024d527c6f3e16e49369a44a0916cacbb6eedb0f3f19db"
+    },
+    {
+      "id": "overlay_coffee_polka",
+      "path": "assets/overlay_overlay_coffee_polka.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "121830fe4a7f6d5c9450eb4d98ef4937f48f24bad495435cb8421215b2b5b846"
+    },
+    {
+      "id": "overlay_ticket",
+      "path": "assets/overlay_overlay_ticket.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "dc36cfe16fc1785e43de0ee2d30ee84d6da427464af4d81c26d7670af68b7468"
+    },
+    {
+      "id": "overlay_together_paper",
+      "path": "assets/overlay_overlay_together_paper.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "e91b1cf81b78333321d77321660d92a973260d37076167113b68111a2ef6f699"
+    },
+    {
+      "id": "overlay_rabbit_star",
+      "path": "assets/overlay_overlay_rabbit_star.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "18c26cd2f87e0614d0ac8bd109dee125c6f1f9716f9852865445af1b419de60e"
+    },
+    {
+      "id": "overlay_snack_cat",
+      "path": "assets/overlay_overlay_snack_cat.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "b046d5d64e4a9ca7e635c957d0ff98871df5145e2a8d259e3543f448503d386d"
+    },
+    {
+      "id": "overlay_hello_label",
+      "path": "assets/overlay_overlay_hello_label.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "4ce7bc106810467a56323c33dff36befe3db6b339b44782066045015ce56bb92"
+    },
+    {
+      "id": "overlay_artist_label",
+      "path": "assets/overlay_overlay_artist_label.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "c32d876f4b5b6e5a8f04f66c83bdc445d104d3beddc415382fa074da521829f5"
+    }
+  ],
+  "slots": [
+    {
+      "id": "slot_photo_1",
+      "type": "image",
+      "label": "左上人物照片",
+      "required": true,
+      "upload_hint": "上传竖版半身人像，人物居中、头顶略留空，边缘将自动羽化与背景融合",
+      "rect": [
+        20,
+        100,
+        770,
+        900
+      ],
+      "rotation_deg": 0,
+      "mode": "photo_feather",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 62
+    },
+    {
+      "id": "slot_photo_2",
+      "type": "image",
+      "label": "右上特写人物照片",
+      "required": true,
+      "upload_hint": "上传面部特写或半身照，建议手部入镜，左边缘将羽化融合",
+      "rect": [
+        680,
+        340,
+        610,
+        870
+      ],
+      "rotation_deg": 0,
+      "mode": "photo_feather",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 49
+    },
+    {
+      "id": "slot_photo_3",
+      "type": "image",
+      "label": "中左人物照片",
+      "required": true,
+      "upload_hint": "上传半身人像，人物偏左，右侧与底部边缘将羽化融合",
+      "rect": [
+        0,
+        930,
+        740,
+        900
+      ],
+      "rotation_deg": 0,
+      "mode": "photo_feather",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 59
+    },
+    {
+      "id": "slot_photo_4",
+      "type": "image",
+      "label": "底部大人物照片",
+      "required": true,
+      "upload_hint": "上传竖版自拍式人像，面部偏上居中，左侧与顶部边缘将羽化融合",
+      "rect": [
+        420,
+        1110,
+        870,
+        1196
+      ],
+      "rotation_deg": 0,
+      "mode": "photo_feather",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 70
+    },
+    {
+      "id": "slot_text_together",
+      "type": "text",
+      "label": "文字「together.」",
+      "required": true,
+      "upload_hint": "输入一句简短英文单词或短句",
+      "rect": [
+        45,
+        810,
+        510,
+        180
+      ],
+      "rotation_deg": 0,
+      "default_text": "together.",
+      "font_path": null,
+      "font_size": 99,
+      "fallback_approved": true,
+      "color": "#000000",
+      "align": "left",
+      "max_lines": 3,
+      "line_spacing": 4
+    },
+    {
+      "id": "slot_text_hello",
+      "type": "text",
+      "label": "文字「hello」",
+      "required": true,
+      "upload_hint": "输入一个简短单词",
+      "rect": [
+        615,
+        1960,
+        255,
+        100
+      ],
+      "rotation_deg": 0,
+      "default_text": "hello",
+      "font_path": null,
+      "font_size": 55,
+      "fallback_approved": true,
+      "color": "#000000",
+      "align": "left",
+      "max_lines": 3,
+      "line_spacing": 4
+    },
+    {
+      "id": "slot_text_artist",
+      "type": "text",
+      "label": "文字「I am a artist」",
+      "required": true,
+      "upload_hint": "输入一句简短英文短句",
+      "rect": [
+        580,
+        2095,
+        510,
+        115
+      ],
+      "rotation_deg": 0,
+      "default_text": "I am a artist",
+      "font_path": null,
+      "font_size": 63,
+      "fallback_approved": true,
+      "color": "#000000",
+      "align": "left",
+      "max_lines": 3,
+      "line_spacing": 4
+    }
+  ],
+  "layers": [
+    {
+      "type": "asset",
+      "asset_id": "bg",
+      "rect": [
+        0,
+        0,
+        1290,
+        2306
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_hearts",
+      "rect": [
+        420,
+        0,
+        510,
+        280
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_photo_1"
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_photo_3"
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_photo_4"
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_photo_2"
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_coffee_polka",
+      "rect": [
+        845,
+        95,
+        425,
+        300
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_ticket",
+      "rect": [
+        605,
+        265,
+        445,
+        255
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_together_paper",
+      "rect": [
+        25,
+        790,
+        555,
+        215
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_text_together"
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_rabbit_star",
+      "rect": [
+        930,
+        940,
+        360,
+        570
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_snack_cat",
+      "rect": [
+        25,
+        1630,
+        560,
+        676
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_hello_label",
+      "rect": [
+        595,
+        1945,
+        295,
+        130
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_text_hello"
+    },
+    {
+      "type": "asset",
+      "asset_id": "overlay_artist_label",
+      "rect": [
+        555,
+        2075,
+        545,
+        145
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "slot",
+      "slot_id": "slot_text_artist"
+    }
+  ],
+  "build": {
+    "source_sha256": "314ca6dd0548a5bf8861584140fcb27c71707cca5420746878acee02a91c8c2b",
+    "created_at": "2026-09-10T09:20:24+00:00",
+    "tool_version": "0.1.0",
+    "fixture_used": false,
+    "providers": [
+      {
+        "node": "background",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "s1-iaq7VKvOX3boP08iTUQ",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 191390
+      },
+      {
+        "node": "overlay:overlay_hearts",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "ZWCiauetJJmZ3boPtfD-2Ao",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 135641
+      },
+      {
+        "node": "overlay:overlay_coffee_polka",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "7WCiasX2MLrR28oPibGWoA4",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 157828
+      },
+      {
+        "node": "overlay:overlay_ticket",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "jGGiarJ76uOR1Q-84I2ACw",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 264500
+      },
+      {
+        "node": "overlay:overlay_together_paper",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "lGKiatGvOfOX3boP08iTUQ",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 180921
+      },
+      {
+        "node": "overlay:overlay_rabbit_star",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "SmOiaorWGqKKvdIPqZWW-Q8",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 129125
+      },
+      {
+        "node": "overlay:overlay_snack_cat",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "_2-iaqq3B6KKvdIPqZWW-Q8",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 282609
+      },
+      {
+        "node": "overlay:overlay_hello_label",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "F3GiapXbIPnYxs0P94b2-QU",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 138844
+      },
+      {
+        "node": "overlay:overlay_artist_label",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image",
+        "request_id": "onGiasG_MvWyvdIP8vuogQI",
+        "fixture": false,
+        "cache_hit": true,
+        "elapsed_ms": 194250
+      }
+    ]
+  },
+  "review": {
+    "visual_approved": false,
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": "",
+    "evidence_sha256": []
+  }
+}

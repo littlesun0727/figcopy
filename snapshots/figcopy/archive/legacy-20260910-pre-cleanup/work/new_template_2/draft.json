@@ -1,0 +1,287 @@
+{
+  "version": "collage-draft/1",
+  "status": "draft",
+  "source": {
+    "path": "reference.png",
+    "sha256": "f618f9df91109bc65197efb6d4e6020dabcabca3e320dfaf0d6db4ea088424fb",
+    "width": 1080,
+    "height": 2346
+  },
+  "canvas": {
+    "width": 1080,
+    "height": 2346,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "prompt_version": "collage-draft/1",
+  "provider": {
+    "name": "yibu-audit-vlm",
+    "requested_model": "claude-opus-4-8",
+    "actual_model": "claude-opus-4-8",
+    "request_id": "msg_2d67885b31cf4485ae97f1f2f4fc3d3c",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 78671
+  },
+  "created_at": "2026-09-10T03:16:39+00:00",
+  "slots": [
+    {
+      "id": "slot_body_text",
+      "label": "正文内容块",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        55,
+        390,
+        970,
+        1690
+      ],
+      "target_rect": [
+        55,
+        390,
+        970,
+        1690
+      ],
+      "upload_hint": "填入分条正文/代码块文字，保留左侧行号列结构",
+      "review_notes": "整块可编辑文字，字号较小但可读；具体逐行内容较长，需客户逐条替换。行号(1-16)属固定装饰列还是内容需确认。"
+    },
+    {
+      "id": "slot_title_top",
+      "label": "顶部绿色标题",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        275,
+        300,
+        530,
+        75
+      ],
+      "target_rect": [
+        275,
+        300,
+        530,
+        75
+      ],
+      "upload_hint": "填入首段标题文字，约6-8字",
+      "review_notes": "源文疑似'视频转场提示词'，绿字白描边样式。是否作为可编辑文字待确认。"
+    },
+    {
+      "id": "slot_title_mid",
+      "label": "中部绿色标题",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        275,
+        1610,
+        530,
+        75
+      ],
+      "target_rect": [
+        275,
+        1610,
+        530,
+        75
+      ],
+      "upload_hint": "填入第二段标题文字，约6-8字",
+      "review_notes": "源文疑似'通用的视频提示词'，与顶部标题同款样式，被人物照片压住一角。"
+    },
+    {
+      "id": "slot_person_photo",
+      "label": "中心人物照片",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        380,
+        1620,
+        340,
+        340
+      ],
+      "target_rect": [
+        380,
+        1620,
+        340,
+        340
+      ],
+      "upload_hint": "上传人物半身照，放入圆形取景框",
+      "review_notes": "圆形取景照片，非抠图；若需去背景压到正文上则应改 cutout，待确认。"
+    },
+    {
+      "id": "slot_avatar",
+      "label": "账号头像",
+      "type": "image",
+      "mode": "photo",
+      "source_rect": [
+        37,
+        2020,
+        90,
+        90
+      ],
+      "target_rect": [
+        37,
+        2020,
+        90,
+        90
+      ],
+      "upload_hint": "上传账号头像，圆形显示",
+      "review_notes": "左下角小圆头像，客户账号信息。"
+    },
+    {
+      "id": "slot_username",
+      "label": "账号名称",
+      "type": "text",
+      "mode": null,
+      "source_rect": [
+        147,
+        2025,
+        300,
+        60
+      ],
+      "target_rect": [
+        147,
+        2025,
+        300,
+        60
+      ],
+      "upload_hint": "填入账号昵称",
+      "review_notes": "源文疑似'阿葱产品日记'，客户可替换昵称。"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "overlay_statusbar",
+      "label": "手机状态栏",
+      "source_rect": [
+        0,
+        0,
+        1080,
+        110
+      ],
+      "target_rect": [
+        0,
+        0,
+        1080,
+        110
+      ],
+      "action": "reference_generate",
+      "generation_brief": "生成手机顶部状态栏：左侧时间，右侧信号/WiFi/电量图标",
+      "requires_exact_content": true,
+      "review_notes": "含具体时间(8:40)与电量(43)等精确数值，属界面元素，需按原图确认或改为通用占位。"
+    },
+    {
+      "id": "overlay_header",
+      "label": "章节标题栏",
+      "source_rect": [
+        55,
+        110,
+        420,
+        130
+      ],
+      "target_rect": [
+        55,
+        110,
+        420,
+        130
+      ],
+      "action": "reference_generate",
+      "generation_brief": "生成黑色大标题加浅灰小副标题的两行章节标题栏",
+      "requires_exact_content": false,
+      "review_notes": "源文'二、视频提示词'/'使用首尾帧功能'，界面顶部标题；是否算客户可编辑内容待确认。"
+    },
+    {
+      "id": "overlay_follow_btn",
+      "label": "立即关注按钮",
+      "source_rect": [
+        440,
+        2035,
+        220,
+        65
+      ],
+      "target_rect": [
+        440,
+        2035,
+        220,
+        65
+      ],
+      "action": "basic_shape",
+      "generation_brief": "生成红色圆角胶囊按钮，内含白色'立即关注'文字",
+      "requires_exact_content": false,
+      "review_notes": "固定UI装饰按钮，不跨客户内容编辑。"
+    },
+    {
+      "id": "overlay_engagement_bar",
+      "label": "底部互动栏",
+      "source_rect": [
+        0,
+        2240,
+        1080,
+        106
+      ],
+      "target_rect": [
+        0,
+        2240,
+        1080,
+        106
+      ],
+      "action": "reference_generate",
+      "generation_brief": "生成底部互动条：左侧'说点什么'输入框，右侧点赞/收藏/评论图标及计数",
+      "requires_exact_content": true,
+      "review_notes": "含精确互动数值(655/829/11)，属界面元素；如保留数字则需按原图确认。"
+    }
+  ],
+  "background": {
+    "background_brief": "生成浅灰白色的笔记/文档类界面底纹，正文区为白色卡片，无独立可拆解元素",
+    "review_notes": "背景为App界面纯色底，非报纸/纸纹拼贴，整体作为一层不逐片拆解。"
+  },
+  "layer_order": [
+    {
+      "type": "background"
+    },
+    {
+      "type": "slot",
+      "id": "slot_body_text"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_header"
+    },
+    {
+      "type": "slot",
+      "id": "slot_title_top"
+    },
+    {
+      "type": "slot",
+      "id": "slot_title_mid"
+    },
+    {
+      "type": "slot",
+      "id": "slot_person_photo"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_statusbar"
+    },
+    {
+      "type": "slot",
+      "id": "slot_avatar"
+    },
+    {
+      "type": "slot",
+      "id": "slot_username"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_follow_btn"
+    },
+    {
+      "type": "overlay",
+      "id": "overlay_engagement_bar"
+    }
+  ],
+  "questions": [
+    "两处绿色描边标题是作为客户可编辑文字槽，还是固定装饰样式？",
+    "中心圆形人物照片是普通照片入框(photo)，还是需要抠图后压在正文上(cutout)？",
+    "正文代码块的逐行文字与左侧行号(1-16)是否均由客户替换，还是行号为固定装饰？",
+    "状态栏时间/电量与底部互动数值(655/829/11)是否需保留原始精确数值，或改为通用占位？",
+    "章节标题'二、视频提示词'及副标题属客户内容还是固定界面元素？"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "kind": "identity",
+  "source_size": [
+    540,
+    676
+  ],
+  "target_size": [
+    540,
+    676
+  ],
+  "scale": [
+    1.0,
+    1.0
+  ],
+  "offset": [
+    0.0,
+    0.0
+  ],
+  "content_size": [
+    540,
+    676
+  ],
+  "provider_output": {
+    "kind": "center_crop_uniform_resize",
+    "source_size": [
+      2048,
+      2048
+    ],
+    "crop_box": [
+      206,
+      0,
+      1842,
+      2048
+    ],
+    "target_size": [
+      540,
+      676
+    ]
+  }
+}

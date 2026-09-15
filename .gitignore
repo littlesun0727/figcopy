@@ -15,3 +15,6 @@ __pycache__/
 *.render.json
 .env
 .env.*
+
+# Keep render audit records in the explicit project data snapshot.
+!/snapshots/figcopy/**/*.render.json

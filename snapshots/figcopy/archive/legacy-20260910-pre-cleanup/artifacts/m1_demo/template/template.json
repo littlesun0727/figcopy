@@ -1,0 +1,149 @@
+{
+  "version": "collage-template/1",
+  "status": "needs_review",
+  "canvas": {
+    "width": 480,
+    "height": 360,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "assets": [
+    {
+      "id": "bg",
+      "path": "assets/background.png",
+      "role": "background",
+      "requires_alpha": false,
+      "sha256": "5c9ddd8da8c9cc7b8630d7625b56b30c788d9e7168cde66bf534d7f49389de94"
+    },
+    {
+      "id": "star",
+      "path": "assets/overlay_star.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "3041d1da3457f544590ee51d88552cbbb3db9e96eb22596726ec2dffcc4883b7"
+    }
+  ],
+  "slots": [
+    {
+      "id": "photo_left",
+      "type": "image",
+      "label": "左侧照片",
+      "required": true,
+      "upload_hint": "上传横向或方形照片",
+      "rect": [
+        20,
+        60,
+        260,
+        240
+      ],
+      "rotation_deg": -3,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "person_main",
+      "type": "image",
+      "label": "右侧透明主体",
+      "required": true,
+      "upload_hint": "上传透明 PNG",
+      "rect": [
+        190,
+        40,
+        250,
+        300
+      ],
+      "rotation_deg": 0,
+      "mode": "cutout",
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        1.0
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    }
+  ],
+  "layers": [
+    {
+      "type": "asset",
+      "asset_id": "bg",
+      "rect": [
+        0,
+        0,
+        480,
+        360
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "slot",
+      "slot_id": "photo_left"
+    },
+    {
+      "type": "asset",
+      "asset_id": "star",
+      "rect": [
+        170,
+        140,
+        120,
+        100
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "slot",
+      "slot_id": "person_main"
+    }
+  ],
+  "build": {
+    "source_sha256": "16c8eb4f8fdb2d8a22ec0da92e47f2912fb9fbc9e6ab79151b392dc12e4bbca3",
+    "created_at": "2026-09-09T11:06:34+00:00",
+    "tool_version": "0.1.0",
+    "fixture_used": false,
+    "providers": [
+      {
+        "node": "background",
+        "name": "imported-background",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:star",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      }
+    ]
+  },
+  "review": {
+    "visual_approved": false,
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": "",
+    "evidence_sha256": []
+  }
+}

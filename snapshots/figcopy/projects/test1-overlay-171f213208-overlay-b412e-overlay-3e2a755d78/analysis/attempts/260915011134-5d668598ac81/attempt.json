@@ -1,0 +1,27 @@
+{
+  "id": "260915011134-5d668598ac81",
+  "started_at": "2026-09-15T01:11:34.142659+00:00",
+  "status": "succeeded",
+  "phase": "saving_draft",
+  "files": [
+    "prompt.txt",
+    "policy.json",
+    "input.json",
+    "transport_response.txt",
+    "response.json",
+    "response_metadata.json",
+    "response.txt",
+    "candidate.json",
+    "audit.json",
+    "assembled_draft.json",
+    "validation.json"
+  ],
+  "job_id": "a530749612d2412984e4442803c6a2a1",
+  "provider": "yibu-audit-vlm",
+  "model": "qwen3.8-max",
+  "fixture": false,
+  "prompt_version": "collage-draft/8",
+  "max_tokens": 16384,
+  "reasoning_effort": "high",
+  "finished_at": "2026-09-15T01:15:12.754373+00:00"
+}

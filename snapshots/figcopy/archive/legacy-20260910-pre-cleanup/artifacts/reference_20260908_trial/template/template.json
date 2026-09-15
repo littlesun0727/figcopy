@@ -1,0 +1,201 @@
+{
+  "version": "collage-template/1",
+  "status": "needs_review",
+  "canvas": {
+    "width": 1320,
+    "height": 1767,
+    "coordinate_space": "canvas_px",
+    "rect_format": "xywh"
+  },
+  "assets": [
+    {
+      "id": "bg",
+      "path": "assets/background.png",
+      "role": "background",
+      "requires_alpha": false,
+      "sha256": "15f8d1a36d33b70d04368d4d857df288b956c6223baac51b510426adfabda6ca"
+    },
+    {
+      "id": "fixed_foreground",
+      "path": "assets/overlay_fixed_foreground.png",
+      "role": "overlay",
+      "requires_alpha": true,
+      "sha256": "20cff43ec9c573689fc69e5e68cb583c27c10dc2ec92f2d3155e0cca584f8871"
+    }
+  ],
+  "slots": [
+    {
+      "id": "photo_background",
+      "type": "image",
+      "label": "全画布主照片",
+      "required": true,
+      "upload_hint": "上传任意照片；渲染器会按 cover 等比裁切",
+      "rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "photo_small_left",
+      "type": "image",
+      "label": "左上小照片",
+      "required": true,
+      "upload_hint": "上传任意照片；渲染器会按 cover 等比裁切",
+      "rect": [
+        70,
+        213,
+        340,
+        252
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "photo_tall_right",
+      "type": "image",
+      "label": "右上竖照片",
+      "required": true,
+      "upload_hint": "上传任意照片；渲染器会按 cover 等比裁切",
+      "rect": [
+        598,
+        99,
+        602,
+        800
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    },
+    {
+      "id": "photo_large_left",
+      "type": "image",
+      "label": "左下大照片",
+      "required": true,
+      "upload_hint": "上传任意照片；渲染器会按 cover 等比裁切",
+      "rect": [
+        106,
+        862,
+        559,
+        747
+      ],
+      "rotation_deg": 0,
+      "mode": "photo",
+      "fit": "cover",
+      "anchor": [
+        0.56,
+        0.5
+      ],
+      "clip_mask": null,
+      "edge_fade_px": 0
+    }
+  ],
+  "layers": [
+    {
+      "type": "asset",
+      "asset_id": "bg",
+      "rect": [
+        0,
+        0,
+        1320,
+        1767
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "type": "slot",
+      "slot_id": "photo_background"
+    },
+    {
+      "type": "slot",
+      "slot_id": "photo_large_left"
+    },
+    {
+      "type": "slot",
+      "slot_id": "photo_tall_right"
+    },
+    {
+      "type": "slot",
+      "slot_id": "photo_small_left"
+    },
+    {
+      "type": "asset",
+      "asset_id": "fixed_foreground",
+      "rect": [
+        44,
+        9,
+        1276,
+        1750
+      ],
+      "rotation_deg": 0,
+      "fit": "contain",
+      "anchor": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "build": {
+    "source_sha256": "3c72b1ce0781cff7011dc99c40ce76cd37880fd50a31f417ffa8cc2a3a59b7c3",
+    "created_at": "2026-09-10T01:33:43+00:00",
+    "tool_version": "0.1.0",
+    "fixture_used": false,
+    "providers": [
+      {
+        "node": "background",
+        "name": "imported-background",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      },
+      {
+        "node": "overlay:fixed_foreground",
+        "name": "imported-overlay",
+        "requested_model": null,
+        "actual_model": null,
+        "request_id": null,
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 0
+      }
+    ]
+  },
+  "review": {
+    "visual_approved": false,
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": "",
+    "evidence_sha256": []
+  }
+}

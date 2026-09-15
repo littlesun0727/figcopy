@@ -1,0 +1,38 @@
+{
+  "status": "generated",
+  "attempt": 0,
+  "prompt": "右侧中间两到三枚透明肥皂泡，泡内有蓝色冰块与细小反光文字/高光，泡泡边缘带彩虹折射，可爱清透贴纸风，叠在右上红框下缘与右下相框上方。\n只制作这一件完整独立素材。补全遮挡或截断的部分，禁止附带相邻照片、边框和背景残片。保留所有细线，四周至少留 8% 空白。",
+  "audit": {
+    "name": "yibu-audit-seedream-image",
+    "requested_model": "doubao-seedream-5-0-260128",
+    "actual_model": "doubao-seedream-5-0-260128",
+    "request_id": "0217894387779927d96eb03402f8d23bede142cc170f12145e1e3",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 51984
+  },
+  "raw_sha256": "d2703c85530e22700ec103904f5e63b3b39f78e3da8a9586ca73e890389f1d19",
+  "provider_transform": {
+    "kind": "contain_padding",
+    "source_size": [
+      1984,
+      1952
+    ],
+    "target_size": [
+      239,
+      234
+    ],
+    "scale": [
+      0.11995967741935484,
+      0.11987704918032786
+    ],
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "content_size": [
+      238,
+      234
+    ]
+  }
+}

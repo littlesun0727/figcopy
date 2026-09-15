@@ -1,0 +1,24 @@
+{
+  "revision": "cd2c7dfb6e0d14e56fceb0ababe924d41dee39ceded27933ccb2177b1c628967",
+  "final_confirmed": true,
+  "reviewer": "wang jing",
+  "confirmed_draft": "ui_confirmed_draft.json",
+  "questions_accepted_as_is": [],
+  "default_text_accepted": [
+    "ov_hand_english",
+    "ov_moment"
+  ],
+  "background_decision": {
+    "before": {
+      "mode": "slot",
+      "slot_id": "slot_background"
+    },
+    "after": {
+      "mode": "slot",
+      "slot_id": "slot_background"
+    },
+    "source": "accepted_current",
+    "before_revision": "cd2c7dfb6e0d14e56fceb0ababe924d41dee39ceded27933ccb2177b1c628967",
+    "edited_revision": "cd2c7dfb6e0d14e56fceb0ababe924d41dee39ceded27933ccb2177b1c628967"
+  }
+}

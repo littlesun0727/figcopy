@@ -1,0 +1,139 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T01:39:41.119260+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=1ee29ab933214dd69d19c21481e81584 kind=render"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T01:39:41.152298+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=001_image_bin"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-15T01:39:41.612947+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=002_image_bin"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-15T01:39:41.727361+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=003_image_bin"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-15T01:39:42.259117+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=004_image_bin"
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-15T01:39:43.011845+00:00",
+      "level": "INFO",
+      "logger": "collage.template.guide",
+      "message": "上传指南已生成 | html=<path>"
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-15T01:39:43.542963+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78 stage=rendering"
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-15T01:39:43.830990+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.bindings",
+      "message": "准备客户素材 | slots=4"
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-15T01:39:43.834085+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=001_image.png"
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-15T01:39:43.950964+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=002_image.png"
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-15T01:39:43.981545+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=003_image.png"
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-15T01:39:44.096675+00:00",
+      "level": "INFO",
+      "logger": "collage.imaging.operations",
+      "message": "规范化图片 | input=004_image.png"
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-15T01:39:44.541399+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.service",
+      "message": "开始本地合成 | layers=11"
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-15T01:39:45.258317+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.service",
+      "message": "本地合成完成"
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-15T01:39:45.697394+00:00",
+      "level": "INFO",
+      "logger": "collage.rendering.service",
+      "message": "PNG 已导出 | output=<path>"
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-15T01:39:45.706619+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78 stage=awaiting_approval"
+    },
+    {
+      "seq": 17,
+      "at": "2026-09-15T01:39:45.980775+00:00",
+      "level": "INFO",
+      "logger": "collage.workflows.state",
+      "message": "项目工作流阶段更新 | project=test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78 stage=awaiting_approval"
+    },
+    {
+      "seq": 18,
+      "at": "2026-09-15T01:39:45.994417+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务完成 | job=1ee29ab933214dd69d19c21481e81584"
+    }
+  ],
+  "last_seq": 18,
+  "id": "1ee29ab933214dd69d19c21481e81584",
+  "project_id": "test1-overlay-171f213208-overlay-b412e-overlay-3e2a755d78",
+  "kind": "render",
+  "state": "succeeded",
+  "created_at": "2026-09-15T01:39:41.106993+00:00",
+  "updated_at": "2026-09-15T01:39:45.998964+00:00",
+  "error": null,
+  "result": null
+}

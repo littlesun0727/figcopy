@@ -1,0 +1,30 @@
+{
+  "events": [
+    {
+      "seq": 1,
+      "at": "2026-09-15T01:28:41.288304+00:00",
+      "level": "INFO",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务开始 | job=d1e4ee5ed4254d8ba1335f6de7666326 kind=regenerate_overlay"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-15T01:28:41.293027+00:00",
+      "level": "WARNING",
+      "logger": "collage.studio.workbench.jobs",
+      "message": "工作台任务失败 | job=d1e4ee5ed4254d8ba1335f6de7666326 code=YIBU_CREDENTIAL_MISSING message=请设置 YIBU_API_KEY、YIBU_CREDENTIALS_FILE 或 YIBU_SHARED_PATH"
+    }
+  ],
+  "last_seq": 2,
+  "id": "d1e4ee5ed4254d8ba1335f6de7666326",
+  "project_id": "test1",
+  "kind": "regenerate_overlay",
+  "state": "failed",
+  "created_at": "2026-09-15T01:28:41.276626+00:00",
+  "updated_at": "2026-09-15T01:28:41.297580+00:00",
+  "error": {
+    "code": "YIBU_CREDENTIAL_MISSING",
+    "message": "请设置 YIBU_API_KEY、YIBU_CREDENTIALS_FILE 或 YIBU_SHARED_PATH",
+    "details": {}
+  }
+}

@@ -1,0 +1,417 @@
+{
+  "draft": {
+    "slots": [
+      {
+        "id": "photo_top_left",
+        "label": "左上人物照",
+        "type": "image",
+        "mode": "photo",
+        "source_rect": [
+          116,
+          115,
+          464,
+          807
+        ],
+        "target_rect": [
+          116,
+          115,
+          464,
+          807
+        ],
+        "upload_hint": "上传竖版半身人物照，头顶留白略被顶部撕纸遮挡",
+        "review_notes": "矩形贴片，左右边缘为硬边，未见明显羽化；如原图带白边可改为 photo_feather"
+      },
+      {
+        "id": "photo_top_right",
+        "label": "右上人物照",
+        "type": "image",
+        "mode": "photo",
+        "source_rect": [
+          790,
+          540,
+          500,
+          600
+        ],
+        "target_rect": [
+          790,
+          540,
+          500,
+          600
+        ],
+        "upload_hint": "上传特写脸部照片，右侧可出血到画布边缘",
+        "review_notes": "边界与右侧蓝星、兔子存在叠压，需人工确认裁切范围"
+      },
+      {
+        "id": "photo_mid_left",
+        "label": "中部左侧人物照",
+        "type": "image",
+        "mode": "photo",
+        "source_rect": [
+          180,
+          1015,
+          400,
+          745
+        ],
+        "target_rect": [
+          180,
+          1015,
+          400,
+          745
+        ],
+        "upload_hint": "上传绿色上衣半身照，室内背景",
+        "review_notes": "底部与蝴蝶结/箭头装饰交界，下缘位置为估算"
+      },
+      {
+        "id": "photo_center_main",
+        "label": "中央主图人物照",
+        "type": "image",
+        "mode": "photo",
+        "source_rect": [
+          545,
+          1210,
+          565,
+          1096
+        ],
+        "target_rect": [
+          545,
+          1210,
+          565,
+          1096
+        ],
+        "upload_hint": "上传主视觉大幅自拍，占据画面下半部核心",
+        "review_notes": "作为视觉主体，底部出血至画布下缘；与周围照片有轻微重叠，边界为粗估"
+      },
+      {
+        "id": "text_together",
+        "label": "文字-together",
+        "type": "text",
+        "mode": null,
+        "source_rect": [
+          40,
+          875,
+          540,
+          150
+        ],
+        "target_rect": [
+          40,
+          875,
+          540,
+          150
+        ],
+        "upload_hint": "可替换主标语，默认 together.",
+        "review_notes": "剪报风格文字，可见内容为 together. ；如需保持贴纸质感建议保留原样式"
+      },
+      {
+        "id": "text_hello",
+        "label": "文字-hello",
+        "type": "text",
+        "mode": null,
+        "source_rect": [
+          670,
+          2055,
+          245,
+          105
+        ],
+        "target_rect": [
+          670,
+          2055,
+          245,
+          105
+        ],
+        "upload_hint": "可替换短语，默认 hello",
+        "review_notes": "剪报拼贴文字，内容清晰为 hello"
+      },
+      {
+        "id": "text_artist",
+        "label": "文字-I am a artist",
+        "type": "text",
+        "mode": null,
+        "source_rect": [
+          630,
+          2175,
+          480,
+          110
+        ],
+        "target_rect": [
+          630,
+          2175,
+          480,
+          110
+        ],
+        "upload_hint": "可替换标语，默认 I am a artist",
+        "review_notes": "白底黑字剪报条，可见内容为 I am a artist（原文如此）"
+      }
+    ],
+    "overlays": [
+      {
+        "id": "overlay_hearts",
+        "label": "粉色爱心",
+        "source_rect": [
+          490,
+          35,
+          225,
+          105
+        ],
+        "target_rect": [
+          490,
+          35,
+          225,
+          105
+        ],
+        "action": "reference_generate",
+        "generation_brief": "三个并排的柔和粉色手绘爱心贴纸",
+        "requires_exact_content": false,
+        "review_notes": "纯装饰，可近似生成"
+      },
+      {
+        "id": "overlay_coffee",
+        "label": "咖啡杯波点贴纸",
+        "source_rect": [
+          925,
+          115,
+          365,
+          310
+        ],
+        "target_rect": [
+          925,
+          115,
+          365,
+          310
+        ],
+        "action": "reference_generate",
+        "generation_brief": "白色波点绿边咖啡杯，带拉花，剪贴纸风格",
+        "requires_exact_content": false,
+        "review_notes": "装饰贴纸，右上出血"
+      },
+      {
+        "id": "overlay_ticket",
+        "label": "车票贴纸 Ticket To Anywhere",
+        "source_rect": [
+          690,
+          375,
+          280,
+          185
+        ],
+        "target_rect": [
+          690,
+          375,
+          280,
+          185
+        ],
+        "action": "reference_generate",
+        "generation_brief": "复古打字机风格车票，主文字 Ticket To Anywhere 与编号",
+        "requires_exact_content": true,
+        "review_notes": "含具体文字与编号(如 070)，属证据性内容，需原素材或人工确认精确文案"
+      },
+      {
+        "id": "overlay_blue_star_right",
+        "label": "右侧蓝色星形",
+        "source_rect": [
+          1025,
+          1035,
+          200,
+          245
+        ],
+        "target_rect": [
+          1025,
+          1035,
+          200,
+          245
+        ],
+        "action": "basic_shape",
+        "generation_brief": "蓝色实心五角星，作为兔子底衬",
+        "requires_exact_content": false,
+        "review_notes": "位于兔子图案下方的装饰形状"
+      },
+      {
+        "id": "overlay_rabbit",
+        "label": "兔子抠图贴纸",
+        "source_rect": [
+          1105,
+          1175,
+          185,
+          345
+        ],
+        "target_rect": [
+          1105,
+          1175,
+          185,
+          345
+        ],
+        "action": "reference_generate",
+        "generation_brief": "棕色兔子头部抠图，带紫色手绘描边",
+        "requires_exact_content": false,
+        "review_notes": "带描边的抠图装饰，右侧出血，边界为粗估"
+      },
+      {
+        "id": "overlay_arrows",
+        "label": "粉色箭头组",
+        "source_rect": [
+          135,
+          1695,
+          320,
+          150
+        ],
+        "target_rect": [
+          135,
+          1695,
+          320,
+          150
+        ],
+        "action": "reference_generate",
+        "generation_brief": "两个粉色手绘箭头，指向中心",
+        "requires_exact_content": false,
+        "review_notes": "成组处理，不逐片拆解"
+      },
+      {
+        "id": "overlay_croissant",
+        "label": "牛角包贴纸",
+        "source_rect": [
+          110,
+          1755,
+          325,
+          250
+        ],
+        "target_rect": [
+          110,
+          1755,
+          325,
+          250
+        ],
+        "action": "reference_generate",
+        "generation_brief": "牛角面包抠图贴纸",
+        "requires_exact_content": false,
+        "review_notes": "装饰贴纸，压在蓝色波点星上方"
+      },
+      {
+        "id": "overlay_blue_star_bottom",
+        "label": "左下蓝色波点星",
+        "source_rect": [
+          55,
+          1895,
+          400,
+          285
+        ],
+        "target_rect": [
+          55,
+          1895,
+          400,
+          285
+        ],
+        "action": "reference_generate",
+        "generation_brief": "蓝色白波点五角星贴纸，作为猫头底衬",
+        "requires_exact_content": false,
+        "review_notes": "波点纹理，装饰底衬"
+      },
+      {
+        "id": "overlay_cat",
+        "label": "橘猫抠图贴纸",
+        "source_rect": [
+          215,
+          1995,
+          360,
+          311
+        ],
+        "target_rect": [
+          215,
+          1995,
+          360,
+          311
+        ],
+        "action": "reference_generate",
+        "generation_brief": "橘色猫脸抠图，带浅色手绘描边，猫耳外形轮廓",
+        "requires_exact_content": false,
+        "review_notes": "带描边抠图装饰，底部出血至画布下缘"
+      }
+    ],
+    "background": {
+      "background_brief": "移除所有人物照、贴纸与文字后，保留报纸拼贴、旧信纸手写体、纸纹与顶部撕纸边缘作为整体背景底纹",
+      "review_notes": "报纸/纸纹作为背景整体保留，不逐片拆解；顶部撕纸白边属背景层"
+    },
+    "layer_order": [
+      {
+        "type": "background"
+      },
+      {
+        "type": "slot",
+        "id": "photo_top_left"
+      },
+      {
+        "type": "slot",
+        "id": "photo_mid_left"
+      },
+      {
+        "type": "slot",
+        "id": "photo_top_right"
+      },
+      {
+        "type": "overlay",
+        "id": "overlay_blue_star_right"
+      },
+      {
+        "type": "overlay",
+        "id": "overlay_rabbit"
+      },
+      {
+        "type": "slot",
+        "id": "photo_center_main"
+      },
+      {
+        "type": "overlay",
+        "id": "overlay_hearts"
+      },
+      {
+        "type": "overlay",
+        "id": "overlay_coffee"
+      },
+      {
+        "type": "overlay",
+        "id": "overlay_ticket"
+      },
+      {
+        "type": "overlay",
+        "id": "overlay_arrows"
+      },
+      {
+        "type": "overlay",
+        "id": "overlay_blue_star_bottom"
+      },
+      {
+        "type": "overlay",
+        "id": "overlay_croissant"
+      },
+      {
+        "type": "overlay",
+        "id": "overlay_cat"
+      },
+      {
+        "type": "slot",
+        "id": "text_together"
+      },
+      {
+        "type": "slot",
+        "id": "text_hello"
+      },
+      {
+        "type": "slot",
+        "id": "text_artist"
+      }
+    ],
+    "questions": [
+      "四张人物照是否需要统一为矩形贴片，还是部分需要白边羽化(photo_feather)？",
+      "顶部撕纸白边与报纸应作为固定背景，还是需要成为可替换槽位？",
+      "车票上的具体文字与编号(Ticket To Anywhere / 070 等)是否需要精确还原，请提供原始文案或素材。",
+      "together./hello/I am a artist 是可编辑客户文案，还是应作为固定装饰贴纸保留？",
+      "兔子与猫的抠图边界与出血范围需人工确认，尤其与右侧和底部画布边缘的交界。"
+    ]
+  },
+  "audit": {
+    "name": "yibu-audit-vlm",
+    "requested_model": "claude-opus-4-8",
+    "actual_model": "claude-opus-4-8",
+    "request_id": "msg_508d5bedcd2244899a519e9055e3873f",
+    "fixture": false,
+    "cache_hit": false,
+    "elapsed_ms": 83719
+  }
+}

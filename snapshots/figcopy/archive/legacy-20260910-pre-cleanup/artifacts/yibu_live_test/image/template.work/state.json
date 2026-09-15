@@ -1,0 +1,37 @@
+{
+  "status": "needs_review",
+  "nodes": {
+    "overlay_crops": {
+      "status": "complete",
+      "count": 0
+    },
+    "background": {
+      "status": "complete",
+      "input_sha256": "18a320825a96b565a290afe7a628cffa9d9f27699c58bafce5307be4b707c8fb",
+      "error": {
+        "code": "PROVIDER_INVALID_RESPONSE",
+        "message": "图片模型响应中没有可解码的图片"
+      },
+      "audit": {
+        "node": "background",
+        "name": "yibu-audit-gemini-image",
+        "requested_model": "gemini-3-pro-image-preview",
+        "actual_model": "gemini-3-pro-image-preview",
+        "request_id": "-RmiapLKFoaGz7IPoJjBkAE",
+        "fixture": false,
+        "cache_hit": false,
+        "elapsed_ms": 22094
+      },
+      "outputs": [
+        "background_candidate.png",
+        "background.png",
+        "remove_mask.png",
+        "blend_mask.png"
+      ]
+    }
+  },
+  "last_error": {
+    "code": "PROVIDER_INVALID_RESPONSE",
+    "message": "图片模型响应中没有可解码的图片"
+  }
+}

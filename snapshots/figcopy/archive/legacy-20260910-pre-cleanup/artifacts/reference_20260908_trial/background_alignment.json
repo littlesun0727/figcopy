@@ -1,0 +1,16 @@
+{
+  "kind": "center_crop_then_uniform_resize",
+  "source_size": [
+    1085,
+    1449
+  ],
+  "target_size": [
+    1320,
+    1767
+  ],
+  "centering": [
+    0.5,
+    0.5
+  ],
+  "direct_nonuniform_stretch": false
+}
