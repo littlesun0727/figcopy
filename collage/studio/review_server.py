@@ -34,7 +34,11 @@ REVIEW_JS = _read_text_resource("static", "review.js")
 
 
 def render_review_html(
-    *, api_base: str = "", return_url: str = "", csrf_token: str = ""
+    *,
+    api_base: str = "",
+    return_url: str = "",
+    csrf_token: str = "",
+    read_only: bool = False,
 ) -> str:
     """Inject transport-specific endpoints into the shared review page."""
 
@@ -42,6 +46,7 @@ def render_review_html(
         HTML.replace("__REVIEW_API_BASE__", api_base)
         .replace("__REVIEW_RETURN_URL__", return_url)
         .replace("__FIGCOPY_CSRF_TOKEN__", csrf_token)
+        .replace("__REVIEW_READ_ONLY__", "true" if read_only else "false")
     )
 
 

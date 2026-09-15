@@ -5,10 +5,10 @@ import threading
 from pathlib import Path
 
 import pytest
+from test_candidate_workflow import _project
 
 from collage.devtools.pipeline_ui_smoke import Browser
 from collage.studio.workbench.server import create_workbench_server
-from test_candidate_workflow import _project
 
 
 @pytest.mark.parametrize("photo", [False, True])
@@ -51,16 +51,24 @@ def test_candidate_page_and_single_piece_regeneration(tmp_path, monkeypatch, pho
             browser.until("document.querySelector('#approvalForm') !== null")
         browser.screenshot(tmp_path / "candidate-before.png")
         provider.broken = False
+        browser.js("window.figcopyOriginalPage = true")
         browser.js(
             "document.querySelector('#overlayChoice').value = 'first'; document.querySelector('#regenerateOverlay').click()"
         )
-        browser.until("location.pathname.startsWith('/projects/candidate-overlay-')")
-        browser.until("document.querySelector('#regenerateOverlay') !== null")
+        browser.until(
+            "document.querySelector('#regenerateOverlay') !== null && !document.querySelector('#regenerateOverlay').disabled && !document.querySelector('#overlayActions').textContent.includes('已跳过')"
+        )
+        assert browser.js("location.pathname") == "/projects/candidate"
+        assert browser.js("window.figcopyOriginalPage") is True
+        assert "替换当前素材" in browser.js(
+            "document.querySelector('#regenerateOverlay').textContent"
+        )
         assert "已跳过" not in browser.js(
             "document.querySelector('#overlayActions').textContent"
         )
         assert len(provider.calls) == 3
-        assert app.project_status(source.project_id)["warnings"][0]["skipped"] is True
+        assert app.project_status(source.project_id)["warnings"] == []
+        assert len(app.store.list()) == 1
         assert not browser.errors
         browser.screenshot(tmp_path / "candidate-after.png")
     finally:

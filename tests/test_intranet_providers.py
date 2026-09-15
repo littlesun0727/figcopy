@@ -12,6 +12,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
 from PIL import Image, ImageDraw
+from test_workbench import _create_form, _manual_draft, _review_payload, _wait_for_job
 
 from collage.core.errors import CollageError
 from collage.core.io import read_json, sha256_file
@@ -25,13 +26,12 @@ from collage.providers.selection import (
     YIBU_VISION,
     cache_configuration,
 )
-from collage.providers.yibu import YibuVisionProvider, YibuSettings
+from collage.providers.yibu import YibuSettings, YibuVisionProvider
 from collage.schemas.draft_prompt import DRAFT_PROMPT
 from collage.studio.workbench.application import WorkbenchApplication
 from collage.studio.workbench.multipart import UploadedFile
 from collage.studio.workbench.provider_settings import ProviderRuntimeSettings
 from collage.template.review.feedback import review_revision
-from test_workbench import _create_form, _manual_draft, _review_payload, _wait_for_job
 
 
 def model_draft():
@@ -452,8 +452,10 @@ def test_project_selection_feedback_regeneration_and_background_fork(
         assert (
             app.project_status(target_id)["providers"]["image_provider"] == YIBU_IMAGE
         )
-        assert sha256_file(source.manifest) == original
-        assert sha256_file(source.template / "template.json") == original_template
+        assert target_id == source.project_id
+        assert len(app.store.list()) == 1
+        assert sha256_file(source.manifest) != original
+        assert sha256_file(source.template / "template.json") != original_template
         fork = app.fork_background(target_id, app.background_revision(target_id))
         assert (
             app.project_status(fork["project_id"])["providers"]["image_provider"]
@@ -496,9 +498,9 @@ def test_defaults_and_busy_settings_do_not_change_active_jobs(tmp_path, monkeypa
 
 @pytest.mark.parametrize("request_state", ["not_started", "failed", "unknown"])
 def test_overlay_attempts_recover_only_known_failures(tmp_path, request_state):
+    from collage.core.state import NodeCache
     from collage.providers import GeneratedImage, ImageCapabilities, ProviderAudit
     from collage.template.build.overlays import _provider_overlay
-    from collage.core.state import NodeCache
 
     class Provider:
         capabilities = ImageCapabilities(

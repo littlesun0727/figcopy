@@ -14,8 +14,8 @@ from ...core.io import (
     atomic_write_json,
     read_json,
     resolve_input_path,
-    sha256_file,
     safe_package_path,
+    sha256_file,
 )
 from ...core.privacy import safe_value
 from ...projects import DataPaths, ProjectPaths, ProjectStore
@@ -694,8 +694,8 @@ class WorkbenchApplication:
         )
 
     def regenerate_overlay(self, project_id: str, payload: Any) -> dict[str, Any]:
-        """Explicitly regenerate one known decoration and save a separate revision."""
-        from .layout import fork_layout, layout_document
+        """Explicitly regenerate one known decoration in the current project."""
+        from .layout import layout_document, regenerate_overlay_in_place
 
         project = self.store.open(project_id)
         document = layout_document(project)
@@ -722,7 +722,7 @@ class WorkbenchApplication:
 
         def operation() -> dict:
             provider = self.workflow.stages._image_provider(workflow, reviewed)
-            return fork_layout(
+            return regenerate_overlay_in_place(
                 self.store,
                 project_id,
                 document,

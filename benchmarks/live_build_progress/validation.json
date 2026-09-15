@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-15",
+  "full_suite": {
+    "tests": "428",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "159.367"
+  },
+  "final_live_progress_checks": {
+    "tests": "5",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "15.524"
+  },
+  "fixtures_only": true,
+  "new_real_model_calls": 0,
+  "coverage": [
+    "background phase and elapsed time",
+    "current material index and true completion counters",
+    "crop/raw images available before template.json exists",
+    "per-piece failure and continued generation",
+    "retry does not count stale image files",
+    "zero materials and customer photo background",
+    "default running page polls without stage changes",
+    "completed image DOM and open zoom survive updates",
+    "slow polling requests do not overlap",
+    "review navigation and reload preserve progress",
+    "paused projects retain the resume action"
+  ]
+}

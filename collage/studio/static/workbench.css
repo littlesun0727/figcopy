@@ -239,3 +239,83 @@ label > select { width: 100%; border: 1px solid var(--line); border-radius: 10px
 
 #projectProviders { padding: 18px; margin-bottom: 16px; }
 #projectProviders .form-grid { margin: 12px 0; }
+
+/* Pipeline browsing and reference/result comparisons. */
+.stage-step button { display:block; width:calc(100% - 6px); text-align:left; color:inherit; background:none; border:1px solid transparent; padding:9px 7px; border-radius:9px; cursor:pointer; font:inherit; }
+.stage-step button small { display:block; margin-top:5px; font-size:10px; color:var(--muted); }
+.stage-step button:hover:not(:disabled), .stage-step.selected button { border-color:var(--cyan); background:#79dbff12; }
+.stage-step button:disabled { cursor:default; opacity:.55; }
+.stage-step button:focus-visible { outline:2px solid var(--cyan); outline-offset:2px; }
+.pipeline-toolbar { display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:14px 18px; border:1px solid #79dbff44; background:#79dbff0c; border-radius:12px; margin-bottom:16px; }
+.pipeline-toolbar span { color:var(--muted); font-size:12px; }
+.pipeline-toolbar button { margin-left:auto; }
+.content-grid.pipeline-reading { grid-template-columns:minmax(0,1fr); }
+.pipeline-reading .details-panel { display:none; }
+.result-comparison { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:20px 0 10px; align-items:start; }
+.pipeline-image { margin:0; min-width:0; }
+.pipeline-image figcaption { color:#dce3ee; font-size:13px; font-weight:600; margin:0 0 10px; }
+.pipeline-image a, .image-empty { display:flex; align-items:center; justify-content:center; min-height:180px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#0b0d10; }
+.pipeline-image img { display:block; width:100%; height:360px; object-fit:contain; }
+.pipeline-image a { cursor:zoom-in; }
+.image-empty { color:var(--muted); font-size:12px; padding:20px; text-align:center; }
+.comparison-hint { color:var(--muted); font-size:12px; line-height:1.6; }
+.review-snapshot { width:100%; height:820px; border:1px solid var(--line); border-radius:12px; margin:18px 0; background:#1d1f24; }
+.material-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin:16px 0 24px; }
+.material-card { min-width:0; padding:18px; background:#11141a; border:1px solid var(--line); border-radius:14px; }
+.material-card h3 { margin:0 0 12px; }
+.material-card > .pipeline-image img { height:220px; }
+.material-card p { line-height:1.6; overflow-wrap:anywhere; }
+.material-card details { margin-top:16px; }
+.material-card summary { cursor:pointer; color:var(--cyan); }
+.material-process { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:16px; }
+.material-process img { height:180px; }
+.material-process .image-empty { min-height:180px; }
+.material-status { font-size:11px; color:var(--muted); white-space:nowrap; }
+.material-status.complete { color:#9ee6b8; }
+.material-status.running { color:var(--cyan); }
+.material-status.missing, .material-status.skipped, .material-warning { color:#ffd479; }
+.checkerboard a { background-color:#484b53; background-image:conic-gradient(#353840 25%,transparent 0 50%,#353840 0 75%,transparent 0); background-size:20px 20px; }
+.image-dialog { width:min(1280px,94vw); max-height:94vh; overflow:auto; padding:22px; border:1px solid var(--line); border-radius:14px; background:#14171d; color:var(--text); }
+.image-dialog::backdrop { background:#000c; }
+.image-dialog > img { display:block; width:100%; max-height:74vh; object-fit:contain; margin-bottom:16px; }
+.image-dialog .dialog-heading { margin-bottom:12px; align-items:center; }
+@media (max-width:760px) {
+  .result-comparison, .material-grid { grid-template-columns:1fr; }
+  .stage-step, .stage-step.current { font-size:10px; }
+  .stage-step button { padding:8px 2px; }
+  .stage-step button small { font-size:9px; }
+  .review-snapshot { height:980px; }
+}
+
+.project-settings { margin-bottom:16px; }
+.project-settings > summary { padding:14px 18px; cursor:pointer; color:var(--muted); font-size:13px; }
+.project-settings #projectProviders { margin-bottom:0; padding-top:0; }
+.content-grid.result-view { grid-template-columns:minmax(0,1fr); }
+.result-view .artifact-list { grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+
+/* Live build progress: completed cards stay mounted while the next piece runs. */
+.build-summary { padding:20px; border:1px solid #79dbff55; background:#79dbff09; border-radius:14px; margin:18px 0 10px; }
+.build-summary-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+.build-summary-heading h3 { margin:0; color:var(--cyan); }
+.build-background-state { font-size:12px; color:var(--muted); }
+.build-counts { font-size:16px; line-height:1.7; }
+.build-counts strong { color:var(--lime); font-size:23px; }
+.build-summary progress { display:block; width:100%; height:10px; border:0; border-radius:8px; accent-color:var(--lime); overflow:hidden; }
+.build-summary progress::-webkit-progress-bar { background:#303946; border-radius:8px; }
+.build-summary progress::-webkit-progress-value { background:var(--lime); border-radius:8px; transition:width .3s; }
+.build-current { color:var(--text); font-size:15px; line-height:1.7; }
+[data-build-started] { color:var(--muted); font-size:12px; margin-left:8px; }
+.material-pair, .background-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.material-pair .pipeline-image img { height:210px; }
+.background-pair .pipeline-image img { height:230px; }
+.material-status.running::before { content:''; display:inline-block; width:7px; height:7px; margin-right:6px; border-radius:50%; background:var(--cyan); animation:pulse 1.4s infinite; }
+.material-wait { color:var(--cyan); font-size:12px; }
+@media (max-width:620px) {
+  .material-pair .pipeline-image img { height:160px; }
+  .background-pair .pipeline-image img { height:170px; }
+  .material-pair .image-empty, .background-pair .image-empty { min-height:160px; }
+}
+
+.build-background-details { margin:16px 0 24px; padding:12px 16px; border:1px solid var(--line); border-radius:12px; }
+.build-background-details summary { cursor:pointer; color:var(--muted); font-size:13px; }
+.build-background-details[open] summary { margin-bottom:16px; }

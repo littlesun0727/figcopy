@@ -4,6 +4,7 @@ const state = {
   projects: [],
   currentId: null,
   currentStatus: null,
+  viewedStage: null,
   renderSignature: null,
   providerStatus: null,
   providerFormDirty: false,
@@ -55,7 +56,7 @@ const JOB_LABELS = {
   build: '正在根据确认结果制作模板',
   render: '正在导入客户素材并生成预览',
   retry: '正在继续工作流',
-  regenerate_overlay: '正在重做一件装饰并保存新版本',
+  regenerate_overlay: '正在重做一件装饰并替换当前素材',
   approve: '正在记录批准并发布模板',
 };
 
@@ -120,6 +121,9 @@ function projectIdFromPath() {
 
 function navigate(projectId, {replace = false} = {}) {
   state.currentId = projectId;
+  state.viewedStage = null;
+  pipelineView.key = pipelineView.signature = null;
+  pipelineView.request++;
   state.renderSignature = null;
   const target = projectId ? `/projects/${encodeURIComponent(projectId)}` : '/';
   window.history[replace ? 'replaceState' : 'pushState']({}, '', target);
@@ -178,8 +182,12 @@ function renderSteps(status) {
   if (currentIndex < 0) currentIndex = 0;
   $('#stageSteps').innerHTML = STAGES.map((step, index) => {
     const stateClass = index < currentIndex ? 'done' : index === currentIndex ? 'current' : '';
-    return `<li class="stage-step ${stateClass}">${escapeHtml(step.label)}</li>`;
+    const selected = state.viewedStage === index;
+    return `<li class="stage-step ${stateClass} ${selected ? 'selected' : ''}"><button type="button" data-stage-index="${index}" ${stageAvailable(status, index) ? '' : 'disabled'} aria-pressed="${selected}" ${index === currentIndex ? 'aria-current="step"' : ''}>${escapeHtml(step.label)}<small>${index === currentIndex ? '当前进度' : index < currentIndex ? '查看结果' : '尚未执行'}</small></button></li>`;
   }).join('');
+  $('#stageSteps').querySelectorAll('button').forEach(button => {
+    button.onclick = () => selectPipelineStage(Number(button.dataset.stageIndex));
+  });
 }
 
 function renderArtifacts(status) {
@@ -249,7 +257,7 @@ async function loadBindingForm(status) {
   const projectId = status.project_id;
   try {
     const payload = await api(`/api/projects/${encodeURIComponent(projectId)}/slots`);
-    if (state.currentId !== projectId || !['awaiting_bindings', 'awaiting_approval'].includes(state.currentStatus?.stage)) return;
+    if (state.currentId !== projectId || state.viewedStage !== null || !['awaiting_bindings', 'awaiting_approval'].includes(state.currentStatus?.stage)) return;
     const cards = payload.slots.map(slot => {
       if (slot.type === 'text') {
         return `<article class="slot-card" data-slot-id="${escapeHtml(slot.id)}" data-slot-type="text">
@@ -286,6 +294,7 @@ async function loadBindingForm(status) {
       </form>`;
     $('#bindingsForm').onsubmit = event => submitBindings(event, projectId);
   } catch (error) {
+    if (state.currentId !== projectId || state.viewedStage !== null) return;
     $('#actionPanel').innerHTML = `${actionHeader('CUSTOMER INPUT', '无法读取素材槽位', describeError(error))}<button id="continueButton" class="button" type="button">重试</button>`;
     bindContinueButton(projectId);
   }
@@ -333,7 +342,7 @@ function renderApproval(status, complete = false) {
   const result = status.artifacts.render;
   $('#actionPanel').innerHTML = `
     ${actionHeader(complete ? 'PUBLISHED' : 'HUMAN GATE 2 / 2', complete ? '模板已发布' : '检查最终合成效果', complete ? '本次模板已经通过人工验收，可以继续复用本地 Renderer。' : '重点检查旧素材残留、边缘接缝、层序、文字和主体遮挡。批准操作会写入审核记录。')}
-    ${preview(result?.url, complete ? '已发布模板预览' : '待批准结果预览')}
+    ${resultComparison(status)}
     <p><a class="button quiet" href="/projects/${encodeURIComponent(status.project_id)}/layers">调整照片与装饰布局 · 保存新版本</a></p>
     ${complete ? `
       <div class="action-row"><a class="button primary" href="${escapeHtml(result?.url)}?download=1">下载结果 PNG</a></div>
@@ -448,7 +457,7 @@ function renderOverlayActions(status) {
       <label>重做一件装饰 <select id="overlayChoice" ${busy ? 'disabled' : ''}>${overlays.map(item =>
         `<option value="${escapeHtml(item.id)}">${escapeHtml(item.label)}</option>`).join('')}</select></label>
       <label>这次使用的图片服务<select id="regenerateImage" ${busy ? 'disabled' : ''}>${serviceOptions('image', status.providers?.image_provider, true)}</select></label>
-      <button id="regenerateOverlay" class="button quiet" ${busy ? 'disabled' : ''}>生成一次并保存新版本</button>
+      <button id="regenerateOverlay" class="button quiet" ${busy ? 'disabled' : ''}>生成一次并替换当前素材</button>
     </div>` : ''}`;
   if (!overlays.length) return;
   $('#regenerateOverlay').onclick = async () => {
@@ -505,6 +514,17 @@ function renderProject(status) {
   $('#errorBanner').textContent = error ? describeError(error) : '';
   renderErrorDetails(error);
   refreshDiagnostics();
+  renderPipelineNavigation(status);
+  if (state.viewedStage !== null) {
+    renderPipelineView(status);
+    return;
+  }
+  if (shouldShowBuildProgress(status)) {
+    renderPipelineView(status, true);
+    return;
+  }
+  pipelineView.key = pipelineView.signature = null;
+  pipelineView.request++;
 
   if (activeJob(task)) {
     renderRunning(status);
@@ -552,11 +572,17 @@ async function refreshCurrent(force = false) {
     return;
   }
   try {
-    const status = await api(`/api/projects/${encodeURIComponent(state.currentId)}`);
+    const projectId = state.currentId;
+    const status = await api(`/api/projects/${encodeURIComponent(projectId)}`);
+    if (state.currentId !== projectId) return;
+    state.currentStatus = status;
     if (status.task?.id === state.followTaskId && status.task.state === 'succeeded' && status.task.result?.url) {
       state.followTaskId = null;
-      window.location.assign(status.task.result.url);
-      return;
+      if (status.task.result.project_id !== state.currentId) {
+        window.location.assign(status.task.result.url);
+        return;
+      }
+      force = true;
     }
     const signature = JSON.stringify([
       status.stage,
@@ -568,6 +594,10 @@ async function refreshCurrent(force = false) {
     if (force || signature !== state.renderSignature) {
       state.renderSignature = signature;
       renderProject(status);
+    } else if (state.viewedStage !== null) {
+      renderPipelineView(status);
+    } else if (shouldShowBuildProgress(status)) {
+      renderPipelineView(status, true);
     }
   } catch (error) {
     if (error.code === 'PROJECT_NOT_FOUND') {
@@ -940,6 +970,7 @@ async function boot() {
   $('#dataDirectory').textContent = config.data_dir;
   await loadProviderStatus().catch(() => null);
   state.currentId = projectIdFromPath();
+  state.viewedStage = viewedStageFromUrl();
   await loadProjects();
   await refreshCurrent(true);
   window.setInterval(refreshAll, 2500);
@@ -979,6 +1010,9 @@ $('#referenceUpload').onchange = event => {
 };
 window.onpopstate = () => {
   state.currentId = projectIdFromPath();
+  state.viewedStage = viewedStageFromUrl();
+  pipelineView.key = pipelineView.signature = null;
+  pipelineView.request++;
   state.renderSignature = null;
   renderProjectList();
   refreshCurrent(true);

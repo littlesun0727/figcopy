@@ -44,3 +44,20 @@ canvas { touch-action:none; }
 .review-stage { display:block; }
 .review-stage section { margin-bottom:20px; }
 #structurePreview { max-width:100%; max-height:70vh; }
+
+/* Saved review views keep the original canvas and photo/decor structure preview. */
+.read-only .mode, .read-only #revise, .read-only #revisionHint,
+.read-only #otherFeedback, .read-only label:has(#otherFeedback),
+.read-only #save, .read-only label:has(#finalConfirmed),
+.read-only aside > h2:last-of-type, .read-only #savedCorrections,
+.read-only #backgroundControls, .read-only #layers button { display:none; }
+.read-only main { grid-template-columns:minmax(0, 1fr) 300px; }
+.read-only canvas { max-width:100%; max-height:65vh; cursor:pointer; }
+.read-only input:disabled, .read-only select:disabled, .read-only textarea:disabled { opacity:1; color:#dce3ee; }
+.read-only .card { cursor:pointer; }
+@media (max-width:850px) {
+  .read-only main { display:block; height:auto; }
+  .read-only .review-stage { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:12px; }
+  .read-only .review-stage section { min-width:0; }
+  .read-only canvas, .read-only #structurePreview { max-height:55vh; }
+}

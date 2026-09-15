@@ -7,8 +7,8 @@ import threading
 import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 from ...core.errors import CollageError, SpecValidationError
 from ...core.privacy import safe_value
@@ -153,7 +153,7 @@ class JobRegistry:
             )
         else:
             # Workflow summaries may contain local paths; expose only the new
-            # project destination from the explicit single-overlay operation.
+            # project identity from the explicit single-overlay operation.
             destination = (
                 {"project_id": result["project_id"], "url": result["url"]}
                 if self._jobs[job_id]["kind"] == "regenerate_overlay"

@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-15",
+  "full_suite_before_final_edge_checks": {
+    "tests": "421",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "145.103"
+  },
+  "final_pipeline_checks": {
+    "tests": "6",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "11.429"
+  },
+  "fixtures_only": true,
+  "new_real_model_calls": 0,
+  "coverage": [
+    "confirmed Draft stays independent of later analysis",
+    "read-only API and same-origin embedding",
+    "decoration raw/processed/final correspondence including in-place replacement",
+    "legacy raw association requires unambiguous provider request",
+    "customer photo matches its saved slot",
+    "viewed step survives polling, active jobs, delayed requests and reload",
+    "reference/result comparison and enlargement before and after approval"
+  ]
+}

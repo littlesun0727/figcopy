@@ -6,6 +6,7 @@ const $ = selector => document.querySelector(selector);
 const apiBase = document.querySelector('meta[name="review-api-base"]')?.content || '';
 const returnUrl = document.querySelector('meta[name="review-return-url"]')?.content || '';
 const csrfToken = document.querySelector('meta[name="figcopy-csrf-token"]')?.content || '';
+const readOnly = document.querySelector('meta[name=review-read-only]')?.content === 'true';
 const endpoint = path => `${apiBase}${path}`;
 const escapeHtml = value => String(value).replace(
   /[&<>"']/g,
@@ -168,7 +169,7 @@ function render() {
 }
 
 async function refreshStructure(change = null) {
-  if (layoutBusy) return;
+  if (readOnly || layoutBusy) return;
   const isEdit = Boolean(change), requestId = ++structureRequest;
   if (isEdit) { layoutBusy = true; busy(true); }
   try {
@@ -378,6 +379,10 @@ function renderItems() {
       }
     };
   });
+  if (readOnly) {
+    root.querySelectorAll('input, select, textarea, button').forEach(node => { node.disabled = true; });
+    return;
+  }
   root.querySelectorAll('[data-rect-kind]').forEach(element => {
     element.onchange = () => {
       updateRect(
@@ -497,6 +502,7 @@ view.onpointerdown = event => {
     });
     if (hit && hit.item.id !== photoBackgroundId()) {
       selected = hit.item.id;
+      if (readOnly) { renderItems(); render(); return; }
       drag = {
         item: hit.item,
         x,
@@ -508,7 +514,7 @@ view.onpointerdown = event => {
       };
       renderItems();
     }
-  } else {
+  } else if (!readOnly) {
     drag = {};
     paint(x, y);
   }
@@ -689,13 +695,28 @@ async function load() {
   renderLayers();
   renderQuestions();
   renderBackgroundSource();
-  await loadRecoveries();
+  if (!readOnly) await loadRecoveries();
   $('#autoSummary').textContent = '没有反馈时可直接勾选整体确认；未展开的装饰文字沿用识别结果。';
   render();
   $('#status').textContent = '请检查识别结果；接受当前结果可直接确认，有错误再填写反馈。';
+  if (readOnly) {
+    document.body.classList.add('read-only');
+    document.querySelector('h1').textContent = apiBase.includes('/confirmed') ? '已确认的 Draft' : '已保存的识别结果';
+    document.querySelector('h1 + p').textContent = '点击框或内容卡片查看对应元素；框选图与 photo/decor 结构预览沿用确认页。';
+    document.querySelectorAll('aside input, aside select, aside textarea, aside button').forEach(node => { node.disabled = true; });
+    $('#status').textContent = '只读回看 · 查看不会修改项目或重新执行';
+    $('#autoSummary').textContent = '';
+    if (!draft.questions.length) $('#questions').hidden = true;
+    $('#layers').closest('details').querySelector('summary').textContent = '已保存的图层顺序';
+    $('#returnLink').target = '_top';
+    if (window.self !== window.top) $('#returnLink').hidden = true;
+    $('#overlayDetails')?.querySelector('p.muted')?.replaceChildren(document.createTextNode('已保存的装饰内容，点击卡片可定位。'));
+    document.querySelector('.review-stage section > p').textContent = '参考图与识别框';
+  }
 }
 
 $('#save').onclick = async () => {
+  if (readOnly) return;
   if (layoutBusy) return;
   const errors = preflightErrors();
   if (errors.length) {
@@ -833,6 +854,7 @@ async function awaitCorrection(task) {
 }
 
 $('#revise').onclick = async () => {
+  if (readOnly) return;
   const answers = questionAnswers();
   const other = $('#otherFeedback').value.trim();
   if (!answers.some(item => item.answer) && !other) {
@@ -870,6 +892,7 @@ document.querySelector('aside').addEventListener('input', event => {
 view.addEventListener('pointerdown', () => { $('#finalConfirmed').checked = false; });
 
 load().then(async () => {
+  if (readOnly) return;
   const response = await fetch(endpoint('/correction-status'));
   if (!response.ok) return;
   const task = (await response.json()).task;

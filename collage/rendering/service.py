@@ -23,6 +23,7 @@ from ..schemas.background import background_slot_id
 from ..template.validation import validate_package
 from ..template.layout import compile_layers
 from .bindings import prepare_bindings
+from .frame_window import plan_photo_windows
 from .image_layer import _render_image_slot
 from .layout import _fit_to_rect, _rotate_and_place
 from .model import PreparedBinding
@@ -62,17 +63,32 @@ def _render_layers(
     assets = {asset["id"]: asset for asset in template["assets"]}
     slots = {slot["id"]: slot for slot in template["slots"]}
     layers = compile_layers(template)
+
+    def fit_asset(identifier: str, layout: dict) -> Image.Image:
+        asset = assets[identifier]
+        source = decode_image(safe_package_path(root, asset["path"]), mode="RGBA")
+        left, top, right, bottom = rect_to_box(layout["rect"])
+        return _fit_to_rect(
+            source,
+            (right - left, bottom - top),
+            fit=layout["fit"],
+            anchor=tuple(layout["anchor"]),
+        )
+
+    fitted_overlays = {}
+
+    def load_overlay(overlay: dict) -> Image.Image:
+        local = fit_asset(overlay["id"], overlay)
+        fitted_overlays[overlay["id"]] = local
+        return local
+
+    windows = plan_photo_windows(template, load_overlay)
     for index, layer in enumerate(layers, start=1):
         if layer["type"] == "asset":
             asset = assets[layer["asset_id"]]
-            source = decode_image(safe_package_path(root, asset["path"]), mode="RGBA")
-            left, top, right, bottom = rect_to_box(layer["rect"])
-            local = _fit_to_rect(
-                source,
-                (right - left, bottom - top),
-                fit=layer["fit"],
-                anchor=tuple(layer["anchor"]),
-            )
+            local = fitted_overlays.pop(asset["id"], None)
+            if local is None:
+                local = fit_asset(asset["id"], layer)
             _rotate_and_place(canvas, local, layer["rect"], layer["rotation_deg"])
             LOGGER.debug(
                 "已合成图层 %s/%s | asset=%s",
@@ -88,7 +104,9 @@ def _render_layers(
                     raise CollageError("MISSING_BINDING", f"缺少必填槽位：{slot['id']}")
                 continue
             if slot["type"] == "image":
-                _render_image_slot(root, canvas, slot, binding)
+                _render_image_slot(
+                    root, canvas, slot, binding, window=windows.get(slot["id"])
+                )
                 # Check before overlays can hide holes: source alpha and crop offsets may expose the base.
                 if slot["id"] == background_slot_id(template) and canvas.getchannel(
                     "A"

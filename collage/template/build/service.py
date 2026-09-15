@@ -78,6 +78,12 @@ def build_template(
     state = WorkflowState(work_dir / "state.json")
     cache = NodeCache(work_dir / "cache")
     state.data["last_error"] = None
+    state.data["build_started_at"] = _utc_now()
+    # Saved pixels and cache entries survive retries; progress describes this run.
+    state.data["nodes"] = {
+        "background": {"status": "pending"},
+        **{f"overlay:{item['id']}": {"status": "pending"} for item in spec["overlays"]},
+    }
     state.transition("building")
     LOGGER.info("开始构建模板 | version=%s", spec["version"])
     try:
@@ -121,6 +127,7 @@ def build_template(
                 slot_id=photo_background,
                 outputs=[],
                 audit=None,
+                completed_at=_utc_now(),
             )
             LOGGER.info(
                 "跳过固定背景制作 | code=BACKGROUND_PROVIDED_BY_SLOT slot=%s",
@@ -128,7 +135,10 @@ def build_template(
             )
         else:
             state.node(
-                "background", "running", input_sha256=spec["reference"]["sha256"]
+                "background",
+                "running",
+                input_sha256=spec["reference"]["sha256"],
+                started_at=_utc_now(),
             )
             background_asset, background_audit = _build_background(
                 spec, spec_path, reference, output_dir, work_dir, cache, image_provider
@@ -137,6 +147,7 @@ def build_template(
             state.node(
                 "background",
                 "complete",
+                completed_at=_utc_now(),
                 audit=audits[-1],
                 outputs=[
                     "background_candidate.png",
@@ -153,6 +164,7 @@ def build_template(
                 f"overlay:{overlay['id']}",
                 "running",
                 source_rect=overlay["source_rect"],
+                started_at=_utc_now(),
             )
             try:
                 asset, audit, visible_bbox, findings = _build_overlay(
@@ -171,6 +183,7 @@ def build_template(
                 state.node(
                     f"overlay:{overlay['id']}",
                     "skipped",
+                    completed_at=_utc_now(),
                     error={"code": exc.code, "message": finding["message"]},
                 )
                 LOGGER.warning(
@@ -186,6 +199,7 @@ def build_template(
             state.node(
                 f"overlay:{overlay['id']}",
                 "complete",
+                completed_at=_utc_now(),
                 audit=audits[-1],
                 visible_bbox=visible_regions[overlay["id"]],
                 output=asset["path"],

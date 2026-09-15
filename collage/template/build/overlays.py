@@ -45,7 +45,7 @@ from .asset_validation import (
 )
 
 LOGGER = logging.getLogger(__name__)
-OVERLAY_PROMPT_VERSION = "reference-overlay/5"
+OVERLAY_PROMPT_VERSION = "reference-overlay/6"
 OVERLAY_PIPELINE_VERSION = "candidate-overlay/1"
 
 
@@ -360,6 +360,8 @@ def _build_overlay(
         generated, audit, _effective_mode, key, transform_record = _provider_overlay(
             provider, crop, overlay, cache, cache_key
         )
+        # Link this material to its exact saved request, including cache reuse.
+        transform_record = {**transform_record, "evidence_cache_key": cache_key}
 
     original = generated
     if (

@@ -1,11 +1,11 @@
-"""Edit fixed layer placement and fork a reviewable local project revision."""
+"""Edit layer placement, save layout revisions and replace individual project materials."""
 
 from __future__ import annotations
 
 import copy
 import io
-import math
 import logging
+import math
 import shutil
 import uuid
 from typing import Any
@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw
 
 from ...core.errors import CollageError
 from ...core.io import (
+    atomic_write_bytes,
     atomic_write_json,
     decode_image,
     read_json,
@@ -30,7 +31,7 @@ from ...schemas.background import background_slot_id
 from ...template.guide import create_upload_guide
 from ...template.layout import compile_layers, transform_attachments
 from ...template.validation import validate_package
-from ...workflows.model import validate_workflow
+from ...workflows.model import utc_now, validate_workflow
 from ...workflows.state import transition
 
 LOGGER = logging.getLogger(__name__)
@@ -319,12 +320,12 @@ def _replace_overlay(
     template: dict,
     identifier: str,
     provider,
-) -> None:
-    """Regenerate one decoration in a revision while keeping every other asset."""
+) -> bool:
+    """Stage one fresh generation before changing any active asset or manifest."""
     from ...core.state import NodeCache
     from ...imaging.operations import crop_source
-    from ...template.build.overlays import _build_overlay
     from ...template.build.asset_validation import overlay_warning
+    from ...template.build.overlays import _build_overlay
 
     spec_path = target.review / "reviewed.json"
     spec = read_json(spec_path)
@@ -351,15 +352,19 @@ def _replace_overlay(
         for item in template["build"].get("warnings", [])
         if item["overlay_id"] != identifier
     ]
+    # Each explicit click gets its own cache; an old candidate is not a new generation.
+    # Keep the directory short: provider evidence adds a SHA-256 path on Windows.
+    attempt = target.workspace / ("r" + uuid.uuid4().hex[:8])
+    replaced = False
     try:
         asset, audit, _box, findings = _build_overlay(
             overlay,
             spec,
             spec_path,
             crop,
-            target.template,
-            target.workspace,
-            NodeCache(target.workspace / "cache"),
+            attempt,
+            attempt,
+            NodeCache(attempt / "cache"),
             provider,
         )
     except CollageError as exc:
@@ -369,6 +374,12 @@ def _replace_overlay(
         warnings.append(finding)
         LOGGER.warning("单件重做未完成 | id=%s code=%s", identifier, exc.code)
     else:
+        candidate = safe_package_path(attempt, asset["path"])
+        # Use a new filename so readers of the old manifest still see matching pixels.
+        asset["path"] = f"assets/overlay_{identifier}_{attempt.name}.png"
+        atomic_write_bytes(
+            safe_package_path(target.template, asset["path"]), candidate.read_bytes()
+        )
         template["assets"] = [
             a for a in template["assets"] if a["id"] != identifier
         ] + [asset]
@@ -381,7 +392,120 @@ def _replace_overlay(
             template["build"]["fixture_used"] or audit.fixture
         )
         warnings.extend(findings)
+        replaced = True
     template["build"]["warnings"] = warnings
+    return replaced
+
+
+def regenerate_overlay_in_place(
+    store: ProjectStore,
+    project_id: str,
+    payload: Any,
+    *,
+    overlay_id: str,
+    image_provider,
+    image_provider_spec: str | None = None,
+) -> dict:
+    """Replace one material in the current project and refresh its local review output."""
+    from ...workflows.bindings import bindings_wait_reason
+
+    project = store.open(project_id)
+    with project_edit_lock(project.root):
+        LOGGER.info("开始在当前项目重做装饰 | project=%s id=%s", project_id, overlay_id)
+        original = validate_package(project.template, require_ready=False)
+        template = apply_layout(project, payload)
+        manifest = store.get_manifest(project_id)
+        workflow = copy.deepcopy(validate_workflow(manifest.get("workflow")))
+        previous = next(
+            (asset for asset in original["assets"] if asset["id"] == overlay_id), None
+        )
+        result = {
+            "ok": True,
+            "project_id": project_id,
+            "url": f"/projects/{project_id}",
+        }
+        if not _replace_overlay(project, template, overlay_id, image_provider):
+            # A failed attempt changes only the warning, not current pixels or approval.
+            original["build"]["warnings"] = template["build"]["warnings"]
+            atomic_write_json(project.template / "template.json", original)
+            return {**result, "replaced": False}
+
+        asset = next(item for item in template["assets"] if item["id"] == overlay_id)
+        candidate_path = safe_package_path(project.template, asset["path"])
+        bindings = project.renders / "bindings.json"
+        output = project.renders / "result.png"
+        render_audit = output.with_suffix(".png.render.json")
+        # Only the manifests and derived preview are backed up, never the project tree.
+        changed_paths = (
+            project.template / "template.json",
+            project.manifest,
+            project.template / "preview.png",
+            bindings,
+            output,
+            render_audit,
+        )
+        before = {
+            path: path.read_bytes() if path.is_file() else None
+            for path in changed_paths
+        }
+        try:
+            template["build"]["created_at"] = utc_now()
+            atomic_write_json(project.template / "template.json", template)
+            validate_package(project.template, require_ready=False)
+            if image_provider_spec is not None:
+                workflow["options"].update(
+                    image_provider=image_provider_spec, fixture_provider=False
+                )
+            (project.template / "preview.png").unlink(missing_ok=True)
+            if not bindings.exists() and not template["slots"]:
+                atomic_write_json(
+                    bindings, {"version": "collage-bindings/1", "slots": {}}
+                )
+            wait = bindings_wait_reason(project)
+            if wait is None:
+                # Rendering is local. A rendering failure rolls back this replacement.
+                render_from_files(
+                    project.template, bindings, output, require_ready=False
+                )
+                transition(
+                    store,
+                    project,
+                    workflow,
+                    "awaiting_approval",
+                    wait={
+                        "code": "VISUAL_APPROVAL_REQUIRED",
+                        "message": "装饰已替换并重新合成，请检查效果后确认",
+                    },
+                )
+            else:
+                # An old composition must not survive a successful asset replacement.
+                output.unlink(missing_ok=True)
+                render_audit.unlink(missing_ok=True)
+                transition(store, project, workflow, "awaiting_bindings", wait=wait)
+        except Exception:
+            for path, content in before.items():
+                if content is None:
+                    path.unlink(missing_ok=True)
+                else:
+                    atomic_write_bytes(path, content)
+            candidate_path.unlink(missing_ok=True)
+            raise
+
+        if (
+            previous
+            and previous["path"] != asset["path"]
+            and not any(item["path"] == previous["path"] for item in template["assets"])
+        ):
+            try:
+                safe_package_path(project.template, previous["path"]).unlink(
+                    missing_ok=True
+                )
+            except OSError:
+                LOGGER.debug(
+                    "旧装饰文件清理未完成 | code=UNUSED_OVERLAY_CLEANUP_FAILED"
+                )
+        LOGGER.info("当前项目装饰已替换 | project=%s id=%s", project_id, overlay_id)
+        return {**result, "replaced": True}
 
 
 def _sync_reviewed_layout(project: ProjectPaths, template: dict) -> None:
@@ -408,10 +532,6 @@ def fork_layout(
     store: ProjectStore,
     project_id: str,
     payload: Any,
-    *,
-    overlay_id: str | None = None,
-    image_provider=None,
-    image_provider_spec: str | None = None,
 ) -> dict:
     """Create a new package and local render; all prior assets and approvals stay immutable."""
     source = store.open(project_id)
@@ -420,30 +540,21 @@ def fork_layout(
         template = apply_layout(source, payload)
         manifest = store.get_manifest(project_id)
         workflow = copy.deepcopy(validate_workflow(manifest.get("workflow")))
-        if image_provider_spec is not None:
-            workflow["options"].update(
-                image_provider=image_provider_spec, fixture_provider=False
-            )
-        kind = "overlay" if overlay_id else "layout"
-        new_id = project_id[:38] + f"-{kind}-" + uuid.uuid4().hex[:10]
+        new_id = project_id[:38] + "-layout-" + uuid.uuid4().hex[:10]
         target = store.create(
             new_id,
-            name=manifest.get("name", project_id)
-            + ("（装饰重做）" if overlay_id else "（布局修订）"),
+            name=manifest.get("name", project_id) + "（布局修订）",
         )
         for name in ("inputs", "analysis", "review", "template"):
             shutil.copytree(source.root / name, target.root / name, dirs_exist_ok=True)
         atomic_write_json(target.template / "template.json", template)
         _sync_reviewed_layout(target, template)
         (target.template / "preview.png").unlink(missing_ok=True)
-        if overlay_id:
-            _replace_overlay(target, template, overlay_id, image_provider)
         # Import bindings rather than retaining source-project absolute references.
         bindings = source.renders / "bindings.json"
         if bindings.exists():
-            from ...workflows.inputs import import_bindings
-
             from ...workflows.bindings import bindings_wait_reason
+            from ...workflows.inputs import import_bindings
 
             if bindings_wait_reason(source) is None:
                 import_bindings(bindings, target.renders / "bindings.json", target)
@@ -455,12 +566,11 @@ def fork_layout(
             "source_project": project_id,
             "source_revision": payload["revision"],
             "revision": sha256_file(target.template / "template.json"),
-            "fixed_assets_regenerated": overlay_id is not None,
-            "regenerated_overlay": overlay_id,
+            "fixed_assets_regenerated": False,
+            "regenerated_overlay": None,
+            "network_calls": 0,
             "items": layer_items(template),
         }
-        if overlay_id is None:
-            evidence["network_calls"] = 0
         atomic_write_json(target.reports / "layout_revision.json", evidence)
         create_upload_guide(
             target.template,

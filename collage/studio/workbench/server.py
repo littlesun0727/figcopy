@@ -13,18 +13,24 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote, urlsplit, parse_qs
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from ...core.errors import CollageError
 from ...projects import DataPaths
 from ..review_server import REVIEW_CSS, REVIEW_JS, render_review_html
 from .application import WorkbenchApplication
 from .multipart import parse_multipart
+from .pipeline import pipeline_document, pipeline_image, review_snapshot
 
 LOGGER = logging.getLogger(__name__)
 MAX_UPLOAD_BYTES = 128 * 1024 * 1024
 MAX_JSON_BYTES = 64 * 1024 * 1024
 _LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+_CLIENT_DISCONNECT_ERRORS = (
+    BrokenPipeError,
+    ConnectionResetError,
+    ConnectionAbortedError,
+)
 
 
 def _read_text_resource(*parts: str) -> str:
@@ -94,6 +100,10 @@ def create_workbench_server(
         def log_message(self, format_string: str, *args: Any) -> None:
             LOGGER.debug("workbench | " + format_string, *args)
 
+        def _client_disconnected(self) -> None:
+            self.close_connection = True
+            LOGGER.debug("浏览器连接已断开 | code=CLIENT_DISCONNECTED")
+
         def _send(
             self,
             status: int,
@@ -101,6 +111,7 @@ def create_workbench_server(
             body: bytes,
             *,
             disposition: str | None = None,
+            allow_same_origin_frame: bool = False,
         ) -> None:
             self.send_response(status)
             self.send_header("Content-Type", content_type)
@@ -108,17 +119,25 @@ def create_workbench_server(
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Referrer-Policy", "no-referrer")
-            self.send_header("X-Frame-Options", "DENY")
+            self.send_header(
+                "X-Frame-Options", "SAMEORIGIN" if allow_same_origin_frame else "DENY"
+            )
             self.send_header(
                 "Content-Security-Policy",
                 "default-src 'self'; img-src 'self' data: blob:; "
                 "script-src 'self'; style-src 'self'; connect-src 'self'; "
-                "base-uri 'none'; frame-ancestors 'none'",
+                "base-uri 'none'; frame-ancestors "
+                + ("'self'" if allow_same_origin_frame else "'none'"),
             )
             if disposition is not None:
                 self.send_header("Content-Disposition", disposition)
-            self.end_headers()
-            self.wfile.write(body)
+            try:
+                self.end_headers()
+                self.wfile.write(body)
+            except _CLIENT_DISCONNECT_ERRORS:
+                # Error responses share this boundary; a closed socket cannot
+                # receive another response or cause an accepted job to repeat.
+                self._client_disconnected()
 
         def _json(self, status: int, payload: Any) -> None:
             self._send(
@@ -219,6 +238,13 @@ def create_workbench_server(
                         HTTPStatus.OK, "text/html; charset=utf-8", page.encode("utf-8")
                     )
                     return
+                if path == "/static/pipeline.js":
+                    self._send(
+                        HTTPStatus.OK,
+                        "text/javascript; charset=utf-8",
+                        _read_text_resource("static", "pipeline.js").encode("utf-8"),
+                    )
+                    return
                 if path == "/static/layers.js":
                     self._send(
                         HTTPStatus.OK,
@@ -281,9 +307,19 @@ def create_workbench_server(
                     project_id = unquote(
                         path.removeprefix("/projects/")[: -len("/review")]
                     )
-                    app.review_session(project_id)
+                    source = parse_qs(parsed.query).get("view", [""])[0]
+                    read_only = source in {"analysis", "confirmed"}
+                    if read_only:
+                        app.store.open(project_id)
+                    else:
+                        app.review_session(project_id)
                     page = render_review_html(
-                        api_base=f"/api/projects/{project_id}/review",
+                        api_base=(
+                            f"/api/projects/{project_id}/pipeline/review/{source}"
+                            if read_only
+                            else f"/api/projects/{project_id}/review"
+                        ),
+                        read_only=read_only,
                         return_url=f"/projects/{project_id}",
                         csrf_token=csrf_token,
                     )
@@ -291,6 +327,7 @@ def create_workbench_server(
                         HTTPStatus.OK,
                         "text/html; charset=utf-8",
                         page.encode("utf-8"),
+                        allow_same_origin_frame=read_only,
                     )
                     return
 
@@ -345,6 +382,31 @@ def create_workbench_server(
                 if not rest:
                     self._json(HTTPStatus.OK, app.project_status(project_id))
                     return
+                if rest == ["pipeline"]:
+                    self._json(
+                        HTTPStatus.OK, pipeline_document(app.store.open(project_id))
+                    )
+                    return
+                if len(rest) == 5 and rest[:2] == ["pipeline", "images"]:
+                    self._send(
+                        HTTPStatus.OK,
+                        "image/png",
+                        pipeline_image(app.store.open(project_id), *rest[2:]),
+                    )
+                    return
+                if len(rest) == 4 and rest[:2] == ["pipeline", "review"]:
+                    session = review_snapshot(app.store.open(project_id), rest[2])
+                    if rest[3] == "session":
+                        self._json(HTTPStatus.OK, session.browser_state())
+                    elif rest[3] == "reference":
+                        self._send(
+                            HTTPStatus.OK,
+                            "image/png",
+                            session.reference_path.read_bytes(),
+                        )
+                    else:
+                        self._not_found()
+                    return
                 if rest == ["layout"]:
                     self._json(HTTPStatus.OK, app.layout(project_id))
                     return
@@ -398,8 +460,8 @@ def create_workbench_server(
                 self._not_found()
             except CollageError as exc:
                 self._json(_error_status(exc), exc.as_dict())
-            except (BrokenPipeError, ConnectionResetError):
-                LOGGER.debug("浏览器在响应完成前关闭连接")
+            except _CLIENT_DISCONNECT_ERRORS:
+                self._client_disconnected()
             except Exception:
                 LOGGER.exception("工作台 GET 请求失败")
                 self._json(
@@ -518,8 +580,8 @@ def create_workbench_server(
                 self._not_found()
             except CollageError as exc:
                 self._json(_error_status(exc), exc.as_dict())
-            except (BrokenPipeError, ConnectionResetError):
-                LOGGER.debug("浏览器在响应完成前关闭连接")
+            except _CLIENT_DISCONNECT_ERRORS:
+                self._client_disconnected()
             except Exception:
                 LOGGER.exception("工作台 POST 请求失败")
                 self._json(
